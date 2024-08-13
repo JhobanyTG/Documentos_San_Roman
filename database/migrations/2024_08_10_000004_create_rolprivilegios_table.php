@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('rolprivilegios', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('privilegio_id');
+            $table->unsignedBigInteger('rol_id');
             $table->timestamps();
+
+            $table->foreign('privilegio_id')->references('id')->on('privilegios')->onDelete('cascade');
+            $table->foreign('rol_id')->references('id')->on('rols')->onDelete('cascade');
+
         });
     }
 

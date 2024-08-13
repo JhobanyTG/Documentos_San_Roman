@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('backupacciones', function (Blueprint $table) {
             $table->id();
+            $table->string('user_id', 100);
+            $table->string('titulo_documento', 255);
+            $table->string('accion', 20);
             $table->timestamps();
         });
     }

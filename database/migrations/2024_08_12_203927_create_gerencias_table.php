@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('gerencias', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('usuario_id');
+            $table->string('nombre', 100);
+            $table->text('descripcion', 1500);
+            $table->integer('telefono')->length(15);
+            $table->string('direccion', 100);
+            $table->string('estado', 20);
             $table->timestamps();
+
+            $table->foreign('usuario_id')->references('id')->on('usuarios')->onDelete('cascade');
         });
     }
 

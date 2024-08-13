@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('documentos', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('titulo');
+            $table->unsignedBigInteger('sub_usuarios_id');
+            $table->string('titulo', 255);
             $table->text('descripcion', 1500);
             $table->string('archivo', 254)->unique();
+            $table->string('estado', 20);
             $table->timestamps();
+
+            $table->foreign('sub_usuarios_id')->references('id')->on('subusuarios')->onDelete('cascade')->onUpdate('cascade');
+
         });
     }
 

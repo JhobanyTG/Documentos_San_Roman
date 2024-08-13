@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('subusuarios', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('sub_gerencia_id');
+            $table->unsignedBigInteger('usuario_id');
+            $table->string('cargo', 150);
             $table->timestamps();
+
+            $table->foreign('sub_gerencia_id')->references('id')->on('subgerencias')->onDelete('cascade');
+            $table->foreign('usuario_id')->references('id')->on('usuarios')->onDelete('cascade');
         });
     }
 
