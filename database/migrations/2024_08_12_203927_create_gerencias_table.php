@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
+    /**n('usuario_id')-
      * Run the migrations.
      */
     public function up(): void
@@ -20,8 +20,7 @@ return new class extends Migration
             $table->string('direccion', 100);
             $table->string('estado', 20);
             $table->timestamps();
-
-            $table->foreign('usuario_id')->references('id')->on('usuarios')->onDelete('cascade');
+            $table->foreign('usuario_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
