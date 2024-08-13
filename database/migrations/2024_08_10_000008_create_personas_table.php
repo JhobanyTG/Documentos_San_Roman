@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('apellido_p', 50);
             $table->string('apellido_m', 50);
             $table->date('f_nacimiento');
-            $table->integer('celular');
+            $table->string('celular');
             $table->string('direccion', 200);
             $table->timestamps();
         });

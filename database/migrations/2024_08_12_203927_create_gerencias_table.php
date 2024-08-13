@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('usuario_id');
             $table->string('nombre', 100);
-            $table->text('descripcion', 1500);
-            $table->integer('telefono')->length(15);
+            $table->text('descripcion', 500);
+            $table->string('telefono');
             $table->string('direccion', 100);
             $table->string('estado', 20);
             $table->timestamps();
