@@ -2,20 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Documento extends Model
 {
-    protected $table = 'documentos';
-    protected $fillable = ['titulo', 'descripcion', 'archivo'];
+    use HasFactory;
 
-    // Relación con el modelo User
-    // public function user()
-    // {
-    //     return $this->belongsTo(User::class);
-    // }
-    public function user()
+    protected $table = 'documentos';
+
+    protected $fillable = [
+        'sub_usuarios_id',
+        'titulo',
+        'descripcion',
+        'archivo',
+        'estado',
+    ];
+
+    public function subusuario()
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(Subusuario::class, 'sub_usuarios_id');
     }
 }

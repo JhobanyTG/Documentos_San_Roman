@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DocumentosController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\GerenciaController;
+use App\Http\Controllers\SubgerenciaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,6 +57,14 @@ Route::middleware(['auth'])->group(function () {
     // Route::post('documentos', [DocumentosController::class, 'store'])->name('documentos.store');
 
     Route::resource('documentos', DocumentosController::class)->middleware('auth');
+    Route::resource('gerencias', GerenciaController::class)->middleware('auth');
+    // Route::resource('subgerencias', SubgerenciaController::class);
+    // Route::prefix('gerencias/{gerencia}')->group(function () {
+    //     Route::resource('subgerencias', SubgerenciaController::class);
+    // });
+    Route::prefix('gerencias/{gerencia}')->group(function () {
+        Route::resource('subgerencias', SubgerenciaController::class);
+    });
 
 
 

@@ -37,6 +37,18 @@
 						<span class="nav-text">Documentos</span>
 					</a>
 				</li>
+				<li class="nav-item active">
+					<a href="{{ url('gerencias') }}">
+						<i class="fa fa-suitcase" aria-hidden="true"></i>
+						<span class="nav-text">Gerencias</span>
+					</a>
+				</li>
+				<li class="nav-item active">
+					<a href="{{ url('documentos') }}">
+						<i class="fa fa-address-book" aria-hidden="true"></i>
+						<span class="nav-text">Sub Gerencias</span>
+					</a>
+				</li>
                 <!-- <li class="nav-item">
                     <a href="#">
                         <i class="fa fa-book"></i>
