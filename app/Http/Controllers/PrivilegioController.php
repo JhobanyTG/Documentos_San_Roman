@@ -7,59 +7,62 @@ use Illuminate\Http\Request;
 
 class PrivilegioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Mostrar una lista de los privilegios
     public function index()
     {
-        //
+        $privilegios = Privilegio::all();
+        return view('privilegio.index', compact('privilegios'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // Mostrar el formulario para crear un nuevo privilegio
     public function create()
     {
-        //
+        return view('privilegio.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // Almacenar un nuevo privilegio en la base de datos
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre' => 'required|string|max:100',
+            'descripcion' => 'required|string|max:1500',
+        ]);
+
+        Privilegio::create($request->all());
+
+        return redirect()->route('privilegios.index')->with('success', 'Privilegio creado exitosamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // Mostrar los detalles de un privilegio específico
     public function show(Privilegio $privilegio)
     {
-        //
+        return view('privilegios.show', compact('privilegio'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // Mostrar el formulario para editar un privilegio existente
     public function edit(Privilegio $privilegio)
     {
-        //
+        return view('privilegio.edit', compact('privilegio'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // Actualizar un privilegio existente en la base de datos
     public function update(Request $request, Privilegio $privilegio)
     {
-        //
+        $request->validate([
+            'nombre' => 'required|string|max:100',
+            'descripcion' => 'required|string|max:1500',
+        ]);
+
+        $privilegio->update($request->all());
+
+        return redirect()->route('privilegios.index')->with('success', 'Privilegio actualizado exitosamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // Eliminar un privilegio existente de la base de datos
     public function destroy(Privilegio $privilegio)
     {
-        //
+        $privilegio->delete();
+
+        return redirect()->route('privilegios.index')->with('success', 'Privilegio eliminado exitosamente.');
     }
 }

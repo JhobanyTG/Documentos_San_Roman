@@ -182,26 +182,26 @@ class DocumentosController extends Controller
 
         //     $documento->archivo = $archivoRuta;
         // }
-        
+
         if ($request->hasFile('archivo')) {
             $archivo = $request->file('archivo');
-    
+
             // Generar el número incremental
             $ultimoDocumento = Documento::latest('id')->first();
             $numeroIncremental = $ultimoDocumento ? str_pad($ultimoDocumento->id + 1, 4, '0', STR_PAD_LEFT) : '0001';
-    
+
             // Modificar el nombre del archivo
             $archivoNombreOriginal = $archivo->getClientOriginalName();
             $archivoNombre = 'ATISR-' . $numeroIncremental . '-' . $archivoNombreOriginal;
-    
+
             // Guardar el archivo con el nuevo nombre
             $archivoRuta = $archivo->storeAs('archivos', $archivoNombre, 'public');
-    
+
             // Eliminar el archivo anterior si existe
             if ($documento->archivo) {
                 Storage::delete('public/' . $documento->archivo);
             }
-    
+
             $documento->archivo = $archivoRuta;
         }
 

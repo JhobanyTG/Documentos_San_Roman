@@ -3,143 +3,79 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Rol;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        if (auth()->user()->role == 'SuperAdmin') {
-            $users = User::all();
-            return view('user.index')->with('users', $users);
-        } elseif (auth()->user()->role == 'Admin') {
-            return redirect()->to('/documentos');
-        } else {
-            return redirect()->to('/');
-        }
-    }
-    /**
-     * Show the form for creating sa new resource.
-     */
-    public function create(){
-        if(auth()->user()->role == 'SuperAdmin'){
-            return view('auth.register');
-        } elseif (auth()->user()->role == 'Admin') {
-            return redirect()->to('/documentos');
-        } else{
-            return redirect()->to('/');
-        }
+        $users = User::with('persona', 'rol')->get();
+        return view('user.index', compact('users'));
     }
 
-    public function store(){
-        $this->validate(request(),[
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed',
-            'role' => 'required',
-        ]);
-
-
-        $user = User::create(request(['name', 'email', 'password', 'role']));
-        return redirect()->to('/usuarios')->with('success', 'Se ha registrado un Nuevo usuario.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        if(auth()->user()->role == 'SuperAdmin'){
-            $users = User::findOrFail($id);
-            return view('user.show', compact('users'));
-        } elseif (auth()->user()->role == 'Admin') {
-            return redirect()->to('/documentos');
-        } else{
-            return redirect()->to('/');
-        }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit($id)
     {
-
-
-        if(auth()->user()->role == 'SuperAdmin'){
-            $users = User::findOrFail($id);
-            return view('user.edit', compact('users'));
-        } elseif (auth()->user()->role == 'Admin') {
-            return redirect()->to('/documentos');
-        } else{
-            return redirect()->to('/');
-        }
+        $user = User::findOrFail($id);
+        $roles = Rol::all();
+        return view('user.edit', compact('user', 'roles'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    public function create()
+    {
+        $roles = Rol::all();
+        return view('user.create', compact('roles'));
+    }
+
     public function update(Request $request, $id)
     {
-        if(auth()->user()->role == 'SuperAdmin'){
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255',
-                'role' => 'required|string|max:100',
-            ]);
-            $users = User::findOrFail($id);
-            $users->name = $request->input('name');
-            $users->email = $request->input('email');
-            $users->role = $request->input('role');
-            $users->save();
+        $validatedData = $request->validate([
+            'rol_id' => 'required|integer',
+            'nombre_usuario' => 'required|string|max:100',
+            'email' => 'required|string|email|max:254',
+            'password' => 'nullable|string|min:8',
+            'estado' => 'required|string|max:20',
+        ]);
 
-            return redirect()->route('usuarios.index', $users->id)
-                    ->with('success', 'Usuario actualizado exitosamente.');
-        } elseif (auth()->user()->role == 'Admin') {
-            return redirect()->to('/documentos');
-        } else{
-            return redirect()->to('/');
+        try {
+            $user = User::findOrFail($id);
+            $user->update([
+                'rol_id' => $validatedData['rol_id'],
+                'nombre_usuario' => $validatedData['nombre_usuario'],
+                'email' => $validatedData['email'],
+                'password' => $validatedData['password'] ? Hash::make($validatedData['password']) : $user->password,
+                'estado' => $validatedData['estado'],
+            ]);
+
+            return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado exitosamente.');
+        } catch (\Exception $e) {
+            // Imprime el error para depuración
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
-    public function cambiarContrasena($id)
+
+
+
+    public function show($id)
     {
         $user = User::findOrFail($id);
-        return view('user.cambiarContrasena', compact('user'));
-    }
-
-    public function actualizarContrasena(Request $request, $id)
-    {
-        $request->validate([
-            'password' => 'required|string|min:5|confirmed',
-        ]);
-
-        $user = User::findOrFail($id);
-        $user->password = bcrypt($request->input('password'));
-        $user->save();
-
-        return redirect()->route('usuarios.show', $user->id)
-                        ->with('success', 'Contraseña del usuario ' . $user->name . ' actualizada exitosamente.');
+        return view('user.show', compact('user'));
     }
 
     public function destroy($id)
     {
-        if(auth()->user()->role == 'SuperAdmin'){
-            $users = User::findOrFail($id);
-            $users->delete();
+        $role = Rol::findOrFail($id);
 
-            return redirect()->route('usuarios.index')
-            ->with('success', 'El usuario ha sido eliminado exitosamente.');
-        } elseif (auth()->user()->role == 'Admin') {
-            return redirect()->to('/documentos');
-        } else{
-            return redirect()->to('/');
-        }
+        // Establecer el campo rol_id a null para los usuarios asociados
+        User::where('rol_id', $role->id)->update(['rol_id' => null]);
+
+        // Ahora puedes eliminar el rol
+        $role->delete();
+
+        return redirect()->route('roles.index')->with('success', 'Rol eliminado exitosamente.');
     }
+
 }

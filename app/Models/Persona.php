@@ -20,4 +20,16 @@ class Persona extends Model
         'celular',
         'direccion',
     ];
+
+    protected static function booted()
+    {
+        static::deleting(function ($persona) {
+            $persona->user()->delete();
+        });
+    }
+
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
 }

@@ -1,6 +1,6 @@
 @auth
 <!DOCTYPE html>
-<html>
+<html lang="es">
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -43,14 +43,38 @@
                         <span class="nav-text">Otros</span>
                     </a>
                 </li> -->
-				@if (auth()->check() && auth()->user()->role === 'SuperAdmin')
+				{{-- @if (auth()->check() && auth()->user()->role === 'SuperAdmin') --}}
 					<li class="nav-item">
 						<a href="{{ url('usuarios') }}">
 							<i class="fa fa-users"></i>
 							<span class="nav-text">Usuarios</span>
 						</a>
 					</li>
-				@endif
+				{{-- @endif --}}
+                <li class="nav-item">
+                    <a href="{{ url('personas') }}">
+                        <i class="fa fa-users"></i>
+                        <span class="nav-text">Personas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url('roles') }}">
+                        <i class="fa fa-users"></i>
+                        <span class="nav-text">Roles y Privilegios</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url('privilegios') }}">
+                        <i class="fa fa-users"></i>
+                        <span class="nav-text">Privilegios</span>
+                    </a>
+                </li>
+                {{-- <li class="nav-item">
+                    <a href="{{ url('rolprivilegios') }}">
+                        <i class="fa fa-users"></i>
+                        <span class="nav-text">Roles y Privilegios</span>
+                    </a>
+                </li> --}}
 			</ul>
 		<div class="logout-btn">
 			<div class="logout-btn-wrapper">
@@ -92,7 +116,7 @@
         const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
         const sidebar = document.getElementById('sidebar');
         const content = document.querySelector('.content');
-        
+
         // Función para minimizar el sidebar
         function minimizeSidebar() {
             sidebar.classList.add('sidebar-closed');
@@ -193,6 +217,7 @@
       });
     });
 </script>
+
 <script>
     // var espanol = {
     //     "sProcessing": "Procesando...",

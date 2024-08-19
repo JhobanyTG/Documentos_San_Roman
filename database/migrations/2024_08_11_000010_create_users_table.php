@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('rol_id');
+            $table->unsignedBigInteger('rol_id')->nullable()->change();
             $table->unsignedBigInteger('persona_id');
             $table->string('nombre_usuario', 100);
-            $table->string('email', 100);
+            $table->string('email', 254);
             $table->string('password', 100);
             $table->string('estado', 20);
             $table->rememberToken();

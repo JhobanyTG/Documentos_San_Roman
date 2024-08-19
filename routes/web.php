@@ -5,6 +5,13 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DocumentosController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PublicController;
+use App\Http\Controllers\PersonaController;
+use App\Http\Controllers\RolController;
+use App\Http\Controllers\PrivilegioController;
+use App\Http\Controllers\RolPrivilegioController;
+
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -75,4 +82,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/register', [UserController::class, 'store'])
         ->middleware('auth')
         ->name('register.store');
+
+
+    Route::resource('personas', PersonaController::class);
+    Route::resource('roles', RolController::class);
+
+    Route::resource('privilegios', PrivilegioController::class);
+    Route::resource('rolprivilegios', RolPrivilegioController::class);
+
+
+
+
+
 });
