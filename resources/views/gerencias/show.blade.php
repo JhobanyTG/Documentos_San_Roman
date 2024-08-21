@@ -51,57 +51,101 @@
         </div>
     </div>
 
-    <div class="mt-5">
-        <h4 class="d-flex justify-content-center">Sub Usuarios</h4>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Privilegio</th>
-                    <th>Sub Gerencia</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-
-    <h4 class="d-flex justify-content-center">Sub Gerencias</h4>
+    <h4 class="d-flex justify-content-center mt-5 pt-serif-bold">Sub Usuarios</h4>
     <div class="d-flex justify-content-end mb-3">
-        <a href="{{ route('subgerencias.create', $gerencia->id) }}" class="btn btn-agregar pt-serif-regular">
+        <a href="{{ route('subusuarios.create', ['gerencia' => $gerencia->id]) }}" class="btn btn-agregar pt-serif-regular">
             <i class="fa fa-plus" aria-hidden="true"></i> Registrar
         </a>
     </div>
     <table class="table">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Encargado</th>
-                <th>Descripción</th>
-                <th>Teléfono</th>
-                <th>Dirección</th>
-                <th>Estado</th>
-                <th>Acciones</th>
+            <tr class="pt-serif-bold">
+                <th class="">Nombre</th>
+                <th class="">Cargo</th>
+                <th class="">DNI</th>
+                <th class="">Rol</th>
+                <th class="">Sub Gerencia</th>
+                <th class="col-2">Acciones</th>
             </tr>
         </thead>
         <tbody>
             @foreach($gerencia->subgerencias as $subgerencia)
-                <tr>
-                    <td>{{ $subgerencia->id }}</td>
+                @foreach($subgerencia->subusuarios as $subusuario)
+                    <tr class="pt-serif-regular">
+                        <td>{{ $subusuario->user->persona->nombres }} {{ $subusuario->user->persona->apellido_p }} {{ $subusuario->user->persona->apellido_m }}</td>
+                        <td>{{ $subusuario->cargo }}</td>
+                        <td>{{ $subusuario->user->persona->dni }}</td>
+                        <td>{{ $subusuario->user->rol->nombre }}</td>
+                        <td>{{ $subgerencia->nombre }}</td>
+                        <td>
+                            <a href="{{ route('subusuarios.edit', [$gerencia->id, $subusuario->id]) }}" class="btn btn-sm btn-info">
+                                <i class="fa fa-edit" style="line-height: 1;"></i> Editar
+                            </a>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="showSubusuarioConfirmationModal('{{ route('subusuarios.destroy', [$gerencia->id, $subusuario->id]) }}')">
+                                <i class="fa fa-trash" style="line-height: 1;"></i> Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                @endforeach
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="subusuarioConfirmationModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de eliminar este subusuario? Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-no" data-dismiss="modal">No</button>
+                    <form id="subusuarioDeleteForm" method="POST" class="d-inline-block">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fa fa-trash"></i> Sí
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="d-flex justify-content-center pt-serif-bold mt-5">Sub Gerencias</h4>
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{{ route('subgerencias.create', $gerencia->id) }}" class="btn btn-agregar pt-serif-regular">
+                <i class="fa fa-plus" aria-hidden="true"></i> Registrar
+            </a>
+        </div>
+    <table class="table">
+        <thead>
+            <tr class="pt-serif-bold">
+                <th>Nombre</th>
+                <th>Encargado</th>
+                <th>Teléfono</th>
+                <!-- <th>Dirección</th> -->
+                <th>Estado</th>
+                <th class="col-2">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($gerencia->subgerencias as $subgerencia)
+                <tr class="pt-serif-regular">
                     <td>{{ $subgerencia->nombre }}</td>
                     <td>{{ $subgerencia->user->persona->nombres }} {{ $subgerencia->user->persona->apellido_p }} {{ $subgerencia->user->persona->apellido_m }}</td>
-                    <td>{{ $subgerencia->descripcion }}</td>
                     <td>{{ $subgerencia->telefono }}</td>
-                    <td>{{ $subgerencia->direccion }}</td>
+                    <!-- <td>{{ $subgerencia->direccion }}</td> -->
                     <td>{{ $subgerencia->estado }}</td>
                     <td>
-                        <a href="{{ route('subgerencias.edit', [$gerencia->id, $subgerencia->id]) }}" class="btn btn-sm btn-info mb-1 d-block mx-1 d-flex align-items-center justify-content-center">
-                            <i class="fa fa-edit mr-1"></i> Editar
+                        <a href="{{ route('subgerencias.edit', [$gerencia->id, $subgerencia->id]) }}" class="btn btn-sm btn-info">
+                            <i class="fa fa-edit" style="line-height: 1;"></i> Editar
                         </a>
-                        <button type="button" class="btn btn-sm btn-secondary d-block mx-1 d-flex align-items-center justify-content-center" onclick="showSubgerenciaConfirmationModal('{{ route('subgerencias.destroy', [$gerencia->id, $subgerencia->id]) }}')">
-                            <i class="fa fa-trash mr-1"></i> Eliminar
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="showSubgerenciaConfirmationModal('{{ route('subgerencias.destroy', [$gerencia->id, $subgerencia->id]) }}')">
+                            <i class="fa fa-trash" style="line-height: 1;"></i> Eliminar
                         </button>
                     </td>
                 </tr>
@@ -109,7 +153,6 @@
         </tbody>
     </table>
 
-    <!-- Modal para confirmación de eliminación de subgerencia -->
     <div class="modal fade" tabindex="-1" role="dialog" id="subgerenciaConfirmationModal">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -157,7 +200,14 @@
         $('.btn-close, .btn-no').click(function() {
             $('#confirmationModal').modal('hide');
             $('#subgerenciaConfirmationModal').modal('hide');
+            $('#subusuarioConfirmationModal').modal('hide');
         });
     });
+
+    function showSubusuarioConfirmationModal(url) {
+        $('#subusuarioConfirmationModal').modal('show');
+        $('#subusuarioDeleteForm').attr('action', url);
+    }
+</script>
 </script>
 @stop

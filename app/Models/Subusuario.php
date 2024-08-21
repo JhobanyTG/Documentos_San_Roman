@@ -12,27 +12,18 @@ class Subusuario extends Model
     protected $table = 'subusuarios';
 
     protected $fillable = [
-        'sub_gerencia_id',
-        'usuario_id',
-        'cargo',
+        'user_id', 
+        'subgerencia_id', 
+        'cargo'
     ];
 
-    // public function subgerencia()
-    // {
-    //     return $this->belongsTo(Subgerencia::class, 'sub_gerencia_id');
-    // }
-
-    // public function user()
-    // {
-    //     return $this->belongsTo(User::class, 'usuario_id');
-    // }
     public function subgerencia()
     {
-        return $this->belongsTo(Subgerencia::class, 'sub_gerencia_id');
+        return $this->belongsTo(Subgerencia::class, 'subgerencia_id');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'usuario_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

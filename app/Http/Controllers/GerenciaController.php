@@ -74,13 +74,27 @@ class GerenciaController extends Controller
     //     return view('gerencias.show', compact('gerencia'));
     // }
 
+
     public function show(Gerencia $gerencia)
     {
-        // Cargar las subgerencias con el usuario y la persona relacionada
-        $gerencia->load('subgerencias.user.persona');
+        // Cargar subgerencias con subusuarios y usuarios relacionados
+        $gerencia->load('subgerencias.subusuarios.user');
 
         return view('gerencias.show', compact('gerencia'));
     }
+
+    // public function show(Gerencia $gerencia)
+    // {
+    //     // Cargar las subgerencias con el usuario y la persona relacionada
+    //     $gerencia->load('subgerencias.user.persona');
+
+    //     return view('gerencias.show', compact('gerencia'));
+    // }
+
+
+
+
+
     // public function show($id)
     // {
     //     $gerencia = Gerencia::with(['subgerencias.user.persona', 'subUsuarios.persona'])->findOrFail($id);

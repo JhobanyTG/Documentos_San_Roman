@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('subusuarios', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('sub_gerencia_id');
-            $table->unsignedBigInteger('usuario_id');
+            $table->unsignedBigInteger('user_id'); // Asegúrate de que sea requerido
+            $table->unsignedBigInteger('subgerencia_id');
             $table->string('cargo', 150);
             $table->timestamps();
-
-            $table->foreign('sub_gerencia_id')->references('id')->on('subgerencias')->onDelete('cascade');
-            $table->foreign('usuario_id')->references('id')->on('users')->onDelete('cascade');
+        
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('subgerencia_id')->references('id')->on('subgerencias')->onDelete('cascade');
         });
     }
 

@@ -37,6 +37,13 @@ class User extends Authenticatable
         return $this->belongsTo(Rol::class, 'rol_id');
     }
 
+    protected static function booted()
+    {
+        static::deleting(function ($user) {
+            $user->persona()->delete();
+        });
+    }
+
     public function persona()
     {
         return $this->belongsTo(Persona::class, 'persona_id');

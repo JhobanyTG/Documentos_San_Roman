@@ -20,4 +20,9 @@ class Rol extends Model
     {
         return $this->belongsToMany(Privilegio::class, 'rolprivilegios', 'rol_id', 'privilegio_id');
     }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }
