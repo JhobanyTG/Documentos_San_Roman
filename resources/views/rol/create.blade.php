@@ -4,64 +4,71 @@
 
 @section('content')
     <div class="container mt-4">
-        <h2>Crear Nuevo Rol</h2>
-        <form action="{{ route('roles.store') }}" method="POST">
-            @csrf
-            <div class="form-group">
-                <label for="nombre">Nombre</label>
-                <input type="text" name="nombre" id="nombre" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label for="descripcion">Descripción</label>
-                <textarea name="descripcion" id="descripcion" class="form-control" required></textarea>
+        <div class="row">
+            <!-- Formulario -->
+            <div class="col-md-5">
+                <h2>Crear Nuevo Rol</h2>
+                <form action="{{ route('roles.store') }}" method="POST">
+                    @csrf
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" name="nombre" id="nombre" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea name="descripcion" id="descripcion" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="available_privileges">Privilegios Disponibles</label>
+                        <select id="available_privileges" class="form-control" multiple>
+                            @foreach($all_privilegios as $privilegio)
+                                <option value="{{ $privilegio->id }}">{{ $privilegio->nombre }}</option>
+                            @endforeach
+                        </select>
+                        <button type="button" class="btn btn-primary mt-2" onclick="addPrivileges()">Agregar Privilegios</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Privilegios Asignados</label>
+                        <ul id="assigned_privileges" class="list-group">
+                            <li class="list-group-item">No se han asignado privilegios aún.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Campo oculto para los IDs de los privilegios -->
+                    <input type="hidden" name="privilegios" id="privilegios" value="">
+
+                    <button type="submit" class="btn btn-primary mt-3">Crear Rol</button>
+                </form>
             </div>
 
-            <div class="form-group">
-                <label for="available_privileges">Privilegios Disponibles</label>
-                <select id="available_privileges" class="form-control" multiple>
-                    @foreach($all_privilegios as $privilegio)
-                        <option value="{{ $privilegio->id }}">{{ $privilegio->nombre }}</option>
-                    @endforeach
-                </select>
-                <button type="button" class="btn btn-primary mt-2" onclick="addPrivileges()">Agregar Privilegios</button>
+            <!-- Columna de Privilegios -->
+            <div class="col-md-7">
+                <h2>Lista de Privilegios</h2>
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($all_privilegios as $privilegio)
+                            <tr>
+                                <td>{{ $privilegio->id }}</td>
+                                <td>{{ $privilegio->nombre }}</td>
+                                <td>{{ Str::limit($privilegio->descripcion, 50) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-
-            <div class="form-group">
-                <label>Privilegios Asignados</label>
-                <ul id="assigned_privileges" class="list-group">
-                    <li class="list-group-item">No se han asignado privilegios aún.</li>
-                </ul>
-            </div>
-
-            <!-- Campo oculto para los IDs de los privilegios -->
-            <input type="hidden" name="privilegios" id="privilegios" value="">
-
-            <button type="submit" class="btn btn-primary mt-3">Crear Rol</button>
-        </form>
+        </div>
     </div>
-    <!-- Columna de Privilegios -->
-    <div class="col-md-7">
-        <h2>Lista de Privilegios</h2>
 
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($all_privilegios as $privilegio)
-                    <tr>
-                        <td>{{ $privilegio->id }}</td>
-                        <td>{{ $privilegio->nombre }}</td>
-                        <td>{{ Str::limit($privilegio->descripcion, 50) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             updatePrivilegesInput(); // Asegúrate de que el campo oculto se actualice al cargar la página

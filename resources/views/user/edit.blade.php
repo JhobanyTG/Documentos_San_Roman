@@ -25,17 +25,21 @@
                 @enderror
             </div>
 
-            <div class="form-group">
+            {{-- <div class="form-group">
                 <label for="password">Contraseña (dejar en blanco si no desea cambiarla):</label>
                 <input type="password" name="password" id="password" class="form-control">
                 @error('password')
                     <div class="text-danger">{{ $message }}</div>
                 @enderror
-            </div>
+            </div> --}}
 
             <div class="form-group">
                 <label for="estado">Estado:</label>
-                <input type="text" name="estado" id="estado" class="form-control" value="{{ old('estado', $user->estado) }}" required>
+                <select name="estado" id="estado" class="form-control" required>
+                    <!-- Opciones de estado -->
+                    <option value="Activo" {{ old('estado', $user->estado) == 'Activo' ? 'selected' : '' }}>Activo</option>
+                    <option value="Inactivo" {{ old('estado', $user->estado) == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
+                </select>
                 @error('estado')
                     <div class="text-danger">{{ $message }}</div>
                 @enderror
@@ -57,6 +61,7 @@
 
             <div class="form-group text-center">
                 <button type="submit" class="btn btn-primary">Actualizar</button>
+                <a href="{{ route('usuarios.cambiarContrasena', $user->id) }}" class="btn btn-info">Cambiar Contraseña</a>
                 <a href="{{ route('usuarios.index') }}" class="btn btn-secondary">Cancelar</a>
             </div>
         </form>

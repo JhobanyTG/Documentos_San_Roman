@@ -35,8 +35,7 @@ class UserController extends Controller
             'rol_id' => 'required|integer',
             'nombre_usuario' => 'required|string|max:100',
             'email' => 'required|string|email|max:254',
-            'password' => 'nullable|string|min:8',
-            'estado' => 'required|string|max:20',
+            'estado' => 'required|string|in:Activo,Inactivo',
         ]);
 
         try {
@@ -45,8 +44,7 @@ class UserController extends Controller
                 'rol_id' => $validatedData['rol_id'],
                 'nombre_usuario' => $validatedData['nombre_usuario'],
                 'email' => $validatedData['email'],
-                'password' => $validatedData['password'] ? Hash::make($validatedData['password']) : $user->password,
-                'estado' => $validatedData['estado'],
+                'estado' => $request->input('estado'),
             ]);
 
             return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado exitosamente.');
@@ -55,9 +53,6 @@ class UserController extends Controller
             return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
-
-
-
 
     public function show($id)
     {
@@ -77,5 +72,26 @@ class UserController extends Controller
 
         return redirect()->route('roles.index')->with('success', 'Rol eliminado exitosamente.');
     }
+
+    public function cambiarContrasena($id)
+    {
+        $user = User::findOrFail($id);
+        return view('user.cambiarContrasena', compact('user'));
+    }
+
+    public function actualizarContrasena(Request $request, $id)
+    {
+        $request->validate([
+            'password' => 'required|string|min:8',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return redirect()->route('usuarios.index')->with('success', 'Contraseña actualizada exitosamente.');
+    }
+
+
 
 }

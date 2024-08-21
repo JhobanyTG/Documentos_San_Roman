@@ -95,15 +95,9 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('auth')
         ->name('register.store');
 
-
     Route::resource('personas', PersonaController::class);
     Route::resource('roles', RolController::class);
 
     Route::resource('privilegios', PrivilegioController::class);
     Route::resource('rolprivilegios', RolPrivilegioController::class);
-
-
-
-
-
 });
