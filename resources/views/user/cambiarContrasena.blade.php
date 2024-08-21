@@ -20,7 +20,7 @@
           <input type="password" class="form-control" name="password_confirmation" id="password_confirmation" required>
         </div>
         <div class="col-md-12 col-12 mb-2 d-flex align-items-end justify-content-end">
-          <a href="{{ route('usuarios.show', $user->id) }}" class="btn btn-warning btn-cancel"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
+          <a href="{{ route('usuarios.edit', $user->id) }}" class="btn btn-warning btn-cancel"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
           <button type="submit" class="btn btn-success"><i class="fa fa-floppy-o" aria-hidden="true"></i> Guardar Contraseña</button>
         </div>
       </form>

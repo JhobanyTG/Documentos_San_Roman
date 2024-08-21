@@ -82,6 +82,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/register', [UserController::class, 'store'])
         ->middleware('auth')
         ->name('register.store');
+        // Mostrar el formulario de edición
+    Route::get('usuarios/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+        // Actualizar el usuario
+    Route::put('usuarios/{id}', [UserController::class, 'update'])->name('users.update');
+
+    Route::get('usuarios/{id}/cambiar-contrasena', [UserController::class, 'cambiarContrasena'])->name('usuarios.cambiarContrasena');
+
 
 
     Route::resource('personas', PersonaController::class);

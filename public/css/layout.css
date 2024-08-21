@@ -303,6 +303,22 @@ header .profile img {
     margin-right: 10px;
 }
 
+.btn-form {
+    background: linear-gradient(45deg, #004267, #001932); /* Gradiente de azul oscuro a azul claro */
+    color: white; /* Color del texto */
+    border: none; /* Sin borde */
+    padding: 10px 20px; /* Espaciado interno */
+    border-radius: 5px; /* Bordes redondeados */
+    font-size: 16px; /* Tamaño de fuente */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+    transition: background 0.3s ease; /* Transición suave al pasar el cursor */
+}
+
+.btn-form:hover {
+    background: linear-gradient(45deg, #001932, #004267); /* Inversión del gradiente en hover */
+}
+
+
 .icono_eye {
     color: var(--color-icono-eye)
 }
@@ -636,6 +652,44 @@ div .filtro{
     margin-left: auto;
     margin-right: auto;
 }
+
+/*Form Persona*/
+.form_persona {
+    background: url('../images/fondo/form_persona.png') no-repeat center center fixed; /* Ruta a la imagen en la carpeta public */            background-size: cover;
+    color: var(--color-blanco);
+    padding: 20px;
+    h2{
+        display: flex;
+        justify-content: center;
+    }
+    .form-control {
+        background-color: rgba(255, 255, 255, 0.3); /* Blanco con 80% opacidad */
+        border: none;
+        color: var(--color-blanco-);
+        margin-bottom: 10px;
+    }
+    label{
+        font-weight: bold;
+    }
+}
+.forms{
+    display: flex;
+    justify-content: center;
+}
+.botones_form_persona {
+    display: flex;
+    justify-content: center; /* Centra los botones horizontalmente */
+    gap: 10px; /* Espacio entre los botones */
+    margin-top: 1rem; /* Espacio arriba de los botones */
+}
+.form_persona_user {
+    background-color: rgba(255, 255, 255, 0.2); /* Blanco con 80% opacidad */
+    padding: 40px; /* Espacio interno alrededor del contenido */
+    margin: 20px;
+    border-radius: 8px; /* Bordes redondeados (opcional) */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra sutil (opcional) */
+}
+
 
 @media (min-width: 1360px) {
     .img_file_pdf {
