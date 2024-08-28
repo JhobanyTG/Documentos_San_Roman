@@ -6,7 +6,7 @@
     <a href="{{ route('gerencias.index') }}" class="btn btn-secondary mb-3"><i class="fa fa-arrow-left" aria-hidden="true"></i> Volver</a>
 
     <h4 class="d-flex justify-content-center">Detalles de la Gerencia</h4>
-    
+
     <div class="card">
         <div class="card-body">
             <p><strong>Nombre:</strong> {{ $gerencia->nombre }}</p>
@@ -23,7 +23,7 @@
                 <button type="button" class="btn btn-secondary" onclick="showConfirmationModal()">
                     <i class="fa fa-trash" aria-hidden="true"></i> Eliminar
                 </button>
-                
+
                 <div class="modal fade" tabindex="-1" role="dialog" id="confirmationModal">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">

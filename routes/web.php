@@ -66,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('documentos', DocumentosController::class)->middleware('auth');
     Route::resource('gerencias', GerenciaController::class)->middleware('auth');
+    route::get('/gerencias/{id}', [GerenciaController::class, 'show'])    ->middleware(['auth', 'checkGerenciaOwnership']);
     // Route::resource('subgerencias', SubgerenciaController::class);
     // Route::prefix('gerencias/{gerencia}')->group(function () {
     //     Route::resource('subgerencias', SubgerenciaController::class);
@@ -76,8 +77,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-
-
+    // route::get('/gerencias/{gerencia}', [GerenciaController::class, 'show'])->name('gerencias.show');
+    // route::get('/gerencias/{id}', [GerenciaController::class, 'mostrarGerencia'])->name('gerencias.show');
 
     // Register Usuarios
     Route::resource('/usuarios',UserController::class)

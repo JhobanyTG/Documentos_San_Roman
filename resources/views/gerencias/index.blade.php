@@ -13,38 +13,42 @@
         <div class="col-md-10 order-md-1">
             <div class="card-body">
                 <div id="example1_wrapper" class="dataTables_wrapper dt-bootstrap4">
-                    <table id="example1" class="table mt-4 table-hover pt-serif-regular" role="grid">
-                        <thead>
-                            <tr>
-                                <th class="col-1">ID</th>
-                                <th class="text-center col-2">Nombre</th>
-                                <th class="text-center col-4">Gerente</th>
-                                <th class="text-center col-2">Teléfono</th>
-                                <th class="text-center col-2">Dirección</th>
-                                <th class="text-center col-1">Estado</th>
-                                <th class="text-center col-1">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @foreach($gerencias as $gerencia)
-                            <tr>
-                                <td>{{ $gerencia->id }}</td>
-                                <td>{{ $gerencia->nombre }}</td>
-                                <td class="text-center">
-                                    {{ $gerencia->user->persona->nombres }} 
-                                    {{ $gerencia->user->persona->apellido_p }} 
-                                    {{ $gerencia->user->persona->apellido_m }}
-                                </td>
-                                <td class="text-center">{{ $gerencia->telefono }}</td>
-                                <td class="text-center">{{ $gerencia->direccion }}</td>
-                                <td class="text-center">{{ $gerencia->estado }}</td>
-                                <td class="text-center">
-                                    <a href="{{ route('gerencias.show', $gerencia->id) }}" class="btn btn-info"><i class="fa fa-eye" aria-hidden="true"></i></a>
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
+                    @if ($gerencias->isEmpty())
+                        <p>No tienes gerencias asignadas.</p>
+                    @else
+                        <table id="example1" class="table mt-4 table-hover pt-serif-regular" role="grid">
+                            <thead>
+                                <tr>
+                                    <th class="col-1">ID</th>
+                                    <th class="text-center col-2">Nombre</th>
+                                    <th class="text-center col-4">Gerente</th>
+                                    <th class="text-center col-2">Teléfono</th>
+                                    <th class="text-center col-2">Dirección</th>
+                                    <th class="text-center col-1">Estado</th>
+                                    <th class="text-center col-1">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($gerencias as $gerencia)
+                                <tr>
+                                    <td>{{ $gerencia->id }}</td>
+                                    <td>{{ $gerencia->nombre }}</td>
+                                    <td class="text-center">
+                                        {{ $gerencia->user->persona->nombres }}
+                                        {{ $gerencia->user->persona->apellido_p }}
+                                        {{ $gerencia->user->persona->apellido_m }}
+                                    </td>
+                                    <td class="text-center">{{ $gerencia->telefono }}</td>
+                                    <td class="text-center">{{ $gerencia->direccion }}</td>
+                                    <td class="text-center">{{ $gerencia->estado }}</td>
+                                    <td class="text-center">
+                                        <a href="{{ route('gerencias.show', $gerencia->id) }}" class="btn btn-info"><i class="fa fa-eye" aria-hidden="true"></i></a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    @endif
                 </div>
             </div>
         </div>

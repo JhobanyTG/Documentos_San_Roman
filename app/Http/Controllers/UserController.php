@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
+
 class UserController extends Controller
 {
     public function index()
@@ -62,15 +63,10 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        $role = Rol::findOrFail($id);
+        $users = User::findOrFail($id);
+        $users->delete();
 
-        // Establecer el campo rol_id a null para los usuarios asociados
-        User::where('rol_id', $role->id)->update(['rol_id' => null]);
-
-        // Ahora puedes eliminar el rol
-        $role->delete();
-
-        return redirect()->route('roles.index')->with('success', 'Rol eliminado exitosamente.');
+        return redirect()->route('usuarios.index')->with('success', 'Usuario eliminada exitosamente.');
     }
 
     public function cambiarContrasena($id)

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Gerencia;
 
 class AuthController extends Controller
 {
@@ -84,4 +85,22 @@ class AuthController extends Controller
         Auth::logout();
         return redirect('/');
     }
+
+    public function redirectToGerencia()
+    {
+        $user = Auth::user();
+
+        // Busca la gerencia del usuario
+        $gerencia = Gerencia::where('usuario_id', $user->id)->first();
+
+        // Verifica que la gerencia exista
+        if ($gerencia) {
+            // Redirige a la ruta de la gerencia con el ID correcto
+            return redirect()->route('gerencias.show', ['gerencia' => $gerencia->id]);
+        } else {
+            return redirect()->back()->withErrors(['error' => 'No tienes ninguna gerencia asignada']);
+        }
+    }
+
+
 }

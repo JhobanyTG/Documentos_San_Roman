@@ -15,13 +15,30 @@ class GerenciaController extends Controller
      * Display a listing of the resource.
      */
 
-     public function index()
-     {
-         // Usa la relación 'user' en lugar de 'usuario'
-         $gerencias = Gerencia::with('user.persona')->get();
- 
-         return view('gerencias.index', compact('gerencias'));
-     }
+    // public function index()
+    // {
+    //     // Usa la relación 'user' en lugar de 'usuario'
+    //     $gerencias = Gerencia::with('user.persona')->get();
+
+    //     return view('gerencias.index', compact('gerencias'));
+    // }
+    public function index()
+    {
+        // Obtener el usuario autenticado
+        $usuario = auth()->user();
+
+        // Si el usuario es SuperAdmin, mostrar todas las gerencias
+        if ($usuario->rol->nombre === 'SuperAdmin') {
+            $gerencias = Gerencia::all();
+        } else {
+            // Si no es SuperAdmin, mostrar solo las gerencias asignadas a este usuario
+            $gerencias = Gerencia::where('usuario_id', $usuario->id)->get();
+        }
+
+        // Retornar la vista con la lista de gerencias filtrada
+        return view('gerencias.index', compact('gerencias'));
+    }
+
 
     // public function index()
     // {
@@ -75,13 +92,60 @@ class GerenciaController extends Controller
     // }
 
 
-    public function show(Gerencia $gerencia)
+    // public function show(Gerencia $gerencia)
+    // {
+    //     // Cargar subgerencias con subusuarios y usuarios relacionados
+    //     if (auth()->user()->rol->nombre === 'SuperAdmin' || 'Crear Gerencias') {
+    //         $gerencia->load('subgerencias.subusuarios.user');
+
+    //         return view('gerencias.show', compact('gerencia'));
+    //     }
+    // }
+    // public function show($id)
+    // {
+    //     // Obtener la gerencia por su ID
+    //     $gerencia = Gerencia::find($id);
+
+    //     // Si no existe la gerencia, retornar un error 404
+    //     if (!$gerencia) {
+    //         abort(404, 'Gerencia no encontrada');
+    //     }
+
+    //     // Verificar si el usuario autenticado está asociado a esta gerencia
+    //     $usuario = auth()->user();
+
+    //     if ($gerencia->usuario_id !== $usuario->id) {
+    //         // Si el usuario no tiene permiso, se puede redirigir o abortar con un error
+    //         abort(403, 'No tienes permiso para ver esta gerencia');
+    //     }
+
+    //     // Si el usuario tiene permiso, mostrar la vista con los detalles de la gerencia
+    //     return view('gerencias.show', compact('gerencia'));
+    // }
+    public function show($id)
     {
-        // Cargar subgerencias con subusuarios y usuarios relacionados
-        $gerencia->load('subgerencias.subusuarios.user');
+        $gerencia = Gerencia::find($id);
+
+        if (!$gerencia) {
+            abort(404, 'Gerencia no encontrada');
+        }
+
+        $usuario = auth()->user();
+
+        // Si el usuario es SuperAdmin, permitir el acceso
+        if ($usuario->rol->nombre === 'SuperAdmin') {
+            return view('gerencias.show', compact('gerencia'));
+        }
+
+        // Si no es SuperAdmin, verificar que esté asignado a la gerencia
+        if ($gerencia->usuario_id !== $usuario->id) {
+            abort(403, 'No tienes permiso para ver esta gerencia');
+        }
 
         return view('gerencias.show', compact('gerencia'));
     }
+
+
 
     // public function show(Gerencia $gerencia)
     // {
@@ -103,12 +167,12 @@ class GerenciaController extends Controller
     // public function show($id)
     // {
     //     $gerencia = Gerencia::findOrFail($id);
-        
+
     //     // Obtén los subusuarios relacionados con la gerencia
     //     $subusuarios = Subusuario::whereHas('subgerencia', function ($query) use ($id) {
     //         $query->where('gerencia_id', $id);
     //     })->get();
-        
+
     //     return view('gerencias.show', compact('gerencia', 'subusuarios'));
     // }
 
@@ -157,5 +221,27 @@ class GerenciaController extends Controller
     {
         $gerencia->delete();
         return redirect()->route('gerencias.index')->with('success', 'Gerencia eliminada exitosamente.');
+    }
+
+    // Asegúrate de pasar el ID de la gerencia correcta
+    public function mostrarGerencia($gerenciaId)
+    {
+        $usuario = auth()->user();
+
+        if ($usuario->rol->nombre === 'SuperAdmin') {
+            $gerencia = Gerencia::findOrFail($gerenciaId);
+            return view('gerencias.show', compact('gerencia'));
+        }
+
+        // Aquí obtienes la gerencia asignada al usuario
+        $gerencia = Gerencia::where('id', $gerenciaId)
+            ->where('usuario_id', $usuario->usuario_id)
+            ->first();
+
+        if ($gerencia) {
+            return redirect()->route('gerencias.show', ['gerencia' => $gerencia->gerencia_id]);
+        }
+
+        // return redirect()->route('/documentos')->withErrors('No tienes acceso a esta gerencia.');
     }
 }

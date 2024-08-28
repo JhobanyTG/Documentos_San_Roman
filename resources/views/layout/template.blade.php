@@ -37,56 +37,60 @@
 						<span class="nav-text">Documentos</span>
 					</a>
 				</li>
-				<li class="nav-item active">
-					<a href="{{ url('gerencias') }}">
-						<i class="fa fa-suitcase" aria-hidden="true"></i>
-						<span class="nav-text">Gerencias</span>
-					</a>
-				</li>
-				<li class="nav-item active">
-					<a href="{{ url('documentos') }}">
-						<i class="fa fa-address-book" aria-hidden="true"></i>
-						<span class="nav-text">Sub Gerencias</span>
-					</a>
-				</li>
-                <!-- <li class="nav-item">
-                    <a href="#">
-                        <i class="fa fa-book"></i>
-                        <span class="nav-text">Otros</span>
-                    </a>
-                </li> -->
-				{{-- @if (auth()->check() && auth()->user()->role === 'SuperAdmin') --}}
+                @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total'))
+                    <li class="nav-item active">
+                        <a href="{{ url('gerencias') }}">
+                            <i class="fa fa-suitcase" aria-hidden="true"></i>
+                            <span class="nav-text">Gerencias</span>
+                        </a>
+                    </li>
+                    <!-- <li class="nav-item">
+                        <a href="#">
+                            <i class="fa fa-book"></i>
+                            <span class="nav-text">Otros</span>
+                        </a>
+                    </li> -->
+                    {{-- @if (auth()->check() && auth()->user()->rols === "SuperAdmin" ) --}}
+                    {{-- @if (auth()->check() && auth()->user()->rol && auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) --}}
 					<li class="nav-item">
 						<a href="{{ url('usuarios') }}">
 							<i class="fa fa-users"></i>
 							<span class="nav-text">Usuarios</span>
 						</a>
 					</li>
-				{{-- @endif --}}
-                <li class="nav-item">
-                    <a href="{{ url('personas') }}">
-                        <i class="fa fa-users"></i>
-                        <span class="nav-text">Personas</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url('roles') }}">
-                        <i class="fa fa-users"></i>
-                        <span class="nav-text">Roles y Privilegios</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url('privilegios') }}">
-                        <i class="fa fa-users"></i>
-                        <span class="nav-text">Privilegios</span>
-                    </a>
-                </li>
-                {{-- <li class="nav-item">
-                    <a href="{{ url('rolprivilegios') }}">
-                        <i class="fa fa-users"></i>
-                        <span class="nav-text">Roles y Privilegios</span>
-                    </a>
-                </li> --}}
+                    <li class="nav-item">
+                        <a href="{{ url('personas') }}">
+                            <i class="fa fa-users"></i>
+                            <span class="nav-text">Personas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url('roles') }}">
+                            <i class="fa fa-users"></i>
+                            <span class="nav-text">Roles y Privilegios</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url('privilegios') }}">
+                            <i class="fa fa-users"></i>
+                            <span class="nav-text">Privilegios</span>
+                        </a>
+                    </li>
+                    {{-- <li class="nav-item">
+                        <a href="{{ url('rolprivilegios') }}">
+                            <i class="fa fa-users"></i>
+                            <span class="nav-text">Roles y Privilegios</span>
+                        </a>
+                    </li> --}}
+                @endif
+                @if (auth()->user()->rol->privilegios->contains('nombre', 'Crear SubGerencias'))
+                    <li class="nav-item active">
+                        <a href="{{ url('gerencias') }}">
+                            <i class="fa fa-address-book" aria-hidden="true"></i>
+                            <span class="nav-text">Gerencia y Sub Gerencias</span>
+                        </a>
+                    </li>
+                @endif
 			</ul>
 		<div class="logout-btn">
 			<div class="logout-btn-wrapper">
@@ -204,7 +208,7 @@
 	// Listener para detectar el cambio de tamaño de pantalla
 	window.addEventListener('resize', () => {
 	if (window.innerWidth <= 600) {
-		minimizeSidebar();
+		minimizeSidebar();W
 	} else {
 		maximizeSidebar();
 	}
