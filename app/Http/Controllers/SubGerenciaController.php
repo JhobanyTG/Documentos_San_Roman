@@ -9,6 +9,7 @@ use App\Models\User;
 
 class SubgerenciaController extends Controller
 {
+
     public function create(Gerencia $gerencia)
     {
         $users = User::with('persona')->get();

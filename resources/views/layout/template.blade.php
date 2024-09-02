@@ -76,6 +76,12 @@
                             <span class="nav-text">Privilegios</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ url('tipodocumento') }}">
+                            <i class="fa fa-users"></i>
+                            <span class="nav-text">Tipo Documento</span>
+                        </a>
+                    </li>
                     {{-- <li class="nav-item">
                         <a href="{{ url('rolprivilegios') }}">
                             <i class="fa fa-users"></i>

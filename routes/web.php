@@ -12,6 +12,9 @@ use App\Http\Controllers\RolPrivilegioController;
 use App\Http\Controllers\GerenciaController;
 use App\Http\Controllers\SubgerenciaController;
 use App\Http\Controllers\SubUsuarioController;
+use App\Http\Controllers\TipoDocumentoController;
+
+
 
 
 
@@ -65,8 +68,10 @@ Route::middleware(['auth'])->group(function () {
     // Route::post('documentos', [DocumentosController::class, 'store'])->name('documentos.store');
 
     Route::resource('documentos', DocumentosController::class)->middleware('auth');
+    Route::resource('tipodocumento', TipoDocumentoController::class);
     Route::resource('gerencias', GerenciaController::class)->middleware('auth');
     route::get('/gerencias/{id}', [GerenciaController::class, 'show'])    ->middleware(['auth', 'checkGerenciaOwnership']);
+
     // Route::resource('subgerencias', SubgerenciaController::class);
     // Route::prefix('gerencias/{gerencia}')->group(function () {
     //     Route::resource('subgerencias', SubgerenciaController::class);
@@ -101,4 +106,5 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('privilegios', PrivilegioController::class);
     Route::resource('rolprivilegios', RolPrivilegioController::class);
+
 });

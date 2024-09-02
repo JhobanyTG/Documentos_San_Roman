@@ -23,4 +23,9 @@ class Documento extends Model
     {
         return $this->belongsTo(Subusuario::class, 'sub_usuarios_id');
     }
+
+    public function tipoDocumento()
+    {
+        return $this->belongsTo(TipoDocumento::class, 'id_tipodocumento');
+    }
 }
