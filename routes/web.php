@@ -58,6 +58,10 @@ Route::post('/change-password', [AuthController::class, 'changePassword'])->midd
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->middleware('auth')->name('register');
 Route::post('/register', [AuthController::class, 'register'])->middleware('auth');
 
+Route::resource('documentos', DocumentosController::class);
+Route::get('/documentos/{id}', [DocumentosController::class, 'show'])->name('documentos.show');
+
+
 Route::middleware(['auth'])->group(function () {
     // Otras rutas protegidas por autenticación...
 
@@ -67,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('/documentos/edit', [DocumentosController::class, 'edit'])->name('documentos.edit');
     // Route::post('documentos', [DocumentosController::class, 'store'])->name('documentos.store');
 
-    Route::resource('documentos', DocumentosController::class)->middleware('auth');
+    Route::resource('documentos', DocumentosController::class)->except(['index', 'show']);
     Route::resource('tipodocumento', TipoDocumentoController::class);
     Route::resource('gerencias', GerenciaController::class)->middleware('auth');
     route::get('/gerencias/{id}', [GerenciaController::class, 'show'])    ->middleware(['auth', 'checkGerenciaOwnership']);

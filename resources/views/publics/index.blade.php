@@ -130,32 +130,36 @@
                     <table id="example1" class="table mt-4 table-hover pt-serif-regular" role="grid" aria-describedby="example1_info">
                         <thead>
                             <tr role="row">
-                                <th class="col-1"><div class="imagen_title_index">Imagen</div></th>
-                                <th class="text-center col-2">Titulo</th>
-                                <th class="text-center col-7">Descripcion</th>
-                                <th class="text-center col-1">Fecha y Hora</th>
+                                <th>N°</th>
+                                <th class="text-center col-2">Fecha</th>
+                                <th>Título</th>
+                                <th>Tipo Documento</th>
+                                <th>Descripción</th>
+                                <th class="col-1">
+                                    <div class="imagen_title_index">Archivo</div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($documentos as $documento)
                                 <tr role="row" class="border-table border-bottom-3" data-id="{{ $documento->id }}">
-                                    <td class="text-center">
-                                        <div class="previwe-pdf">
-                                            <div class="archivo-preview" style="overflow: hidden">
-                                                <div style="margin-right: -16px;">
-                                                    <iframe id="pdfIframe" src="{{ asset('storage/archivos/' . basename($documento->archivo)) }}" type="application/pdf" style="display: block; overflow: hidden scroll; height: 160px; width: 100%; pointer-events: none;" frameborder="0" loading="lazy"></iframe>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <img class="img_file_pdf centered-img" src="{{ asset('images/icons/pdf.png') }}" alt="PDF" />
+                                    <td>
+                                        {{ $documento->id}}
                                     </td>
-                                    <td class="text-center">
+                                    <td>
+                                        {{ $documento->created_at->format('Y-m-d') }}<br>
+                                    </td>
+                                    <td>
                                         @php
                                             if ($searchTerm) {
                                                 // Escapar el término de búsqueda para evitar problemas de HTML
                                                 $escapedSearchTerm = preg_quote($searchTerm, '/');
                                                 // Usar preg_replace para reemplazo insensible al caso
-                                                $highlightedTitle = preg_replace('/(' . $escapedSearchTerm . ')/i', '<mark>$1</mark>', $documento->titulo);
+                                                $highlightedTitle = preg_replace(
+                                                    '/(' . $escapedSearchTerm . ')/i',
+                                                    '<mark>$1</mark>',
+                                                    $documento->titulo,
+                                                );
                                             } else {
                                                 // Si no hay término de búsqueda, mostrar el título sin resaltar
                                                 $highlightedTitle = $documento->titulo;
@@ -163,25 +167,38 @@
                                         @endphp
                                         {!! $highlightedTitle !!}
                                     </td>
-
-                                    <td class="text-center">
-                                        @if(strlen($documento->descripcion) > 370)
+                                    <td>{{ $documento->tipoDocumento->nombre }}</td>
+                                    <td>
+                                        @if (strlen($documento->descripcion) > 370)
                                             @php
                                                 if ($searchTerm) {
                                                     // Escapar el término de búsqueda para evitar problemas de HTML
                                                     $escapedSearchTerm = preg_quote($searchTerm, '/');
                                                     // Usar preg_replace para reemplazo insensible al caso en la descripción truncada
-                                                    $highlightedDescription = preg_replace('/(' . $escapedSearchTerm . ')/i', '<mark>$1</mark>', substr($documento->descripcion, 0, 370));
+                                                    $highlightedDescription = preg_replace(
+                                                        '/(' . $escapedSearchTerm . ')/i',
+                                                        '<mark>$1</mark>',
+                                                        substr($documento->descripcion, 0, 370),
+                                                    );
                                                     // Usar preg_replace para reemplazo insensible al caso en la descripción completa
-                                                    $highlightedFullDescription = preg_replace('/(' . $escapedSearchTerm . ')/i', '<mark>$1</mark>', $documento->descripcion);
+                                                    $highlightedFullDescription = preg_replace(
+                                                        '/(' . $escapedSearchTerm . ')/i',
+                                                        '<mark>$1</mark>',
+                                                        $documento->descripcion,
+                                                    );
                                                 } else {
                                                     // Si no hay término de búsqueda, mostrar la descripción sin resaltar
-                                                    $highlightedDescription = substr($documento->descripcion, 0, 370);
+                                                    $highlightedDescription = substr(
+                                                        $documento->descripcion,
+                                                        0,
+                                                        370,
+                                                    );
                                                     $highlightedFullDescription = $documento->descripcion;
                                                 }
                                             @endphp
                                             <span class="truncated">{!! $highlightedDescription !!}...</span>
-                                            <span class="expand-description" data-target="#desc-{{ $documento->id }}">Ver más</span>
+                                            <span class="expand-description"
+                                                data-target="#desc-{{ $documento->id }}">Ver más</span>
                                             <div id="desc-{{ $documento->id }}" class="collapse full-description">
                                                 <span>{!! $highlightedFullDescription !!}</span>
                                                 <span class="collapse-description">Ver menos</span>
@@ -192,7 +209,11 @@
                                                     // Escapar el término de búsqueda para evitar problemas de HTML
                                                     $escapedSearchTerm = preg_quote($searchTerm, '/');
                                                     // Usar preg_replace para reemplazo insensible al caso en la descripción completa
-                                                    $highlightedDescription = preg_replace('/(' . $escapedSearchTerm . ')/i', '<mark>$1</mark>', $documento->descripcion);
+                                                    $highlightedDescription = preg_replace(
+                                                        '/(' . $escapedSearchTerm . ')/i',
+                                                        '<mark>$1</mark>',
+                                                        $documento->descripcion,
+                                                    );
                                                 } else {
                                                     // Si no hay término de búsqueda, mostrar la descripción sin resaltar
                                                     $highlightedDescription = $documento->descripcion;
@@ -202,8 +223,19 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        {{ $documento->created_at->format('Y-m-d') }}<br>
-                                        {{ $documento->created_at->format('H:i') }}
+                                        <div class="previwe-pdf">
+                                            <div class="archivo-preview" style="overflow: hidden">
+                                                <div style="margin-right: -16px;">
+                                                    <iframe id="pdfIframe"
+                                                        src="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
+                                                        type="application/pdf"
+                                                        style="display: block; overflow: hidden scroll; height: 160px; width: 100%; pointer-events: none;"
+                                                        frameborder="0" loading="lazy"></iframe>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <img class="img_file_pdf centered-img"
+                                            src="{{ asset('images/icons/pdf.png') }}" alt="PDF" />
                                     </td>
                                     <div class="modal fade pt-serif-regular" id="pdfModal-{{ $documento->id }}" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel-{{ $documento->id }}" aria-hidden="true">
                                         <div class="modal-dialog modal-lg" role="document">

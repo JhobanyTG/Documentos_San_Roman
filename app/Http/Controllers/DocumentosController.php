@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+
 use App\Models\Documento;
+use App\Models\TipoDocumento;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-
 
 class DocumentosController extends Controller
 {
     public function index(Request $request)
     {
-        if ($user = auth()->user()) {
+            $documentos = Documento::with('tipoDocumento')->get();
             $query = Documento::query();
 
             $searchTerm = $request->input('q');
@@ -70,15 +71,25 @@ class DocumentosController extends Controller
             }
 
             return view('documentos.index', compact('documentos', 'searchTerm', 'fecha', 'availableYears', 'availableMonths', 'filtroAnio', 'filtroMes'));
-        } else {
-            return redirect()->to('/');
-        }
     }
 
     public function create()
     {
         if (auth()->user()) {
-            return view('documentos.create');
+            $tiposDocumento = TipoDocumento::all();
+            return view('documentos.create', compact('tiposDocumento'));
+        } else {
+            return redirect()->to('/');
+        }
+
+    }
+
+    public function edit($id)
+    {
+        if (auth()->user()) {
+            $documento = Documento::findOrFail($id);
+            $tiposDocumento = TipoDocumento::all();
+            return view('documentos.edit', compact('documento', 'tiposDocumento'));
         } else {
             return redirect()->to('/');
         }
@@ -86,81 +97,47 @@ class DocumentosController extends Controller
 
     public function store(Request $request)
     {
-        // Validar los datos del formulario
         $request->validate([
             'titulo' => 'required|string|max:255',
-            'descripcion' => 'required|string',
+            'tipodocumento_id' => 'required|exists:tipodocumento,id',
             'archivo' => [
-                    'required',
-                    'file',
-                    'mimes:pdf',
-                    'max:10000',
-                    Rule::unique('documentos', 'archivo'),
-                ],
+                'required',
+                'file',
+                'mimes:pdf',
+                'max:10000',
+                Rule::unique('documentos', 'archivo'),
+            ],
+            'estado' => 'required|in:Creado,Validado,Publicado',
         ]);
 
-        try {
-            $archivo = $request->file('archivo');
-            // $archivoNombre = $archivo->getClientOriginalName();
-            // $archivoRuta = $archivo->storeAs('archivos', $archivoNombre, 'public');
-            // $archivoExiste = Documento::where('archivo', $archivoRuta)->exists();
-            // if ($archivoExiste) {
-            //     return redirect()->route('documentos.create')
-            //         ->withErrors(['archivo' => 'El archivo con ese nombre ya existe. Por favor, elige otro archivo diferente.'])
-            //         ->withInput();
-            // }
-
-            // Generar el número incremental
-            $ultimoDocumento = Documento::latest('id')->first();
-            $numeroIncremental = $ultimoDocumento ? str_pad($ultimoDocumento->id + 1, 4, '0', STR_PAD_LEFT) : '0001';
-
-            // Modificar el nombre del archivo
-            $archivoNombreOriginal = $archivo->getClientOriginalName();
-            $archivoNombre = 'ATISR-' . $numeroIncremental . '-' . $archivoNombreOriginal;
-
-            // Guardar el archivo con el nuevo nombre
-            $archivoRuta = $archivo->storeAs('archivos', $archivoNombre, 'public');
-
-            $archivoExiste = Documento::where('archivo', $archivoRuta)->exists();
-            if ($archivoExiste) {
-                return redirect()->route('documentos.create')
-                    ->withErrors(['archivo' => 'El archivo con ese nombre ya existe. Por favor, elige otro archivo diferente.'])
-                    ->withInput();
-            }
-
-            // Crear el nuevo documento
-            $documento = new Documento();
-            $documento->user_id = Auth::id();
-            $documento->titulo = $request->input('titulo');
-            $documento->descripcion = $request->input('descripcion');
-            $documento->archivo = $archivoRuta;
-            $documento->save();
-
-            Session::flash('success', 'El documento ha sido creado exitosamente.');
-            return redirect()->route('documentos.index');
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return redirect()->route('documentos.create')
-                ->with('error', 'Ha ocurrido un error en el servidor. Por favor, inténtalo de nuevo más tarde.');
+        $fileName = null;
+        if ($request->hasFile('archivo')) {
+            $file = $request->file('archivo');
+            $fileName = time() . '-' . $file->getClientOriginalName();
+            $file->storeAs('public/documentos', $fileName);
         }
-    }
 
-    public function edit($id)
-    {
-        if (auth()->user()) {
-            $documento = Documento::findOrFail($id);
-            return view('documentos.edit', compact('documento'));
-        } else {
-            return redirect()->to('/');
-        }
+        Documento::create([
+            'sub_usuarios_id' => Auth::user()->id,
+            'tipodocumento_id' => $request->input('tipodocumento_id'),
+            'titulo' => $request->input('titulo'),
+            'descripcion' => $request->input('descripcion'),
+            'archivo' => $fileName,
+            'estado' => $request->input('estado'),
+        ]);
+
+        return redirect()->route('documentos.index')->with('success', 'Documento creado exitosamente.');
     }
 
     public function update(Request $request, $id)
     {
+
         $documento = Documento::findOrFail($id);
+        $fileName = $documento->archivo;
 
         $request->validate([
-            'titulo' => 'required|max:255',
+            'titulo' => 'required|string|max:255',
+            'tipodocumento_id' => 'required|exists:tipodocumento,id',
             'descripcion' => 'required|string',
             'archivo' => [
                 'nullable',
@@ -169,19 +146,8 @@ class DocumentosController extends Controller
                 'max:10000',
                 Rule::unique('documentos')->ignore($documento->id),
             ],
+            'estado' => 'required|in:Creado,Validado,Publicado',
         ]);
-
-        // if ($request->hasFile('archivo')) {
-        //     $archivo = $request->file('archivo');
-        //     $archivoNombre = $archivo->getClientOriginalName();
-        //     $archivoRuta = $archivo->storeAs('archivos', $archivoNombre, 'public');
-
-        //     if ($documento->archivo) {
-        //         Storage::delete('public/' . $documento->archivo);
-        //     }
-
-        //     $documento->archivo = $archivoRuta;
-        // }
 
         if ($request->hasFile('archivo')) {
             $archivo = $request->file('archivo');
@@ -209,31 +175,24 @@ class DocumentosController extends Controller
         $documento->descripcion = $request->input('descripcion');
         $documento->save();
 
-        return redirect()->route('documentos.index')->with('success', 'El documento se actualizó correctamente.');
+        $documento->update([
+            'tipodocumento_id' => $request->input('tipodocumento_id'),
+            'titulo' => $request->input('titulo'),
+            'descripcion' => $request->input('descripcion'),
+            'archivo' => $fileName,
+            'estado' => $request->input('estado'),
+        ]);
+
+        return redirect()->route('documentos.index')->with('success', 'Documento actualizado exitosamente.');
     }
 
-    // Método para eliminar un documento
-    // public function destroy($id)
-    // {
-    //     $documento = Documento::findOrFail($id);
-
-    //     // Eliminar el archivo
-    //     if (Storage::exists($documento->archivo)) {
-    //         Storage::delete($documento->archivo);
-    //     }
-
-    //     // Eliminar el registro en la base de datos
-    //     $documento->delete();
-
-    //     Session::flash('success', 'El documento ha sido eliminado exitosamente.');
-    //     return redirect()->route('documentos.index');
-    // }
     public function destroy($id)
     {
+
         if (auth()->user()) {
             $documento = Documento::findOrFail($id);
             if ($documento->archivo) {
-                Storage::delete('public/' . $documento->archivo);
+                Storage::delete('public/documentos/' . $documento->archivo);
             }
             $documento->delete();
 
@@ -243,5 +202,4 @@ class DocumentosController extends Controller
             return redirect()->to('/');
         }
     }
-
 }

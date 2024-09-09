@@ -13,6 +13,7 @@ class Documento extends Model
 
     protected $fillable = [
         'sub_usuarios_id',
+        'tipodocumento_id',
         'titulo',
         'descripcion',
         'archivo',
@@ -26,6 +27,6 @@ class Documento extends Model
 
     public function tipoDocumento()
     {
-        return $this->belongsTo(TipoDocumento::class, 'id_tipodocumento');
+        return $this->belongsTo(TipoDocumento::class, 'tipodocumento_id');
     }
 }

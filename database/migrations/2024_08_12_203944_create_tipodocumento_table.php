@@ -15,7 +15,7 @@ class CreateTipoDocumentoTable extends Migration
     {
         // Crear tabla tipo_documento
         Schema::create('tipodocumento', function (Blueprint $table) {
-            $table->id('id_tipodocumento');  // Primary key
+            $table->id();  // Primary key
             $table->string('nombre');  // Nombre del tipo de documento
             $table->string('descripcion')->nullable();  // Descripción (opcional)
             $table->timestamps();  // Para created_at y updated_at

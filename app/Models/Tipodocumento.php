@@ -12,8 +12,6 @@ class TipoDocumento extends Model
     // Especifica el nombre de la tabla
     protected $table = 'tipodocumento';
 
-    // Especifica el nombre de la clave primaria
-    protected $primaryKey = 'id_tipodocumento';
 
     // Permite la asignación masiva en estos campos
     protected $fillable = [

@@ -14,6 +14,7 @@
     --color-success: #037672;
     --color-table-linea: #dee2e6;
     --color-table-linea-2: #6c757d;
+    --color-table-encabezado: #D9EDF7;
 }
 
 .pt-serif-bold {
@@ -223,8 +224,8 @@ header .toggle-sidebar-btn {
 }
 
 header .profile img {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     margin-right: 10px;
 }
@@ -431,6 +432,8 @@ div .filtro{
 .table thead th {
     vertical-align: bottom;
     border-bottom: 2px solid var(--color-table-linea);
+    background-color: var(--color-table-encabezado);
+
 }
 
 .paginacion{

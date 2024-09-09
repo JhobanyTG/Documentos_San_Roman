@@ -5,7 +5,7 @@
 @section('content')
     <div class="container mt-4 form_persona">
         <h2>Registrar Persona y Usuario</h2>
-        <form id="registrationForm" action="{{ route('personas.store') }}" method="POST" class="form_persona_user">
+        <form id="registrationForm" action="{{ route('personas.store') }}" method="POST" class="form_persona_user" enctype="multipart/form-data">
             @csrf
             <div class="row forms">
                 <!-- Formulario Persona -->
@@ -33,6 +33,10 @@
                     <div class="form-group">
                         <label for="celular">Celular:</label>
                         <input type="text" class="form-control" id="celular" name="celular" value="{{ old('celular') }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="avatar">Avatar</label>
+                        <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
                     </div>
                 </div>
 

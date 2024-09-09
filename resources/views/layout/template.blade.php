@@ -116,8 +116,18 @@
 			</div>
 			<div class="header-right pt-serif-bold">
 				<div class="profile" id="profile-div">
-					<img src="{{ asset('images/logo/avatar.png') }}" alt="Avatar">
-					<p>{{ auth()->user()->name }}<span>{{ auth()->user()->role }}</span></p>
+                    @php
+                        $personaLogueada = auth()->user()->persona; // Obtener la persona asociada al usuario logueado
+                    @endphp
+
+                    @if ($personaLogueada && $personaLogueada->avatar)
+                        <img src="{{ asset('storage/' . $personaLogueada->avatar) }}" alt="{{ $personaLogueada->nombres }}" class="img-fluid">
+                    @else
+                        <img src="{{ asset('images/logo/avatar.png') }}" alt="Avatar" class="img-fluid">
+                    @endif
+
+                    {{-- <img src="{{ asset('storage/' . $persona->avatar) }}" alt="{{ $persona->nombres }}" class="img-fluid" width="100"> --}}
+                    <p>{{ auth()->user()->nombre_usuario }}<span>{{ auth()->user()->rol->nombre }}</span></p>
 				</div>
 				<a id="change-password-link" href="{{ route('change-password') }}" class="boton_cambiar_contrasena"><i class="fa fa-lock" aria-hidden="true"></i>Cambiar Contraseña</a>
 			</div>

@@ -15,6 +15,7 @@
             <thead>
                 <tr>
                     <th>DNI</th>
+                    <th>Imagen</th>
                     <th>Nombres</th>
                     <th>Apellido Paterno</th>
                     <th>Apellido Materno</th>
@@ -25,9 +26,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($personas as $persona)
+                @foreach ($personas as $persona)
                     <tr>
                         <td>{{ $persona->dni }}</td>
+                        <td>
+                            <img src="{{ $persona->avatar ? asset('storage/' . $persona->avatar) : asset('images/logo/avatar.png') }}" alt="{{ $persona->nombres }}" width="100">
+                        </td>
                         <td>{{ $persona->nombres }}</td>
                         <td>{{ $persona->apellido_p }}</td>
                         <td>{{ $persona->apellido_m }}</td>
@@ -36,7 +40,8 @@
                         <td>{{ $persona->direccion }}</td>
                         <td>
                             <a href="{{ route('personas.edit', $persona->id) }}" class="btn btn-warning">Editar</a>
-                            <form action="{{ route('personas.destroy', $persona->id) }}" method="POST" style="display:inline;">
+                            <form action="{{ route('personas.destroy', $persona->id) }}" method="POST"
+                                style="display:inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger">Eliminar</button>

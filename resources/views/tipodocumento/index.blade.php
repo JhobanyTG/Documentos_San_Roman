@@ -1,41 +1,39 @@
 @extends('layout.template')
 
 @section('content')
-    <h1>Lista de Tipos de Documento</h1>
-    <a href="{{ route('tipodocumento.create') }}" class="btn btn-primary">Crear Tipo de Documento</a>
-
-    @if ($message = Session::get('success'))
-        <div class="alert alert-success mt-3">
-            {{ $message }}
+<div class="container">
+    <h1>Tipos de Documento</h1>
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
         </div>
     @endif
-
+    <a href="{{ route('tipodocumento.create') }}" class="btn btn-primary">Crear Nuevo Tipo de Documento</a>
     <table class="table mt-3">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($tipodocumentos as $tipodocumento)
+            @foreach($tipodocumentos as $tipodocumento)
                 <tr>
-                    <td>{{ $tipodocumento->id_tipodocumento }}</td>
                     <td>{{ $tipodocumento->nombre }}</td>
                     <td>{{ $tipodocumento->descripcion }}</td>
                     <td>
-                        <a href="{{ route('tipodocumento.show', $tipodocumento->id_tipodocumento) }}" class="btn btn-info">Ver</a>
-                        <a href="{{ route('tipodocumento.edit', $tipodocumento->id_tipodocumento) }}" class="btn btn-warning">Editar</a>
-                        <form action="{{ route('tipodocumento.destroy', $tipodocumento->id_tipodocumento) }}" method="POST" style="display:inline-block;">
+                        <a href="{{ route('tipodocumento.show', $tipodocumento->id) }}" class="btn btn-info btn-sm">Ver</a>
+                        <a href="{{ route('tipodocumento.edit', $tipodocumento->id) }}" class="btn btn-warning btn-sm">Editar</a>
+                        <form action="{{ route('tipodocumento.destroy', $tipodocumento->id) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
                         </form>
                     </td>
                 </tr>
             @endforeach
         </tbody>
     </table>
+</div>
 @endsection

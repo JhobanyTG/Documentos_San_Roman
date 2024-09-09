@@ -19,6 +19,7 @@ class Persona extends Model
         'f_nacimiento',
         'celular',
         'direccion',
+        'avatar',
     ];
 
     protected static function booted()

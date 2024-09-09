@@ -7,6 +7,7 @@ use App\Models\Rol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 
 
 class UserController extends Controller
@@ -41,12 +42,29 @@ class UserController extends Controller
 
         try {
             $user = User::findOrFail($id);
+
+                    // Si se ha subido un avatar
+        if ($request->hasFile('avatar')) {
+            // Elimina el avatar viejo si existe
+            if ($user->avatar) {
+                Storage::delete('public/avatars/' . $user->avatar);
+            }
+
+            // Guarda el nuevo avatar
+            $file = $request->file('avatar');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('public/avatars', $filename);
+            $user->avatar = $filename;
+        }
+
             $user->update([
                 'rol_id' => $validatedData['rol_id'],
                 'nombre_usuario' => $validatedData['nombre_usuario'],
                 'email' => $validatedData['email'],
                 'estado' => $request->input('estado'),
             ]);
+
+            $user->save();
 
             return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado exitosamente.');
         } catch (\Exception $e) {

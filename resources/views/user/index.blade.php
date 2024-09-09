@@ -9,6 +9,7 @@
                 <table id="content_ta" class="table table-striped mt-4 table-hover custom-table pt-serif-regular" role="grid" aria-describedby="content_ta_info">
                     <thead>
                         <tr role="row">
+                            <th class="text-center">Imagen</th>
                             <th class="text-center">Nombre de Usuario</th>
                             <th class="text-center">Correo</th>
                             <th class="text-center">Estado</th>
@@ -20,6 +21,9 @@
                     <tbody class="text-center">
                         @foreach ($users as $user)
                         <tr class="odd">
+                            <td>
+                                <img src="{{ $user->persona->avatar ? asset('storage/' . $user->persona->avatar) : asset('images/logo/avatar.png') }}" alt="{{ $user->persona->nombres }}" width="100">
+                            </td>
                             <td>{{ $user->nombre_usuario }}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->estado }}</td>
