@@ -138,6 +138,7 @@
                                 <th class="col-1">
                                     <div class="imagen_title_index">Archivo</div>
                                 </th>
+                                <th>Estado</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -237,6 +238,7 @@
                                         <img class="img_file_pdf centered-img"
                                             src="{{ asset('images/icons/pdf.png') }}" alt="PDF" />
                                     </td>
+                                    <td>{{$documento->estado === 'Publicado'}}</td>
                                     <div class="modal fade pt-serif-regular" id="pdfModal-{{ $documento->id }}" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel-{{ $documento->id }}" aria-hidden="true">
                                         <div class="modal-dialog modal-lg" role="document">
                                             <div class="modal-content">

@@ -31,7 +31,7 @@
                         <td>{{ Str::limit($role->descripcion, 50) }}</td>
                         <td>
                             @forelse ($role->privilegios as $privilegio)
-                                <span class="text">{{ $privilegio->nombre }}</span>
+                                <span class="text badge text-bg-secondary">{{ $privilegio->nombre }}</span>
                             @empty
                                 <span class="text-muted">Sin privilegios</span>
                             @endforelse

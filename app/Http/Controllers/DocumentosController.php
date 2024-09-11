@@ -118,7 +118,8 @@ class DocumentosController extends Controller
         }
 
         Documento::create([
-            'sub_usuarios_id' => Auth::user()->id,
+            'sub_usuarios_id' => $request->input('sub_usuarios_id'),
+            'user_id' => Auth::user()->id,
             'tipodocumento_id' => $request->input('tipodocumento_id'),
             'titulo' => $request->input('titulo'),
             'descripcion' => $request->input('descripcion'),
@@ -144,9 +145,10 @@ class DocumentosController extends Controller
                 'file',
                 'mimes:pdf',
                 'max:10000',
-                Rule::unique('documentos')->ignore($documento->id),
+                Rule::unique('documentos', 'archivo'),
             ],
             'estado' => 'required|in:Creado,Validado,Publicado',
+            'sub_usuarios_id' => 'nullable|exists:subusuarios,id',
         ]);
 
         if ($request->hasFile('archivo')) {
@@ -176,6 +178,8 @@ class DocumentosController extends Controller
         $documento->save();
 
         $documento->update([
+            'user_id' => Auth::user()->id,
+            'sub_usuarios_id' => $request->input('sub_usuarios_id') ?? null,
             'tipodocumento_id' => $request->input('tipodocumento_id'),
             'titulo' => $request->input('titulo'),
             'descripcion' => $request->input('descripcion'),

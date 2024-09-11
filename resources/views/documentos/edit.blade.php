@@ -69,9 +69,9 @@
                 <div class="form-group mt-3">
                     <label for="estado">Estado:</label>
                     <select name="estado" class="form-control" id="estado" required>
-                        <option value="Creado" {{ $documento->estado == 'Creado' ? 'selected' : '' }}>Creado</option>
-                        <option value="Validado" {{ $documento->estado == 'Validado' ? 'selected' : '' }}>Validado</option>
-                        <option value="Publicado" {{ $documento->estado == 'Publicado' ? 'selected' : '' }}>Publicado</option>
+                        <option   value="Creado" {{ $documento->estado == 'Creado' ? 'selected' : '' }} style="color: red">Creado</option>
+                        <option   value="Validado" {{ $documento->estado == 'Validado' ? 'selected' : '' }} style="color: green">Validado</option>
+                        <option   value="Publicado" {{ $documento->estado == 'Publicado' ? 'selected' : '' }} style="color: blue">Publicado</option>
                     </select>
                 </div>
 

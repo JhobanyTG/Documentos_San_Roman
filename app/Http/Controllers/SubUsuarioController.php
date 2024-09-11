@@ -91,12 +91,11 @@ class SubUsuarioController extends Controller
 
         // Crear el subusuario con el user_id recién creado
         Subusuario::create([
-            'user_id' => $user->id, // Aquí es donde se establece el `user_id`
+            'user_id' => $user->id,
             'subgerencia_id' => $validatedData['subgerencia_id'],
             'cargo' => $validatedData['cargo'],
         ]);
-
-        return redirect()->route('gerencias.show', $gerencia->id)->with('success', 'Subusuario creado exitosamente.');
+        return redirect()->route('gerencia.show')->with('success', 'Subusuario creado exitosamente.');
     }
 
     /**

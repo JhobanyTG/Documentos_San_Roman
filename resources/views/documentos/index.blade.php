@@ -263,7 +263,16 @@
                                             <img class="img_file_pdf centered-img"
                                                 src="{{ asset('images/icons/pdf.png') }}" alt="PDF" />
                                         </td>
-                                        <td>{{ $documento->estado }}</td>
+                                        <td>
+                                            @if($documento->estado === 'Creado')
+                                                <span class="badge text-bg-danger">Creado</span>
+                                            @elseif($documento->estado === 'Validado')
+                                                <span class="badge text-bg-success">Validado</span>
+                                            @elseif($documento->estado === 'Publicado')
+                                                <span class="badge text-bg-primary">Publicado</span>
+                                            @endif
+                                        </td>
+
                                         {{-- <td>
                                         <a href="{{ route('documentos.edit', $documento->id) }}" class="btn btn-warning btn-sm">Editar</a>
                                         <form action="{{ route('documentos.destroy', $documento->id) }}" method="POST" style="display:inline;">

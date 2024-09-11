@@ -50,9 +50,9 @@
                         <div class="form-group mt-3">
                             <label for="estado">Estado:</label>
                             <select name="estado" class="form-control" id="estado" required>
-                                <option value="Creado">Creado</option>
-                                <option value="Validado">Validado</option>
-                                <option value="Publicado">Publicado</option>
+                                <option value="Creado" style="color: red" >Creado</option>
+                                <option value="Validado" style="color: green" >Validado</option>
+                                <option value="Publicado" style="color: blue" >Publicado</option>
                             </select>
                         </div>
                         <div class="mt-3">
@@ -156,4 +156,21 @@
         });
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var estadoSelect = document.getElementById('estado');
+
+        function updateColor() {
+            var selectedOption = estadoSelect.options[estadoSelect.selectedIndex];
+            estadoSelect.style.color = getComputedStyle(selectedOption).color;
+        }
+
+        // Inicializa el color al cargar la página
+        updateColor();
+
+        // Actualiza el color cuando se cambia la opción
+        estadoSelect.addEventListener('change', updateColor);
+    });
+</script>
+
 @endsection
