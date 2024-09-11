@@ -19,6 +19,7 @@ use App\Http\Controllers\TipoDocumentoController;
 
 
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,7 +41,7 @@ use App\Http\Controllers\TipoDocumentoController;
 //     return redirect()->route('publics');
 // });
 
-Route::get('/', [PublicController::class, 'index'])->name('publics.index');
+Route::get('/', [PublicController::class, 'index'])->name('public.index');
 
 // Route::post('/login', function () {
 //     return view('auth.login');
