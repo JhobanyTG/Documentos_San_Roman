@@ -81,7 +81,7 @@
                 <input type="text" class="form-control" id="cargo" name="cargo" value="{{ old('cargo') }}" required>
             </div>
             <button type="submit" class="btn btn-primary">Crear</button>
-            <a href="{{ route('gerencias.show', $gerencia->id) }}" class="btn btn-warning btn-cancel"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
+            <a href="{{ route('gerencias.show', $gerencia->id) }}" class="btn btn-secondary btn-cancel"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
         </form>
     </div>
 @endsection

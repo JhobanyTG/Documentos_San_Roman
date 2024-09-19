@@ -8,6 +8,8 @@ use App\Models\Persona;
 use App\Models\Subgerencia;
 use App\Models\Subusuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class GerenciaController extends Controller
 {
@@ -27,15 +29,27 @@ class GerenciaController extends Controller
         // Obtener el usuario autenticado
         $usuario = auth()->user();
 
+
+
         // Si el usuario es SuperAdmin, mostrar todas las gerencias
         if ($usuario->rol->nombre === 'SuperAdmin') {
             $gerencias = Gerencia::all();
         } else {
-            // Si no es SuperAdmin, mostrar solo las gerencias asignadas a este usuario
-            $gerencias = Gerencia::where('usuario_id', $usuario->id)->get();
+            // Gerencias directamente asignadas al usuario
+            $gerenciasAsignadas = Gerencia::where('usuario_id', $usuario->id)->get();
+
+            // Gerencias a las que pertenece como subusuario a través de una subgerencia
+            $gerenciasSubusuario = Gerencia::whereHas('subgerencias.subusuarios', function ($query) use ($usuario) {
+                $query->where('user_id', $usuario->id);
+            })->get();
+
+            // Combinar las gerencias asignadas directamente y las de subusuario
+            $gerencias = $gerenciasAsignadas->merge($gerenciasSubusuario);
         }
 
-        // Retornar la vista con la lista de gerencias filtrada
+
+
+        // Retornar la vista con la lista de gerencias
         return view('gerencias.index', compact('gerencias'));
     }
 
@@ -51,11 +65,13 @@ class GerenciaController extends Controller
      */
     public function create()
     {
-        // Obtener todos los usuarios para el dropdown de gerente
-        $users = User::with('persona')->get();
+        // Obtener todos los usuarios que pueden ser asignados como gerentes
+        $users = User::all();
 
+        // Pasar los usuarios a la vista
         return view('gerencias.create', compact('users'));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -68,10 +84,11 @@ class GerenciaController extends Controller
             'telefono' => 'required|string',
             'direccion' => 'required|string|max:100',
             'estado' => 'required|string|max:20',
+            'usuario_id' => 'required|exists:users,id', // Asegúrate de validar 'usuario_id'
         ]);
 
         Gerencia::create([
-            'usuario_id' => 1,  // Asignado por defecto
+            'usuario_id' => $request->usuario_id,  // Usa 'usuario_id' aquí
             'nombre' => $request->nombre,
             'descripcion' => $request->descripcion,
             'telefono' => $request->telefono,
@@ -137,12 +154,22 @@ class GerenciaController extends Controller
             return view('gerencias.show', compact('gerencia'));
         }
 
-        // Si no es SuperAdmin, verificar que esté asignado a la gerencia
-        if ($gerencia->usuario_id !== $usuario->id) {
-            abort(403, 'No tienes permiso para ver esta gerencia');
+        // Si el usuario es el propietario de la gerencia, permitir acceso
+        if ($gerencia->usuario_id === $usuario->id) {
+            return view('gerencias.show', compact('gerencia'));
         }
 
-        return view('gerencias.show', compact('gerencia'));
+        // Verificar si el usuario es un subusuario de una subgerencia relacionada
+        $subusuario = \App\Models\Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+            $query->where('gerencia_id', $gerencia->id);
+        })->where('user_id', $usuario->id)->first();
+
+        if ($subusuario) {
+            return view('gerencias.show', compact('gerencia')); // Permitir acceso si es subusuario de la subgerencia
+        }
+
+        // Si no cumple ninguna condición, denegar acceso
+        abort(403, 'No tienes permiso para ver esta gerencia');
     }
 
 
@@ -181,12 +208,36 @@ class GerenciaController extends Controller
      */
     public function edit(Gerencia $gerencia)
     {
-        // Consulta para obtener todos los usuarios que pueden ser seleccionados como gerentes
-        $users = User::with('persona')->get();
+        // Obtener el usuario autenticado
+        $usuario = auth()->user();
 
-        // Retornamos la vista de edición pasando la gerencia y la lista de usuarios
-        return view('gerencias.edit', compact('gerencia', 'users'));
+        // Si el usuario es SuperAdmin, permitir el acceso
+        if ($usuario->rol->nombre === 'SuperAdmin') {
+            $users = User::with('persona')->get();
+            return view('gerencias.edit', compact('gerencia', 'users'));
+        }
+
+        // Si el usuario es el propietario de la gerencia, permitir acceso
+        if ($gerencia->usuario_id === $usuario->id) {
+            $users = User::with('persona')->get();
+            return view('gerencias.edit', compact('gerencia', 'users'));
+        }
+
+        // Verificar si el usuario es un subusuario de una subgerencia relacionada
+        $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+            $query->where('gerencia_id', $gerencia->id);
+        })->where('user_id', $usuario->id)->first();
+
+        if ($subusuario) {
+            $users = User::with('persona')->get();
+            return view('gerencias.edit', compact('gerencia', 'users')); // Permitir acceso si es subusuario de la subgerencia
+        }
+
+        // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
+        abort(403, 'No tienes permiso para editar esta gerencia.');
     }
+
+
 
     /**
      * Update the specified resource in storage.

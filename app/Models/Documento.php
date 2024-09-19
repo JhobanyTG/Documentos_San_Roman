@@ -35,4 +35,14 @@ class Documento extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function gerencia()
+    {
+        return $this->belongsTo(Gerencia::class);
+    }
+
+    public function subgerencia()
+    {
+        return $this->belongsTo(Subgerencia::class);
+    }
 }

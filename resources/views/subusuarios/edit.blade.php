@@ -72,7 +72,7 @@
                 <input type="text" class="form-control" id="cargo" name="cargo" value="{{ $subusuario->cargo }}" required>
             </div>
             <button type="submit" class="btn btn-primary">Actualizar</button>
-            <a href="{{ route('subgerencias.show', [$gerencia->id, $subgerencia->id]) }}" class="btn btn-warning btn-cancel"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
+            <a href="{{ route('gerencias.show', $gerencia->id) }}" class="btn btn-secondary btn-cancel"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
         </form>
     </div>
 @endsection

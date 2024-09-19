@@ -54,4 +54,15 @@ class User extends Authenticatable
         return $this->hasMany(Subusuario::class);
     }
 
+    public function gerencia()
+    {
+        return $this->hasOne(Gerencia::class, 'usuario_id');
+    }
+
+    public function subgerencias()
+    {
+        return $this->hasManyThrough(Subgerencia::class, Gerencia::class, 'usuario_id', 'gerencia_id', 'id', 'id');
+    }
+
+
 }

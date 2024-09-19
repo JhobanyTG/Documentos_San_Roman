@@ -33,4 +33,10 @@ class Persona extends Model
     {
         return $this->hasOne(User::class);
     }
+
+    public function persona()
+    {
+        return $this->belongsTo(Persona::class);
+    }
+
 }

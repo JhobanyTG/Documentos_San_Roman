@@ -73,43 +73,53 @@ Route::middleware(['auth'])->group(function () {
     // Route::post('documentos', [DocumentosController::class, 'store'])->name('documentos.store');
 
     Route::resource('documentos', DocumentosController::class)->except(['index', 'show']);
-    Route::resource('tipodocumento', TipoDocumentoController::class);
-    Route::resource('gerencias', GerenciaController::class)->middleware('auth');
-    route::get('/gerencias/{id}', [GerenciaController::class, 'show'])    ->middleware(['auth', 'checkGerenciaOwnership']);
 
     // Route::resource('subgerencias', SubgerenciaController::class);
     // Route::prefix('gerencias/{gerencia}')->group(function () {
     //     Route::resource('subgerencias', SubgerenciaController::class);
     // });
-    Route::prefix('gerencias/{gerencia}')->group(function () {
-        Route::resource('subgerencias', SubgerenciaController::class);
-        Route::resource('subusuarios', SubUsuarioController::class);
-    });
 
 
     // route::get('/gerencias/{gerencia}', [GerenciaController::class, 'show'])->name('gerencias.show');
     // route::get('/gerencias/{id}', [GerenciaController::class, 'mostrarGerencia'])->name('gerencias.show');
 
     // Register Usuarios
-    Route::resource('/usuarios',UserController::class)
+
+    // Grupo de rutas accesibles solo con el privilegio "Acceso Total"
+    Route::group(['middleware' => ['auth', 'privilege:Acceso Total']], function () {
+        Route::resource('privilegios', PrivilegioController::class);
+        Route::resource('tipodocumento', TipoDocumentoController::class);
+        Route::resource('rolprivilegios', RolPrivilegioController::class);
+    });
+
+    // Rutas compartidas entre "Acceso Total" y "Acceso a Gerencia"
+    Route::group(['middleware' => ['auth', 'privilege:Acceso Total,Acceso a Gerencia']], function () {
+        Route::resource('personas', PersonaController::class);
+        Route::resource('roles', RolController::class);
+        Route::resource('/usuarios',UserController::class)
         ->middleware('auth');
-    Route::get('/usuarios/{id}/cambiar-contrasena', [UserController::class, 'cambiarContrasena'])
-        ->middleware('auth')
-        ->name('usuarios.cambiarContrasena');
-    Route::put('/usuarios/{id}/actualizar-contrasena', [UserController::class, 'actualizarContrasena'])
-        ->middleware('auth')
-        ->name('usuarios.actualizarContrasena');
-    Route::get('/register', [UserController::class, 'create'])
-        ->middleware('auth')
-        ->name('register.create');
-    Route::post('/register', [UserController::class, 'store'])
-        ->middleware('auth')
-        ->name('register.store');
+        Route::get('/usuarios/{id}/cambiar-contrasena', [UserController::class, 'cambiarContrasena'])
+            ->middleware('auth')
+            ->name('usuarios.cambiarContrasena');
+        Route::put('/usuarios/{id}/actualizar-contrasena', [UserController::class, 'actualizarContrasena'])
+            ->middleware('auth')
+            ->name('usuarios.actualizarContrasena');
+        Route::get('/register', [UserController::class, 'create'])
+            ->middleware('auth')
+            ->name('register.create');
+        Route::post('/register', [UserController::class, 'store'])
+            ->middleware('auth')
+            ->name('register.store');
+        Route::prefix('gerencias/{gerencia}')->group(function () {
+            Route::resource('subgerencias', SubgerenciaController::class);
+            Route::resource('subusuarios', SubUsuarioController::class);
+        });
+        Route::resource('gerencias', GerenciaController::class)
+            ->middleware('auth');
+        route::get('/gerencias/{id}', [GerenciaController::class, 'show'])
+            ->middleware(['auth', 'checkGerenciaOwnership']);
 
-    Route::resource('personas', PersonaController::class);
-    Route::resource('roles', RolController::class);
+    });
 
-    Route::resource('privilegios', PrivilegioController::class);
-    Route::resource('rolprivilegios', RolPrivilegioController::class);
 
 });

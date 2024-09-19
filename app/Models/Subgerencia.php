@@ -37,7 +37,7 @@ class Subgerencia extends Model
 
     public function gerencia()
     {
-        return $this->belongsTo(Gerencia::class);
+        return $this->belongsTo(Gerencia::class, 'gerencia_id');
     }
 
     public function user()
@@ -48,5 +48,10 @@ class Subgerencia extends Model
     public function subusuarios()
     {
         return $this->hasMany(Subusuario::class, 'subgerencia_id');
+    }
+
+    public function documentos()
+    {
+        return $this->hasMany(Documento::class);
     }
 }

@@ -10,6 +10,8 @@ use App\Models\Rol;
 use App\Models\Persona;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class SubUsuarioController extends Controller
 {
@@ -29,14 +31,43 @@ class SubUsuarioController extends Controller
      */
     public function create(Gerencia $gerencia)
     {
-        // Obtener todos los roles disponibles usando el modelo correcto
-        $roles = Rol::all();
+        // Obtener el ID del usuario autenticado
+        $usuarioId = Auth::id();
 
-        // Obtener las subgerencias que pertenecen a la gerencia actual
-        $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+        // Verificar si el usuario autenticado es el propietario de la gerencia
+        if ($gerencia->usuario_id === $usuarioId) {
+            // Obtener todos los roles disponibles
+            $roles = Rol::all();
+            // Obtener las subgerencias que pertenecen a la gerencia actual
+            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+            return view('subusuarios.create', compact('gerencia', 'subgerencias', 'roles'));
+        }
 
-        return view('subusuarios.create', compact('gerencia', 'subgerencias', 'roles'));
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
+            // Obtener todos los roles disponibles
+            $roles = Rol::all();
+            // Obtener las subgerencias que pertenecen a la gerencia actual
+            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+            return view('subusuarios.create', compact('gerencia', 'subgerencias', 'roles'));
+        }
+
+        // Verificar si el usuario es un subusuario relacionado con alguna subgerencia de la gerencia
+        $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+            $query->where('gerencia_id', $gerencia->id);
+        })->where('user_id', $usuarioId)->first();
+
+        if ($subusuario) {
+            // Obtener todos los roles disponibles
+            $roles = Rol::all();
+            // Obtener las subgerencias que pertenecen a la gerencia actual
+            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+            return view('subusuarios.create', compact('gerencia', 'subgerencias', 'roles'));
+        }
+
+        // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
+        abort(403, 'No tienes permiso para acceder a esta gerencia.');
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -95,7 +126,7 @@ class SubUsuarioController extends Controller
             'subgerencia_id' => $validatedData['subgerencia_id'],
             'cargo' => $validatedData['cargo'],
         ]);
-        return redirect()->route('gerencia.show')->with('success', 'Subusuario creado exitosamente.');
+        return redirect()->route('gerencias.show', $gerencia->id)->with('success', 'Subusuario creado exitosamente.');
     }
 
     /**
@@ -111,17 +142,50 @@ class SubUsuarioController extends Controller
      */
     public function edit(Gerencia $gerencia, Subgerencia $subgerencia, Subusuario $subusuario)
     {
-        // Obtener los roles disponibles
-        $roles = Rol::all();
+        // Obtener el ID del usuario autenticado
+        $usuarioId = Auth::id();
 
-        // Obtener las subgerencias que pertenecen a la gerencia actual
-        $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+        // Verificar si el usuario autenticado es el propietario de la gerencia
+        if ($gerencia->usuario_id === $usuarioId) {
+            // Obtener todos los roles disponibles
+            $roles = Rol::all();
+            // Obtener las subgerencias que pertenecen a la gerencia actual
+            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+            // Obtener los usuarios disponibles para seleccionar
+            $users = User::with('persona')->get();
+            return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+        }
 
-        // Obtener los usuarios disponibles para seleccionar (si lo necesitas)
-        $users = User::with('persona')->get();
+        // Verificar si el usuario tiene el privilegio de "Acceso Total"
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
+            // Obtener todos los roles disponibles
+            $roles = Rol::all();
+            // Obtener las subgerencias que pertenecen a la gerencia actual
+            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+            // Obtener los usuarios disponibles para seleccionar
+            $users = User::with('persona')->get();
+            return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+        }
 
-        return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+        // Verificar si el usuario es un subusuario relacionado con alguna subgerencia de la gerencia
+        $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+            $query->where('gerencia_id', $gerencia->id);
+        })->where('user_id', $usuarioId)->first();
+
+        if ($subusuario) {
+            // Obtener todos los roles disponibles
+            $roles = Rol::all();
+            // Obtener las subgerencias que pertenecen a la gerencia actual
+            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+            // Obtener los usuarios disponibles para seleccionar
+            $users = User::with('persona')->get();
+            return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+        }
+
+        // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
+        abort(403, 'No tienes permiso para acceder a esta gerencia.');
     }
+
 
     /**
      * Update the specified resource in storage.

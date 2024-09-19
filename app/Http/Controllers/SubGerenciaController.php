@@ -4,17 +4,43 @@ namespace App\Http\Controllers;
 
 use App\Models\Gerencia;
 use App\Models\Subgerencia;
+use App\Models\Subusuario;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
 
 class SubgerenciaController extends Controller
 {
 
     public function create(Gerencia $gerencia)
     {
-        $users = User::with('persona')->get();
-        return view('subgerencias.create', compact('gerencia', 'users'));
-        // return view('subgerencias.create', compact());
+        // Obtener el ID del usuario autenticado
+        $usuarioId = Auth::id();
+
+        // Verificar si el usuario autenticado es el propietario de la gerencia
+        if ($gerencia->usuario_id === $usuarioId) {
+            $users = User::with('persona')->get();
+            return view('subgerencias.create', compact('gerencia', 'users'));
+        }
+
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')){
+            $users = User::with('persona')->get();
+            return view('subgerencias.create', compact('gerencia', 'users'));
+        }
+
+        // Verificar si el usuario es un subusuario relacionado con alguna subgerencia de la gerencia
+        $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+            $query->where('gerencia_id', $gerencia->id);
+        })->where('user_id', $usuarioId)->first();
+
+        if ($subusuario) {
+            $users = User::with('persona')->get();
+            return view('subgerencias.create', compact('gerencia', 'users'));
+        }
+
+        // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
+        abort(403, 'No tienes permiso para acceder a esta gerencia.');
     }
 
     public function store(Request $request, Gerencia $gerencia)
@@ -51,9 +77,35 @@ class SubgerenciaController extends Controller
 
     public function edit(Gerencia $gerencia, Subgerencia $subgerencia)
     {
-        $users = User::with('persona')->get();
-        return view('subgerencias.edit', compact('gerencia', 'subgerencia', 'users'));
+        // Obtener el ID del usuario autenticado
+        $usuarioId = Auth::id();
+
+        // Verificar si el usuario autenticado es el propietario de la gerencia
+        if ($gerencia->usuario_id === $usuarioId) {
+            $users = User::with('persona')->get();
+            return view('subgerencias.edit', compact('gerencia', 'subgerencia', 'users'));
+        }
+
+        // Verificar si el usuario tiene el privilegio de "Acceso Total"
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
+            $users = User::with('persona')->get();
+            return view('subgerencias.edit', compact('gerencia', 'subgerencia', 'users'));
+        }
+
+        // Verificar si el usuario es un subusuario relacionado con alguna subgerencia de la gerencia
+        $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+            $query->where('gerencia_id', $gerencia->id);
+        })->where('user_id', $usuarioId)->first();
+
+        if ($subusuario) {
+            $users = User::with('persona')->get();
+            return view('subgerencias.edit', compact('gerencia', 'subgerencia', 'users'));
+        }
+
+        // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
+        abort(403, 'No tienes permiso para acceder a esta gerencia.');
     }
+
 
     public function update(Request $request, Gerencia $gerencia, Subgerencia $subgerencia)
     {
@@ -63,9 +115,10 @@ class SubgerenciaController extends Controller
             'telefono' => 'required|string',
             'direccion' => 'required|string|max:100',
             'estado' => 'required|string|max:20',
+            'usuario_id' => 'required',
         ]);
 
-        $subgerencia->update($request->only('nombre', 'descripcion', 'telefono', 'direccion', 'estado'));
+        $subgerencia->update($request->all());
 
         return redirect()->route('gerencias.show', $gerencia->id)->with('success', 'Subgerencia actualizada correctamente.');
     }
@@ -75,5 +128,31 @@ class SubgerenciaController extends Controller
         $subgerencia->delete();
         return redirect()->route('gerencias.show', $gerencia->id)->with('success', 'Subgerencia eliminada correctamente.');
     }
-}
 
+    public function show($id)
+    {
+        // Obtener la gerencia
+        $gerencia = Gerencia::find($id);
+
+        // Verificar si la gerencia existe
+        if (!$gerencia) {
+            abort(404, 'Gerencia no encontrada.');
+        }
+
+        // Obtener el ID del usuario autenticado
+        $usuarioId = auth()->id();
+
+        // Verificar si el usuario es propietario o subgerente
+        $isOwner = $gerencia->usuario_id === $usuarioId;
+        $isSubgerente = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+            $query->where('gerencia_id', $gerencia->id);
+        })->where('usuario_id', $usuarioId)->exists();
+
+        if (!$isOwner && !$isSubgerente) {
+            return redirect()->back()->with('error', 'No tienes gerencias asignadas.');
+        }
+
+        // Si es propietario o subgerente, mostrar la vista
+        return view('gerencias.show', compact('gerencia'));
+    }
+}

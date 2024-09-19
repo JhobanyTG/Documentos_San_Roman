@@ -55,6 +55,11 @@ class Gerencia extends Model
 
     public function subgerencias()
     {
-        return $this->hasMany(Subgerencia::class);
+        return $this->hasMany(Subgerencia::class, 'gerencia_id');
+    }
+
+    public function documentos()
+    {
+        return $this->hasMany(Documento::class);
     }
 }
