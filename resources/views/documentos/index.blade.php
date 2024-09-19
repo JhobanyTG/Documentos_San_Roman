@@ -161,6 +161,8 @@
                                     <th class="col-1">
                                         <div class="imagen_title_index">Archivo</div>
                                     </th>
+                                    <th>Gerencia</th>
+                                    <th>SubGerencia</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -263,6 +265,8 @@
                                             <img class="img_file_pdf centered-img"
                                                 src="{{ asset('images/icons/pdf.png') }}" alt="PDF" />
                                         </td>
+                                        <td>{{ $documento->gerencia->nombre}}</td>
+                                        <td>{{ $documento->subgerencia ? $documento->subgerencia->nombre : 'N/A' }}</td>
                                         <td>
                                             @if($documento->estado === 'Creado')
                                                 <span class="badge text-bg-danger">Creado</span>

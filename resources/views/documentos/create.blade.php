@@ -24,6 +24,9 @@
                                     </svg>
                                     <span class="iborrainputfile">Seleccionar archivo</span>
                                 </label>
+                                @error('archivo')
+                                    <div class="text-danger">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                     </div>
@@ -32,29 +35,44 @@
                     <div class="col-md-8">
                         <div class="form-group mb-2">
                             <label for="titulo" class="form-label">Título:</label>
-                            <input type="text" class="form-control" name="titulo" id="titulo" placeholder="Ingrese el título" value="{{ old('titulo') }}" required>
+                            <input type="text" class="form-control @error('titulo') is-invalid @enderror" name="titulo" id="titulo" placeholder="Ingrese el título" value="{{ old('titulo') }}" required>
+                            @error('titulo')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
+
                         <div class="form-group mb-2">
                             <label for="tipodocumento_id">Tipo Documento:</label>
-                            <select name="tipodocumento_id" class="form-control" id="tipodocumento_id" required>
+                            <select name="tipodocumento_id" class="form-control @error('tipodocumento_id') is-invalid @enderror" id="tipodocumento_id" required>
                                 @foreach($tiposDocumento as $tipoDocumento)
                                     <option value="{{ $tipoDocumento->id }}">{{ $tipoDocumento->nombre }}</option>
                                 @endforeach
                             </select>
+                            @error('tipodocumento_id')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="form-group mt-3">
                             <label for="descripcion">Descripción:</label>
-                            <textarea class="form-control" name="descripcion" id="descripcion" rows="5" placeholder="Ingrese la descripción" required>{{ old('descripcion') }}</textarea>
+                            <textarea class="form-control @error('descripcion') is-invalid @enderror" name="descripcion" id="descripcion" rows="5" placeholder="Ingrese la descripción" required>{{ old('descripcion') }}</textarea>
+                            @error('descripcion')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
+
                         <div class="form-group mt-3">
                             <label for="estado">Estado:</label>
-                            <select name="estado" class="form-control" id="estado" required>
-                                <option value="Creado" style="color: red" >Creado</option>
-                                <option value="Validado" style="color: green" >Validado</option>
-                                <option value="Publicado" style="color: blue" >Publicado</option>
+                            <select name="estado" class="form-control @error('estado') is-invalid @enderror" id="estado" required>
+                                <option value="Creado" style="color: red">Creado</option>
+                                <option value="Validado" style="color: green">Validado</option>
+                                <option value="Publicado" style="color: blue">Publicado</option>
                             </select>
+                            @error('estado')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
                         </div>
+
                         <div class="mt-3">
                             <a href="{{ route('documentos.index') }}" class="btn btn-warning">Cancelar</a>
                             <button type="submit" class="btn btn-success">Guardar</button>
@@ -65,6 +83,7 @@
         </div>
     </div>
 </div>
+
 <script>
     $(document).ready(function() {
         @if ($errors->any())

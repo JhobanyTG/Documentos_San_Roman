@@ -19,6 +19,8 @@ class Documento extends Model
         'descripcion',
         'archivo',
         'estado',
+        'gerencia_id',
+        'subgerencia_id',
     ];
 
     public function subusuario()
@@ -38,11 +40,11 @@ class Documento extends Model
 
     public function gerencia()
     {
-        return $this->belongsTo(Gerencia::class);
+        return $this->belongsTo(Gerencia::class, 'gerencia_id');
     }
 
     public function subgerencia()
     {
-        return $this->belongsTo(Subgerencia::class);
+        return $this->belongsTo(Subgerencia::class, 'subgerencia_id');
     }
 }
