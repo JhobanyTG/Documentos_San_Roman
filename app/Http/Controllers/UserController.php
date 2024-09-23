@@ -14,9 +14,48 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::with('persona', 'rol')->get();
+        $user = auth()->user();
+        $query = User::with('persona', 'rol');
+
+        // Verificar si el usuario tiene el rol de 'SuperAdmin'
+        if ($user->rol->nombre == 'SuperAdmin') {
+            // Si es 'SuperAdmin', mostrar todos los usuarios sin restricciones
+            $users = $query->get();
+        } else {
+            // Filtrar usuarios según la gerencia o subgerencia del usuario autenticado
+            if ($user->subusuario) {
+                // Si es un subusuario, obtener su subgerencia y gerencia
+                $subgerencia = $user->subusuario->subgerencia;
+                $gerencia = $subgerencia->gerencia;
+
+                // Filtrar usuarios que pertenezcan a la misma subgerencia o gerencia
+                $query->whereHas('subusuario.subgerencia', function ($q) use ($subgerencia) {
+                    $q->where('id', $subgerencia->id);
+                })->orWhereHas('gerencia', function ($q) use ($gerencia) {
+                    $q->where('id', $gerencia->id);
+                });
+            } elseif ($user->gerencia) {
+                // Si el usuario está directamente asociado a una gerencia
+                $gerencia = $user->gerencia;
+
+                // Filtrar usuarios que pertenezcan a la misma gerencia o subgerencias relacionadas
+                $query->whereHas('gerencia', function ($q) use ($gerencia) {
+                    $q->where('id', $gerencia->id); // Acceder correctamente a gerencias.id
+                })
+                    ->orWhereHas('subusuario.subgerencia', function ($q) use ($gerencia) {
+                        $q->where('gerencia_id', $gerencia->id);
+                    });
+            } else {
+                // Si no tiene una gerencia ni subgerencia asociada, mostrar solo su propio registro de usuario
+                $query->where('id', $user->id);
+            }
+
+            $users = $query->get();
+        }
+
         return view('user.index', compact('users'));
     }
+
 
     public function edit($id)
     {
@@ -43,19 +82,19 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
 
-                    // Si se ha subido un avatar
-        if ($request->hasFile('avatar')) {
-            // Elimina el avatar viejo si existe
-            if ($user->avatar) {
-                Storage::delete('public/avatars/' . $user->avatar);
-            }
+            // Si se ha subido un avatar
+            if ($request->hasFile('avatar')) {
+                // Elimina el avatar viejo si existe
+                if ($user->avatar) {
+                    Storage::delete('public/avatars/' . $user->avatar);
+                }
 
-            // Guarda el nuevo avatar
-            $file = $request->file('avatar');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public/avatars', $filename);
-            $user->avatar = $filename;
-        }
+                // Guarda el nuevo avatar
+                $file = $request->file('avatar');
+                $filename = time() . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('public/avatars', $filename);
+                $user->avatar = $filename;
+            }
 
             $user->update([
                 'rol_id' => $validatedData['rol_id'],
@@ -105,7 +144,4 @@ class UserController extends Controller
 
         return redirect()->route('usuarios.index')->with('success', 'Contraseña actualizada exitosamente.');
     }
-
-
-
 }

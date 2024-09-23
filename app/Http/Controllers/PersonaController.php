@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Persona;
+use App\Models\Subgerencia;
 use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,11 +12,60 @@ use Illuminate\Support\Facades\Storage;
 
 class PersonaController extends Controller
 {
+
     public function index()
-    {
-        $personas = Persona::with('user')->get();
-        return view('persona.index', compact('personas'));
+{
+    $user = auth()->user();
+    $query = Persona::with('user');
+
+    // Verificar si el usuario tiene el rol de 'SuperAdmin'
+    if ($user->rol->nombre == 'SuperAdmin') {
+        // Si es 'SuperAdmin', mostrar todas las personas sin restricciones
+        $personas = $query->get();
+    } else {
+        // Filtrar personas según la gerencia o subgerencia del usuario
+        if ($user->subusuario) {
+            // Si es un subusuario, obtener su subgerencia y gerencia
+            $subgerencia = $user->subusuario->subgerencia;
+            $gerencia = $subgerencia->gerencia;
+
+            // Filtrar personas cuyos usuarios pertenezcan a la misma subgerencia o gerencia
+            $query->whereHas('user', function ($q) use ($subgerencia, $gerencia) {
+                $q->whereHas('subusuario.subgerencia', function ($q) use ($subgerencia) {
+                    $q->where('id', $subgerencia->id);
+                })->orWhereHas('gerencia', function ($q) use ($gerencia) {
+                    $q->where('id', $gerencia->id); // Filtrar por gerencia si es relevante
+                });
+            });
+        } elseif ($user->gerencia) {
+            // Si el usuario está directamente asociado a una gerencia
+            $gerencia = $user->gerencia;
+
+            // Filtrar personas cuyos usuarios pertenezcan a la misma gerencia o subgerencias relacionadas
+            $query->whereHas('user', function ($q) use ($gerencia) {
+                // Filtrar por la gerencia del usuario
+                $q->whereHas('gerencia', function ($q) use ($gerencia) {
+                    $q->where('id', $gerencia->id); // Acceder correctamente a gerencias.id a través de la relación
+                })
+                // Incluir también los subusuarios de las subgerencias de esa gerencia
+                ->orWhereHas('subusuario.subgerencia', function ($q) use ($gerencia) {
+                    $q->where('gerencia_id', $gerencia->id);
+                });
+            });
+        } else {
+            // Si no tiene una gerencia ni subgerencia asociada, mostrar solo su propia persona
+            $query->whereHas('user', function ($q) use ($user) {
+                $q->where('id', $user->id);
+            });
+        }
+
+        $personas = $query->get();
     }
+
+    return view('persona.index', compact('personas'));
+}
+
+
 
     public function create()
     {
@@ -176,7 +226,7 @@ class PersonaController extends Controller
     public function destroy($id)
     {
         $persona = Persona::findOrFail($id);
-            // Elimina la imagen asociada si existe
+        // Elimina la imagen asociada si existe
         if ($persona->avatar && Storage::exists('public/' . $persona->avatar)) {
             Storage::delete('public/' . $persona->avatar);
         }
@@ -184,8 +234,4 @@ class PersonaController extends Controller
 
         return redirect()->route('personas.index')->with('success', 'Persona eliminada exitosamente.');
     }
-
-
 }
-
-

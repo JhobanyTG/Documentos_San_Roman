@@ -14,17 +14,19 @@ class RolController extends Controller
     {
         $roles = Rol::with('privilegios')->get();
         return view('rol.index', compact('roles'));
-
     }
 
     // Muestra el formulario para crear un nuevo rol
     public function create()
     {
-        // return view('rol.create');
-        $all_privilegios = Privilegio::all();
-        return view('rol.create', compact('all_privilegios'));
-
-
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'SuberAdmin') {
+            // return view('rol.create');
+            $all_privilegios = Privilegio::all();
+            return view('rol.create', compact('all_privilegios'));
+        } else {
+            // Si no tiene los permisos, bloquea el acceso
+            abort(403, 'No tienes permiso para realizar esta acción');
+        }
     }
 
     // Almacena un nuevo rol en la base de datos
@@ -42,7 +44,7 @@ class RolController extends Controller
 
         // Obtener los privilegios del request
         $privilegios = $request->input('privilegios', '');
-        $privilegiosArray = array_filter(explode(',', $privilegios), function($privilegio) {
+        $privilegiosArray = array_filter(explode(',', $privilegios), function ($privilegio) {
             return is_numeric($privilegio) && (int)$privilegio > 0;
         });
 
@@ -56,9 +58,15 @@ class RolController extends Controller
     // Muestra el formulario para editar un rol existente
     public function edit($id)
     {
-        $role = Rol::findOrFail($id);
-        $all_privilegios = Privilegio::all();
-        return view('rol.edit', compact('role','all_privilegios'));
+
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'SuberAdmin') {
+            $role = Rol::findOrFail($id);
+            $all_privilegios = Privilegio::all();
+            return view('rol.edit', compact('role', 'all_privilegios'));
+        } else {
+            // Si no tiene los permisos, bloquea el acceso
+            abort(403, 'No tienes permiso para realizar esta acción');
+        }
     }
 
     // Actualiza un rol existente en la base de datos
@@ -71,7 +79,7 @@ class RolController extends Controller
 
         // Obtener los privilegios del request
         $privilegios = $request->input('privilegios', '');
-        $privilegiosArray = array_filter(explode(',', $privilegios), function($privilegio) {
+        $privilegiosArray = array_filter(explode(',', $privilegios), function ($privilegio) {
             return is_numeric($privilegio) && (int)$privilegio > 0;
         });
 
@@ -82,30 +90,29 @@ class RolController extends Controller
     }
 
 
-    // Muestra los detalles de un rol
-    public function show(Rol $rol)
-    {
-        return view('roles.show', compact('rol'));
-    }
-
     // Elimina un rol existente de la base de datos
     public function destroy($id)
     {
-        $role = Rol::findOrFail($id);
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'SuberAdmin') {
+            $role = Rol::findOrFail($id);
 
-        // Verifica si hay usuarios asociados a este rol
-        $usersWithRole = User::where('rol_id', $role->id)->count();
+            // Verifica si hay usuarios asociados a este rol
+            $usersWithRole = User::where('rol_id', $role->id)->count();
 
-        if ($usersWithRole > 0) {
-            // Si hay usuarios asociados, no elimines el rol y muestra un mensaje de error
-            return redirect()->route('roles.index')->with('error', 'No se puede eliminar el rol porque está asignado a uno o más usuarios.');
+            if ($usersWithRole > 0) {
+                // Si hay usuarios asociados, no elimines el rol y muestra un mensaje de error
+                return redirect()->route('roles.index')->with('error', 'No se puede eliminar el rol porque está asignado a uno o más usuarios.');
+            }
+
+            // Si no hay usuarios asociados, elimina el rol
+            $role->delete();
+
+            // Redirige con mensaje de éxito
+            return redirect()->route('roles.index')->with('success', 'Rol eliminado exitosamente.');
+        } else {
+            // Si no tiene los permisos, bloquea el acceso
+            abort(403, 'No tienes permiso para realizar esta acción');
         }
 
-        // Si no hay usuarios asociados, elimina el rol
-        $role->delete();
-
-        // Redirige con mensaje de éxito
-        return redirect()->route('roles.index')->with('success', 'Rol eliminado exitosamente.');
     }
-
 }

@@ -5,8 +5,9 @@
 @section('content')
     <div class="container mt-4">
         <h2>Lista de Roles</h2>
-        <a href="{{ route('roles.create') }}" class="btn btn-primary mb-3">Crear Nuevo Rol</a>
-
+        @if ( auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'SuberAdmin')
+            <a href="{{ route('roles.create') }}" class="btn btn-primary mb-3">Crear Nuevo Rol</a>
+        @endif
         @if (session('success'))
             <div class="alert alert-success">
                 {{ session('success') }}
@@ -20,7 +21,9 @@
                     <th>Nombre</th>
                     <th>Descripción</th>
                     <th>Privilegios</th>
-                    <th>Acciones</th>
+                    @if ( auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'SuberAdmin')
+                        <th>Acciones</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -36,15 +39,16 @@
                                 <span class="text-muted">Sin privilegios</span>
                             @endforelse
                         </td>
-                        <td>
-                            <a href="{{ route('roles.show', $role->id) }}" class="btn btn-info">Ver</a>
-                            <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-warning">Editar</a>
-                            <form action="{{ route('roles.destroy', $role->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este rol?')">Eliminar</button>
-                            </form>
-                        </td>
+                        @if ( auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'SuberAdmin')
+                            <td>
+                                <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-warning">Editar</a>
+                                <form action="{{ route('roles.destroy', $role->id) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este rol?')">Eliminar</button>
+                                </form>
+                            </td>
+                        @endif
                     </tr>
                 @endforeach
             </tbody>

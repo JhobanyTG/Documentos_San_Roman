@@ -69,11 +69,16 @@
                 <div class="form-group mt-3">
                     <label for="estado">Estado:</label>
                     <select name="estado" class="form-control" id="estado" required>
-                        <option   value="Creado" {{ $documento->estado == 'Creado' ? 'selected' : '' }} style="color: red">Creado</option>
-                        <option   value="Validado" {{ $documento->estado == 'Validado' ? 'selected' : '' }} style="color: green">Validado</option>
-                        <option   value="Publicado" {{ $documento->estado == 'Publicado' ? 'selected' : '' }} style="color: blue">Publicado</option>
+                        @if (!$user->rol->privilegios->contains('nombre', 'Acceso a Publicar Documento') && $user->rol->nombre !== 'Usuario Publicador')
+                            <option value="Creado" {{ $documento->estado == 'Creado' ? 'selected' : '' }} style="color: red">Creado</option>
+                        @endif
+                        <option value="Validado" {{ $documento->estado == 'Validado' ? 'selected' : '' }} style="color: green">Validado</option>
+                        @if (!$user->rol->privilegios->contains('nombre', 'Acceso a Validar Documento') && $user->rol->nombre !== 'Usuario Validador')
+                            <option value="Publicado" {{ $documento->estado == 'Publicado' ? 'selected' : '' }} style="color: blue">Publicado</option>
+                        @endif
                     </select>
                 </div>
+
 
                 <div class="mt-3">
                     <a href="{{ route('documentos.index') }}" class="btn btn-warning">Cancelar</a>

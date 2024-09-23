@@ -37,11 +37,24 @@
 						<span class="nav-text">Documentos</span>
 					</a>
 				</li>
-                @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Subgerencia'))
-                    <li class="nav-item active">
-                        <a href="{{ url('gerencias') }}">
-                            <i class="fa fa-suitcase" aria-hidden="true"></i>
-                            <span class="nav-text">Gerencias</span>
+                <li class="nav-item active">
+                    <a href="{{ url('gerencias') }}">
+                        <i class="fa fa-suitcase" aria-hidden="true"></i>
+                        <span class="nav-text">Gerencias</span>
+                    </a>
+                </li>
+                @if ( auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'Gerente' || auth()->user()->rol->nombre === 'SubGerente')
+                    <li class="nav-item">
+                        <a href="{{ url('usuarios') }}">
+                            <i class="fa fa-users"></i>
+                            <span class="nav-text">Usuarios</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ url('personas') }}">
+                            <i class="fa fa-users"></i>
+                            <span class="nav-text">Personas</span>
                         </a>
                     </li>
                 @endif
@@ -54,20 +67,7 @@
                     </li> -->
                     {{-- @if (auth()->check() && auth()->user()->rols === "SuperAdmin" ) --}}
                     {{-- @if (auth()->check() && auth()->user()->rol && auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) --}}
-                    @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Subgerencia'))
-                        <li class="nav-item">
-                            <a href="{{ url('usuarios') }}">
-                                <i class="fa fa-users"></i>
-                                <span class="nav-text">Usuarios</span>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="{{ url('personas') }}">
-                                <i class="fa fa-users"></i>
-                                <span class="nav-text">Personas</span>
-                            </a>
-                        </li>
+                    @if (    auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->nombre === 'Gerente')
                         <li class="nav-item">
                             <a href="{{ url('roles') }}">
                                 <i class="fa fa-users"></i>

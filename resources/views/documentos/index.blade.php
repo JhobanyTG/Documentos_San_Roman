@@ -171,7 +171,7 @@
                                 @foreach ($documentos as $documento)
                                     <tr role="row" class="border-table border-bottom-3" data-id="{{ $documento->id }}">
                                         <td class="text-center">
-                                            {{ $documento->id}}
+                                            {{ $documento->id }}
 
                                         </td>
                                         <td class="text-center">
@@ -265,10 +265,11 @@
                                             <img class="img_file_pdf centered-img"
                                                 src="{{ asset('images/icons/pdf.png') }}" alt="PDF" />
                                         </td>
-                                        <td>{{ $documento->gerencia->nombre}}</td>
+                                        <td>{{ $documento->gerencia ? $documento->gerencia->nombre : 'Creado Por el administrador' }}
+                                        </td>
                                         <td>{{ $documento->subgerencia ? $documento->subgerencia->nombre : 'N/A' }}</td>
                                         <td>
-                                            @if($documento->estado === 'Creado')
+                                            @if ($documento->estado === 'Creado')
                                                 <span class="badge text-bg-danger">Creado</span>
                                             @elseif($documento->estado === 'Validado')
                                                 <span class="badge text-bg-success">Validado</span>
@@ -289,18 +290,42 @@
                                             <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                                 class="btn btn-primary" download><i class="fa fa-download"
                                                     aria-hidden="true"></i></a>
-                                            <a href="{{ route('documentos.edit', $documento->id) }}"
-                                                class="btn btn-warning"><i class="fa fa-edit" aria-hidden="true"></i></a>
-                                            <form action="{{ route('documentos.destroy', $documento->id) }}"
-                                                method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                {{-- <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de que quieres eliminar este documento?')">Eliminar</button> --}}
-                                                <button type="button" class="btn btn-danger"
-                                                    onclick="showConfirmationModal()">
-                                                    <i class="fa fa-trash" aria-hidden="true"></i>
-                                                </button>
-                                            </form>
+                                                @if (
+                                                    !(auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Validar Documento') ||
+                                                        auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Publicar Documento') ||
+                                                        auth()->user()->rol->nombre === 'Usuario Validador' ||
+                                                        auth()->user()->rol->nombre === 'Usuario Publicador'
+                                                    ) || $documento->estado !== 'Publicado')
+                                                    <!-- Verifica que el estado no sea 'Publicado' -->
+                                                    <a href="{{ route('documentos.edit', $documento->id) }}"
+                                                        class="btn btn-warning">
+                                                        <i class="fa fa-edit" aria-hidden="true"></i>
+                                                    </a>
+                                                @endif
+
+                                            @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
+                                                    auth()->user()->rol->nombre === 'SubGerente' ||
+                                                    auth()->user()->rol->nombre === 'Gerente' ||
+                                                    auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Documentos'))
+                                                @if (
+                                                    !(auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Validar Documento') ||
+                                                        auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Publicar Documento') ||
+                                                        auth()->user()->rol->nombre === 'Usuario Validador' ||
+                                                        auth()->user()->rol->nombre === 'Usuario Publicador'
+                                                    ) || $documento->estado !== 'Publicado')
+                                                    <!-- Verifica que el estado no sea 'Publicado' -->
+                                                    <form action="{{ route('documentos.destroy', $documento->id) }}"
+                                                        method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="button" class="btn btn-danger"
+                                                            onclick="showConfirmationModal()">
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            @endif
+
                                         </td>
                                         <div class="modal fade pt-serif-regular" id="pdfModal-{{ $documento->id }}"
                                             tabindex="-1" role="dialog"

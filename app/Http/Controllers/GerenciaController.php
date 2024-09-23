@@ -65,11 +65,17 @@ class GerenciaController extends Controller
      */
     public function create()
     {
-        // Obtener todos los usuarios que pueden ser asignados como gerentes
-        $users = User::all();
 
-        // Pasar los usuarios a la vista
-        return view('gerencias.create', compact('users'));
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->nombre === 'SuperAdmin') {
+            // Obtener todos los usuarios que pueden ser asignados como gerentes
+            $users = User::all();
+
+            // Pasar los usuarios a la vista
+            return view('gerencias.create', compact('users'));
+        } else {
+            // Si no tiene los permisos, redirige o muestra un mensaje de error
+            abort(403, 'No tienes permiso para acceder a esta sección');
+        }
     }
 
 
@@ -270,8 +276,15 @@ class GerenciaController extends Controller
      */
     public function destroy(Gerencia $gerencia)
     {
-        $gerencia->delete();
-        return redirect()->route('gerencias.index')->with('success', 'Gerencia eliminada exitosamente.');
+
+        // Verifica si el usuario tiene el privilegio 'Acceso Total' o el rol 'SuperAdmin'
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->nombre === 'SuperAdmin') {
+            $gerencia->delete();
+            return redirect()->route('gerencias.index')->with('success', 'Gerencia eliminada exitosamente.');
+        } else {
+            // Si no tiene los permisos, bloquea el acceso
+            abort(403, 'No tienes permiso para realizar esta acción');
+        }
     }
 
     // Asegúrate de pasar el ID de la gerencia correcta

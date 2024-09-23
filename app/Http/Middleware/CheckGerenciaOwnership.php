@@ -13,34 +13,16 @@ class CheckGerenciaOwnership
 {
     public function handle($request, Closure $next)
     {
-        // Obtener la gerencia de la ruta
-        $gerencia = Gerencia::find($request->route('id'));
+        $user = auth()->user();
+        $gerenciaId = $request->route('gerencia');  // Asegúrate de obtener el ID de gerencia correctamente
 
-        // Verificar si la gerencia existe
-        if (!$gerencia) {
-            abort(404, 'Gerencia no encontrada.');
+        // Verificar si el usuario pertenece a la gerencia
+        if ($user->gerencia_id == $gerenciaId || ($user->subgerencia && $user->subgerencia->gerencia_id == $gerenciaId)) {
+            return $next($request);
         }
 
-        // Obtener el ID del usuario autenticado
-        $usuarioId = auth()->id();
-
-        // Verificar si el usuario autenticado es el propietario de la gerencia
-        if ($gerencia->usuario_id === $usuarioId) {
-            return $next($request); // Si es el propietario, permitir acceso
-        }
-
-        // Verificar si el usuario es un subusuario relacionado con alguna subgerencia de la gerencia
-        $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
-            $query->where('gerencia_id', $gerencia->id);
-        })
-        ->where('usuario_id', $usuarioId)
-        ->first();
-
-        if ($subusuario) {
-            return $next($request); // Si es un subusuario de una subgerencia relacionada, permitir acceso
-        }
-
-        // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
-        abort(403, 'No tienes permiso para acceder a esta gerencia o subgerencia.');
+        // Si no tiene acceso, retornar un error 403
+        abort(403, 'No tienes permiso para acceder a esta gerencia');
     }
+
 }

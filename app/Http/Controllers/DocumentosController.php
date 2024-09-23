@@ -19,111 +19,153 @@ class DocumentosController extends Controller
 {
     public function index(Request $request)
     {
-        $user = auth()->user();
+        if (auth()->user()) {
 
-        // Obtener la gerencia del usuario (directamente o a través de una subgerencia)
-        $gerenciaUsuario = $user->gerencia ?: ($user->subgerencia ? $user->subgerencia->gerencia : null);
+            $user = auth()->user();
 
-        // Obtener las subgerencias relacionadas a la gerencia del usuario
-        $subgerenciasIds = [];
-        if ($gerenciaUsuario) {
-            // Obtener IDs de las subgerencias vinculadas a la gerencia del usuario
-            $subgerenciasIds = Subgerencia::where('gerencia_id', $gerenciaUsuario->id)->pluck('id')->toArray();
-        }
+            // Inicializar la consulta
+            $query = Documento::with('tipoDocumento', 'gerencia', 'subgerencia');
 
-        $query = Documento::with('tipoDocumento', 'gerencia', 'subgerencia')
-            ->where(function ($query) use ($gerenciaUsuario, $subgerenciasIds) {
-                if ($gerenciaUsuario) {
-                    // Incluir documentos de la gerencia del usuario
-                    $query->where('gerencia_id', $gerenciaUsuario->id);
+            // Aplicar filtros de búsqueda
+            $searchTerm = $request->input('q');
+            $fecha = $request->input('fecha');
+            $filtroAnio = $request->input('anio');
+            $filtroMes = $request->input('mes', []);
 
-                    // Incluir documentos de cualquier subgerencia relacionada con la gerencia del usuario
-                    if (!empty($subgerenciasIds)) {
-                        $query->orWhereIn('subgerencia_id', $subgerenciasIds);
-                    }
+            // Verificar si el usuario tiene el rol de 'SuperAdmin'
+            if ($user->rol->nombre == 'SuperAdmin') {
+                // Si es 'SuperAdmin', mostrar todos los documentos sin restricciones
+                $documentos = $query->paginate(5);
+            } else {
+                // Determinar el tipo de usuario y aplicar los filtros correspondientes
+                if ($user->subusuario) {
+                    // Si es un subusuario
+                    $subgerencia = $user->subusuario->subgerencia;
+                    $gerencia = $subgerencia->gerencia;
+
+                    $query->where('gerencia_id', $gerencia->id)
+                        ->where(function ($q) use ($subgerencia) {
+                            $q->where('subgerencia_id', $subgerencia->id)
+                                ->orWhereNull('subgerencia_id');
+                        });
+                } elseif ($user->gerencia) {
+                    // Si el usuario está asociado directamente a una gerencia
+                    $query->where('gerencia_id', $user->gerencia->id);
+                } elseif ($subgerencia = Subgerencia::where('usuario_id', $user->id)->first()) {
+                    // Si el usuario está asociado a una subgerencia
+                    $query->where('gerencia_id', $subgerencia->gerencia_id)
+                        ->where(function ($q) use ($subgerencia) {
+                            $q->where('subgerencia_id', $subgerencia->id)
+                                ->orWhereNull('subgerencia_id');
+                        });
                 } else {
-                    // Si no pertenece a una gerencia, no mostrar documentos
-                    $query->whereRaw('1 = 0');
+                    // Si no tiene una gerencia ni subgerencia asociada, mostrar solo sus propios documentos
+                    $query->where('user_id', $user->id);
                 }
-            });
 
-        // Filtros de búsqueda
-        $searchTerm = $request->input('q');
-        $fecha = $request->input('fecha');
-        $filtroAnio = $request->input('anio');
-        $filtroMes = $request->input('mes', []); // Inicializar como array vacío si no hay valor
+                if ($searchTerm || $fecha || $filtroAnio || $filtroMes) {
+                    if ($searchTerm) {
+                        $query->where(function ($query) use ($searchTerm) {
+                            $query->where('titulo', 'like', '%' . $searchTerm . '%')
+                                ->orWhere('descripcion', 'like', '%' . $searchTerm . '%');
+                        });
+                    }
 
-        if ($searchTerm || $fecha || $filtroAnio || $filtroMes) {
-            if ($searchTerm) {
-                $query->where(function ($query) use ($searchTerm) {
-                    $query->where('titulo', 'like', '%' . $searchTerm . '%')
-                        ->orWhere('descripcion', 'like', '%' . $searchTerm . '%');
-                });
+                    if ($fecha) {
+                        $query->whereDate('created_at', $fecha);
+                    }
+
+                    if ($filtroAnio) {
+                        $query->whereYear('created_at', $filtroAnio);
+                    }
+
+                    if ($filtroMes && is_array($filtroMes) && !empty($filtroMes)) {
+                        $query->whereIn(DB::raw('MONTH(created_at)'), $filtroMes);
+                    }
+                }
+
+                $query->orderByDesc('created_at');
+                $documentos = $query->paginate(5);
             }
 
-            if ($fecha) {
-                $query->whereDate('created_at', $fecha);
-            }
+            $documentos->appends(['q' => $searchTerm, 'fecha' => $fecha, 'anio' => $filtroAnio, 'mes' => $filtroMes]);
 
+            // Obtener años disponibles para el filtro
+            $availableYears = Documento::distinct()
+                ->orderByDesc('created_at')
+                ->pluck('created_at')
+                ->map(function ($date) {
+                    return $date->format('Y');
+                })
+                ->unique();
+
+            // Obtener meses disponibles para el filtro en el año seleccionado
+            $availableMonths = [];
             if ($filtroAnio) {
-                $query->whereYear('created_at', $filtroAnio);
+                $availableMonths = Documento::selectRaw('MONTH(created_at) as month')
+                    ->whereYear('created_at', $filtroAnio)
+                    ->groupBy('month')
+                    ->pluck('month');
             }
 
-            if ($filtroMes && is_array($filtroMes) && !empty($filtroMes)) {
-                $query->whereIn(DB::raw('MONTH(created_at)'), $filtroMes);
-            }
+            return view('documentos.index', compact('documentos', 'searchTerm', 'fecha', 'availableYears', 'availableMonths', 'filtroAnio', 'filtroMes'));
+        } else {
+            return redirect()->to('/');
         }
-
-        $query->orderByDesc('created_at');
-        $documentos = $query->paginate(5);
-        $documentos->appends(['q' => $searchTerm, 'fecha' => $fecha, 'anio' => $filtroAnio, 'mes' => $filtroMes]);
-
-        // Obtener años disponibles para el filtro
-        $availableYears = Documento::distinct()
-            ->orderByDesc('created_at')
-            ->pluck('created_at')
-            ->map(function ($date) {
-                return $date->format('Y');
-            })
-            ->unique();
-
-        // Obtener meses disponibles para el filtro en el año seleccionado
-        $availableMonths = [];
-        if ($filtroAnio) {
-            $availableMonths = Documento::selectRaw('MONTH(created_at) as month')
-                ->whereYear('created_at', $filtroAnio)
-                ->groupBy('month')
-                ->pluck('month');
-        }
-
-        return view('documentos.index', compact('documentos', 'searchTerm', 'fecha', 'availableYears', 'availableMonths', 'filtroAnio', 'filtroMes'));
     }
+
 
 
 
     public function create()
     {
-        if (auth()->user()) {
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'Gerente' || auth()->user()->rol->nombre === 'SubGerente' || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Crear Documento') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Documentos')) {
             $tiposDocumento = TipoDocumento::all();
             $subUsuarios = SubUsuario::all(); // Obtén todos los subusuarios
 
             return view('documentos.create', compact('tiposDocumento', 'subUsuarios'));
         } else {
-            return redirect()->to('/');
+            // Si no tiene los permisos, bloquea el acceso
+            abort(403, 'No tienes permiso para realizar esta acción');
         }
     }
-
 
     public function edit($id)
     {
-        if (auth()->user()) {
-            $documento = Documento::findOrFail($id);
+        $user = auth()->user();
+
+        // Verificar si el documento existe
+        $documento = Documento::findOrFail($id);
+
+        // Verificar si el usuario tiene privilegios o es 'SuperAdmin'
+        $privilegiosNecesarios = [
+            'Acceso Total',
+            'Acceso Gerencia',
+            'Acceso a Documentos',
+            'Acceso a Validar Documento',
+            'Acceso a Publicar Documento'
+        ];
+
+        $tienePrivilegios = $user->rol->privilegios->whereIn('nombre', $privilegiosNecesarios)->isNotEmpty() || $user->rol->nombre === 'SuperAdmin';
+
+        // Obtener gerencia y subgerencia del usuario
+        $subgerencia = $user->subusuario ? $user->subusuario->subgerencia : null;
+        $gerencia = $subgerencia ? $subgerencia->gerencia : $user->gerencia;
+
+        // Verificar si el documento pertenece a la gerencia o subgerencia del usuario
+        $esDocumentoValido = ($documento->gerencia_id == ($gerencia ? $gerencia->id : null)) &&
+            ($documento->subgerencia_id == ($subgerencia ? $subgerencia->id : null) || $documento->subgerencia_id === null);
+
+        // Permitir acceso si tiene privilegios y el documento pertenece a su gerencia o subgerencia
+        if ($tienePrivilegios && $esDocumentoValido) {
             $tiposDocumento = TipoDocumento::all();
-            return view('documentos.edit', compact('documento', 'tiposDocumento'));
-        } else {
-            return redirect()->to('/');
+            return view('documentos.edit', compact('documento', 'tiposDocumento', 'user'));
         }
+
+        // Bloquear el acceso si el usuario no tiene permiso para editar el documento
+        abort(403, 'No tienes permiso para editar este documento');
     }
+
 
     public function store(Request $request)
     {
@@ -138,8 +180,15 @@ class DocumentosController extends Controller
                 Rule::unique('documentos', 'archivo'),
             ],
             'estado' => 'required|in:Creado,Validado,Publicado',
-            'sub_usuarios_id' => 'nullable|exists:subusuarios,id',
         ]);
+
+        // Obtener el usuario autenticado
+        $user = Auth::user();
+        $subusuario = $user->subusuario; // Obtener el subusuario del usuario autenticado
+
+        // Determinar la subgerencia y la gerencia
+        $subgerencia = $subusuario ? $subusuario->subgerencia : null; // Obtener la subgerencia si existe
+        $gerencia = $subgerencia ? $subgerencia->gerencia : $user->gerencia; // Obtener la gerencia del subgerencia o del usuario
 
         $fileName = null;
         if ($request->hasFile('archivo')) {
@@ -148,21 +197,21 @@ class DocumentosController extends Controller
             $file->storeAs('public/documentos', $fileName);
         }
 
-
         Documento::create([
-            'sub_usuarios_id' => $request->input('sub_usuarios_id'),
-            'user_id' => Auth::user()->id,
+            'sub_usuarios_id' => $subusuario ? $subusuario->id : null, // Asignar el ID del subusuario o null
+            'user_id' => $user->id,
             'tipodocumento_id' => $request->input('tipodocumento_id'),
             'titulo' => $request->input('titulo'),
             'descripcion' => $request->input('descripcion'),
             'archivo' => $fileName,
             'estado' => $request->input('estado'),
-            'gerencia_id' => Auth::user()->gerencia->id ?? null, // Asignar la gerencia del usuario
-            'subgerencia_id' => Auth::user()->subgerencia->id ?? null, // Asignar la subgerencia si existe
+            'gerencia_id' => $gerencia ? $gerencia->id : null, // Asignar la gerencia
+            'subgerencia_id' => $subgerencia ? $subgerencia->id : null, // Asignar la subgerencia o 'NA'
         ]);
 
         return redirect()->route('documentos.index')->with('success', 'Documento creado exitosamente.');
     }
+
 
 
     public function update(Request $request, $id)
@@ -226,7 +275,7 @@ class DocumentosController extends Controller
     public function destroy($id)
     {
 
-        if (auth()->user()) {
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'Gerente' || auth()->user()->rol->nombre === 'SubGerente' || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Documentos')) {
             $documento = Documento::findOrFail($id);
             if ($documento->archivo) {
                 Storage::delete('public/documentos/' . $documento->archivo);

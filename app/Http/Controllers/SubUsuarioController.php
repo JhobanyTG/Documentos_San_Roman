@@ -31,41 +31,47 @@ class SubUsuarioController extends Controller
      */
     public function create(Gerencia $gerencia)
     {
-        // Obtener el ID del usuario autenticado
-        $usuarioId = Auth::id();
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente') {
 
-        // Verificar si el usuario autenticado es el propietario de la gerencia
-        if ($gerencia->usuario_id === $usuarioId) {
-            // Obtener todos los roles disponibles
-            $roles = Rol::all();
-            // Obtener las subgerencias que pertenecen a la gerencia actual
-            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
-            return view('subusuarios.create', compact('gerencia', 'subgerencias', 'roles'));
+            // Obtener el ID del usuario autenticado
+            $usuarioId = Auth::id();
+
+            // Verificar si el usuario autenticado es el propietario de la gerencia
+            if ($gerencia->usuario_id === $usuarioId) {
+                // Obtener todos los roles disponibles
+                $roles = Rol::all();
+                // Obtener las subgerencias que pertenecen a la gerencia actual
+                $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+                return view('subusuarios.create', compact('gerencia', 'subgerencias', 'roles'));
+            }
+
+            if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
+                // Obtener todos los roles disponibles
+                $roles = Rol::all();
+                // Obtener las subgerencias que pertenecen a la gerencia actual
+                $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+                return view('subusuarios.create', compact('gerencia', 'subgerencias', 'roles'));
+            }
+
+            // Verificar si el usuario es un subusuario relacionado con alguna subgerencia de la gerencia
+            $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+                $query->where('gerencia_id', $gerencia->id);
+            })->where('user_id', $usuarioId)->first();
+
+            if ($subusuario) {
+                // Obtener todos los roles disponibles
+                $roles = Rol::all();
+                // Obtener las subgerencias que pertenecen a la gerencia actual
+                $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+                return view('subusuarios.create', compact('gerencia', 'subgerencias', 'roles'));
+            }
+
+            // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
+            abort(403, 'No tienes permiso para acceder a esta gerencia.');
+        } else {
+            // Si no tiene los permisos, bloquea el acceso
+            abort(403, 'No tienes permiso para realizar esta acción');
         }
-
-        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
-            // Obtener todos los roles disponibles
-            $roles = Rol::all();
-            // Obtener las subgerencias que pertenecen a la gerencia actual
-            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
-            return view('subusuarios.create', compact('gerencia', 'subgerencias', 'roles'));
-        }
-
-        // Verificar si el usuario es un subusuario relacionado con alguna subgerencia de la gerencia
-        $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
-            $query->where('gerencia_id', $gerencia->id);
-        })->where('user_id', $usuarioId)->first();
-
-        if ($subusuario) {
-            // Obtener todos los roles disponibles
-            $roles = Rol::all();
-            // Obtener las subgerencias que pertenecen a la gerencia actual
-            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
-            return view('subusuarios.create', compact('gerencia', 'subgerencias', 'roles'));
-        }
-
-        // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
-        abort(403, 'No tienes permiso para acceder a esta gerencia.');
     }
 
 
@@ -142,48 +148,54 @@ class SubUsuarioController extends Controller
      */
     public function edit(Gerencia $gerencia, Subgerencia $subgerencia, Subusuario $subusuario)
     {
-        // Obtener el ID del usuario autenticado
-        $usuarioId = Auth::id();
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente') {
 
-        // Verificar si el usuario autenticado es el propietario de la gerencia
-        if ($gerencia->usuario_id === $usuarioId) {
-            // Obtener todos los roles disponibles
-            $roles = Rol::all();
-            // Obtener las subgerencias que pertenecen a la gerencia actual
-            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
-            // Obtener los usuarios disponibles para seleccionar
-            $users = User::with('persona')->get();
-            return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+            // Obtener el ID del usuario autenticado
+            $usuarioId = Auth::id();
+
+            // Verificar si el usuario autenticado es el propietario de la gerencia
+            if ($gerencia->usuario_id === $usuarioId) {
+                // Obtener todos los roles disponibles
+                $roles = Rol::all();
+                // Obtener las subgerencias que pertenecen a la gerencia actual
+                $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+                // Obtener los usuarios disponibles para seleccionar
+                $users = User::with('persona')->get();
+                return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+            }
+
+            // Verificar si el usuario tiene el privilegio de "Acceso Total"
+            if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
+                // Obtener todos los roles disponibles
+                $roles = Rol::all();
+                // Obtener las subgerencias que pertenecen a la gerencia actual
+                $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+                // Obtener los usuarios disponibles para seleccionar
+                $users = User::with('persona')->get();
+                return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+            }
+
+            // Verificar si el usuario es un subusuario relacionado con alguna subgerencia de la gerencia
+            $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+                $query->where('gerencia_id', $gerencia->id);
+            })->where('user_id', $usuarioId)->first();
+
+            if ($subusuario) {
+                // Obtener todos los roles disponibles
+                $roles = Rol::all();
+                // Obtener las subgerencias que pertenecen a la gerencia actual
+                $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+                // Obtener los usuarios disponibles para seleccionar
+                $users = User::with('persona')->get();
+                return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+            }
+
+            // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
+            abort(403, 'No tienes permiso para acceder a esta gerencia.');
+        } else {
+            // Si no tiene los permisos, bloquea el acceso
+            abort(403, 'No tienes permiso para realizar esta acción');
         }
-
-        // Verificar si el usuario tiene el privilegio de "Acceso Total"
-        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
-            // Obtener todos los roles disponibles
-            $roles = Rol::all();
-            // Obtener las subgerencias que pertenecen a la gerencia actual
-            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
-            // Obtener los usuarios disponibles para seleccionar
-            $users = User::with('persona')->get();
-            return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
-        }
-
-        // Verificar si el usuario es un subusuario relacionado con alguna subgerencia de la gerencia
-        $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
-            $query->where('gerencia_id', $gerencia->id);
-        })->where('user_id', $usuarioId)->first();
-
-        if ($subusuario) {
-            // Obtener todos los roles disponibles
-            $roles = Rol::all();
-            // Obtener las subgerencias que pertenecen a la gerencia actual
-            $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
-            // Obtener los usuarios disponibles para seleccionar
-            $users = User::with('persona')->get();
-            return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
-        }
-
-        // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
-        abort(403, 'No tienes permiso para acceder a esta gerencia.');
     }
 
 
@@ -241,16 +253,22 @@ class SubUsuarioController extends Controller
      */
     public function destroy(Gerencia $gerencia, Subgerencia $subgerencia, Subusuario $subusuario)
     {
-        $user = $subusuario->user;
-        $persona = $user->persona;
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente') {
 
-        // Eliminar el subusuario
-        $subusuario->delete();
+            $user = $subusuario->user;
+            $persona = $user->persona;
 
-        // Eliminar el usuario y luego la persona asociada
-        $user->delete();
-        $persona->delete();
+            // Eliminar el subusuario
+            $subusuario->delete();
 
-        return redirect()->route('gerencias.show', $gerencia->id)->with('success', 'Subusuario eliminado exitosamente.');
+            // Eliminar el usuario y luego la persona asociada
+            $user->delete();
+            $persona->delete();
+
+            return redirect()->route('gerencias.show', $gerencia->id)->with('success', 'Subusuario eliminado exitosamente.');
+        } else {
+            // Si no tiene los permisos, bloquea el acceso
+            abort(403, 'No tienes permiso para realizar esta acción');
+        }
     }
 }
