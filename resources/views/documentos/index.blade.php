@@ -8,6 +8,15 @@
         <div class="d-flex justify-content-end mb-3">
             <a href="{{ route('documentos.create') }}" class="btn btn-agregar pt-serif-regular"><i class="fa fa-plus"
                     aria-hidden="true"></i> Registrar</a>
+            <form action="{{ route('reporte.documentos') }}" method="GET" style="display: inline;">
+                <input type="hidden" name="q" value="{{ $searchTerm }}">
+                <input type="hidden" name="fecha" value="{{ $fecha }}">
+                <input type="hidden" name="anio" value="{{ $filtroAnio }}">
+                <input type="hidden" name="mes" value="{{ json_encode($filtroMes) }}">
+                <button type="submit" class="btn btn-dark"><i class="fa fa-download"></i> Descargar Reporte PDF</button>
+            </form>
+
+
         </div>
         <form action="{{ route('documentos.index') }}" method="GET" class="mb-3">
             <div class="buscador input-group mb-3">
@@ -169,7 +178,8 @@
                             </thead>
                             <tbody>
                                 @foreach ($documentos as $documento)
-                                    <tr role="row" class="border-table border-bottom-3" data-id="{{ $documento->id }}">
+                                    <tr role="row" class="border-table border-bottom-3"
+                                        data-id="{{ $documento->id }}">
                                         <td class="text-center">
                                             {{ $documento->id }}
 
@@ -290,18 +300,18 @@
                                             <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                                 class="btn btn-primary" download><i class="fa fa-download"
                                                     aria-hidden="true"></i></a>
-                                                @if (
-                                                    !(auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Validar Documento') ||
-                                                        auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Publicar Documento') ||
-                                                        auth()->user()->rol->nombre === 'Usuario Validador' ||
-                                                        auth()->user()->rol->nombre === 'Usuario Publicador'
-                                                    ) || $documento->estado !== 'Publicado')
-                                                    <!-- Verifica que el estado no sea 'Publicado' -->
-                                                    <a href="{{ route('documentos.edit', $documento->id) }}"
-                                                        class="btn btn-warning">
-                                                        <i class="fa fa-edit" aria-hidden="true"></i>
-                                                    </a>
-                                                @endif
+                                            @if (
+                                                !(auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Validar Documento') ||
+                                                    auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Publicar Documento') ||
+                                                    auth()->user()->rol->nombre === 'Usuario Validador' ||
+                                                    auth()->user()->rol->nombre === 'Usuario Publicador'
+                                                ) || $documento->estado !== 'Publicado')
+                                                <!-- Verifica que el estado no sea 'Publicado' -->
+                                                <a href="{{ route('documentos.edit', $documento->id) }}"
+                                                    class="btn btn-warning">
+                                                    <i class="fa fa-edit" aria-hidden="true"></i>
+                                                </a>
+                                            @endif
 
                                             @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
                                                     auth()->user()->rol->nombre === 'SubGerente' ||

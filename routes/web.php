@@ -13,6 +13,8 @@ use App\Http\Controllers\GerenciaController;
 use App\Http\Controllers\SubgerenciaController;
 use App\Http\Controllers\SubUsuarioController;
 use App\Http\Controllers\TipoDocumentoController;
+use App\Http\Controllers\HistorialCambioController;
+
 
 
 
@@ -120,6 +122,12 @@ Route::middleware(['auth'])->group(function () {
             ->middleware(['auth', 'checkGerenciaOwnership']);
 
     });
+
+    Route::get('/reporte-documentos', [DocumentosController::class, 'generarReporte'])->name('reporte.documentos');
+    Route::post('/documentos/{id}/cambiarEstado', [DocumentosController::class, 'cambiarEstado'])->name('documentos.cambiarEstado');
+
+    Route::resource('historial', HistorialCambioController::class);
+
 
 
 });

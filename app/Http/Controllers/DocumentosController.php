@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Validator;
+
+
+
 
 class DocumentosController extends Controller
 {
@@ -287,5 +292,101 @@ class DocumentosController extends Controller
         } else {
             return redirect()->to('/');
         }
+    }
+
+
+    public function generarReporte(Request $request)
+    {
+        $user = Auth::user();
+
+        // Inicializar la consulta
+        $query = Documento::with('tipoDocumento', 'gerencia', 'subgerencia');
+
+        // Aplicar filtros de búsqueda
+        $searchTerm = $request->input('q');
+        $fecha = $request->input('fecha');
+        $filtroAnio = $request->input('anio');
+        $filtroMes = $request->input('mes', []);
+
+        // Verificar si el usuario tiene el rol de 'SuperAdmin'
+        if ($user->rol->nombre == 'SuperAdmin') {
+            // Si es 'SuperAdmin', mostrar todos los documentos sin restricciones
+            $documentos = $query->get();
+        } else {
+            // Determinar el tipo de usuario y aplicar los filtros correspondientes
+            if ($user->subusuario) {
+                $subgerencia = $user->subusuario->subgerencia;
+                $gerencia = $subgerencia->gerencia;
+
+                $query->where('gerencia_id', $gerencia->id)
+                    ->where(function ($q) use ($subgerencia) {
+                        $q->where('subgerencia_id', $subgerencia->id)
+                            ->orWhereNull('subgerencia_id');
+                    });
+            } elseif ($user->gerencia) {
+                $query->where('gerencia_id', $user->gerencia->id);
+            } elseif ($subgerencia = Subgerencia::where('usuario_id', $user->id)->first()) {
+                $query->where('gerencia_id', $subgerencia->gerencia_id)
+                    ->where(function ($q) use ($subgerencia) {
+                        $q->where('subgerencia_id', $subgerencia->id)
+                            ->orWhereNull('subgerencia_id');
+                    });
+            } else {
+                $query->where('user_id', $user->id);
+            }
+
+            // Aplicar filtros
+            if ($searchTerm || $fecha || $filtroAnio || $filtroMes) {
+                if ($searchTerm) {
+                    $query->where(function ($query) use ($searchTerm) {
+                        $query->where('titulo', 'like', '%' . $searchTerm . '%')
+                            ->orWhere('descripcion', 'like', '%' . $searchTerm . '%');
+                    });
+                }
+
+                if ($fecha) {
+                    $query->whereDate('created_at', $fecha);
+                }
+
+                if ($filtroAnio) {
+                    $query->whereYear('created_at', $filtroAnio);
+                }
+
+                if ($filtroMes && is_array($filtroMes) && !empty($filtroMes)) {
+                    $query->whereIn(DB::raw('MONTH(created_at)'), $filtroMes);
+                }
+            }
+
+            $query->orderByDesc('created_at');
+            $documentos = $query->get();
+        }
+
+        // Generar el PDF con los documentos filtrados
+        $pdf = Pdf::loadView('reporte', compact('documentos'))->setPaper('A4', 'landscape');
+
+        return $pdf->download('reporte_documentos.pdf');
+    }
+
+    public function cambiarEstado(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'estado' => 'required|string',
+            'descripcion' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $documento = Documento::find($id);
+        if ($documento) {
+            $documento->estado = $request->estado;
+            $documento->descripcion = $request->descripcion;
+            $documento->save();
+
+            return response()->json(['success' => true, 'message' => 'Estado cambiado exitosamente']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Documento no encontrado'], 404);
     }
 }
