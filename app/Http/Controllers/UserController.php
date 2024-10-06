@@ -123,7 +123,7 @@ class UserController extends Controller
         $users = User::findOrFail($id);
         $users->delete();
 
-        return redirect()->route('usuarios.index')->with('success', 'Usuario eliminada exitosamente.');
+        return redirect()->route('usuarios.index')->with('success', 'Usuario eliminado exitosamente.');
     }
 
     public function cambiarContrasena($id)

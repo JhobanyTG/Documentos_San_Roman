@@ -2,13 +2,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #1713f0;
+    background-color: #01A7F1;
     padding: 10px;
 }
 
 .company-info {
     display: flex;
-    align-items: center; 
+    align-items: center;
 }
 
 .company-logo img {

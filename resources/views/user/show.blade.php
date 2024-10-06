@@ -23,5 +23,7 @@
                 <p class="card-text"><strong>Rol:</strong> {{ $user->rol->nombre }}</p>
             </div>
         </div>
+        <a href="{{ route('usuarios.index') }}" class="btn btn-secondary">Regresar</a>
+
     </div>
 @endsection

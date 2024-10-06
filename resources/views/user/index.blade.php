@@ -6,7 +6,9 @@
     <div class="card-body mt-3 p-2">
         <div id="content_ta_wrapper" class="dataTables_wrapper">
             <div class="table-responsive">
-                <table id="content_ta" class="table table-striped mt-4 table-hover custom-table pt-serif-regular" role="grid" aria-describedby="content_ta_info">
+                <a href="{{ route('personas.create') }}" class="btn btn-primary mb-3">Registrar Persona y Usuario</a>
+                <table id="content_ta" class="table table-striped mt-4 table-hover custom-table pt-serif-regular"
+                    role="grid" aria-describedby="content_ta_info">
                     <thead>
                         <tr role="row">
                             <th class="text-center">Imagen</th>
@@ -20,31 +22,58 @@
                     </thead>
                     <tbody class="text-center">
                         @foreach ($users as $user)
-                        <tr class="odd">
-                            <td>
-                                <img src="{{ $user->persona->avatar ? asset('storage/' . $user->persona->avatar) : asset('images/logo/avatar.png') }}" alt="{{ $user->persona->nombres }}" width="100">
-                            </td>
-                            <td>{{ $user->nombre_usuario }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>{{ $user->estado }}</td>
-                            <td>{{ $user->rol->nombre }}</td>
-                            <td>{{ $user->persona->nombres }} {{ $user->persona->apellido_p }} {{ $user->persona->apellido_m }}</td>
-                            <td>
-                                <a class="icono_eye" href="{{ route('usuarios.show', $user->id) }}">
-                                    <i class="fa fa-eye fa-2x" aria-hidden="true"></i>
-                                </a>
-                                <a class="icono_edit" href="{{ route('usuarios.edit', $user->id) }}">
-                                    <i class="fa fa-pencil fa-2x" aria-hidden="true"></i>
-                                </a>
-                                <form action="{{ route('usuarios.destroy', $user->id) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="icono_delete" onclick="return confirm('¿Está seguro de que desea eliminar este usuario?')">
-                                        <i class="fa fa-trash fa-2x" aria-hidden="true"></i>
+                            <tr class="odd">
+                                <td>
+                                    <img src="{{ $user->persona->avatar ? asset('storage/' . $user->persona->avatar) : asset('images/logo/avatar.png') }}"
+                                        alt="{{ $user->persona->nombres }}" width="100">
+                                </td>
+                                <td>{{ $user->nombre_usuario }}</td>
+                                <td>{{ $user->email }}</td>
+                                <td>{{ $user->estado }}</td>
+                                <td>{{ $user->rol->nombre }}</td>
+                                <td>{{ $user->persona->nombres }} {{ $user->persona->apellido_p }}
+                                    {{ $user->persona->apellido_m }}</td>
+                                <td>
+                                    <a class="btn btn-info" href="{{ route('usuarios.show', $user->id) }}">
+                                        <i class="fa fa-eye" aria-hidden="true"></i>
+                                    </a>
+                                    <a class="btn btn-warning" href="{{ route('usuarios.edit', $user->id) }}">
+                                        <i class="fa fa-edit" aria-hidden="true"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-danger"
+                                        onclick="showUserConfirmationModal('{{ route('usuarios.destroy', $user->id) }}')">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
                                     </button>
-                                </form>
-                            </td>
-                        </tr>
+                                </td>
+
+                                <!-- Modal para confirmar la eliminación -->
+                                <div class="modal fade" tabindex="-1" role="dialog" id="userConfirmationModal">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmar Eliminación</h5>
+                                                <button type="button" class="btn-close" data-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary btn-no"
+                                                    data-dismiss="modal">No</button>
+                                                <form id="userDeleteForm" method="POST" class="d-inline-block">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger">
+                                                        <i class="fa fa-trash"></i> Sí
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </tr>
                         @endforeach
                     </tbody>
                 </table>
@@ -53,13 +82,52 @@
     </div>
 
     <script>
-    $(document).ready(function() {
-        @if(Session::has('success'))
-            toastr.options = {
-                "positionClass": "toast-bottom-right",
-            };
-            toastr.success("{{ Session::get('success') }}");
-        @endif
-    });
+        $(document).ready(function() {
+            @if (Session::has('success'))
+                toastr.options = {
+                    "positionClass": "toast-bottom-right",
+                };
+                toastr.success("{{ Session::get('success') }}");
+            @endif
+        });
     </script>
+
+    <script>
+        function openPdfModal(pdfUrl, pdfName, modalId) {
+            var modalBody = document.getElementById('pdfModalBody-' + modalId);
+            modalBody.innerHTML = '<embed src="' + pdfUrl + '" type="application/pdf" width="100%" height="500px" />';
+            document.getElementById('pdfModalLabel-' + modalId).innerText = pdfName;
+            $('#pdfModal-' + modalId).modal('show');
+        }
+
+        $(document).ready(function() {
+            $('.archivo-preview').on('click', function() {
+                var pdfUrl = $(this).find('iframe').attr('src');
+                var pdfName = $(this).closest('tr').find('td.text-center:first').text().trim();
+                var modalId = $(this).closest('tr').data('id');
+                openPdfModal(pdfUrl, pdfName, modalId);
+            });
+
+            $('.img_file_pdf').on('click', function() {
+                var pdfUrl = $(this).closest('td').find('.archivo-preview iframe').attr('src');
+                var pdfName = $(this).closest('tr').find('td.text-center:first').text().trim();
+                var modalId = $(this).closest('tr').data('id');
+                openPdfModal(pdfUrl, pdfName, modalId);
+            });
+
+            $('.btn-close, .btn-no').click(function() {
+                $(this).closest('.modal').modal('hide');
+            });
+        });
+    </script>
+    <script>
+        function showUserConfirmationModal(actionUrl) {
+            // Establecer la acción del formulario
+            document.getElementById('userDeleteForm').action = actionUrl;
+
+            // Abrir el modal
+            $('#userConfirmationModal').modal('show');
+        }
+    </script>
+
 @stop

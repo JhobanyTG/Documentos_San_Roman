@@ -13,6 +13,10 @@
         <div class="contenido_login">
             <div class="container">
                 <div class="row">
+                    <div>
+                        <a href="{{route('public.index')}}" class="boton_back"><i class="fa fa-arrow-left" aria-hidden="true"></i>
+                        </a>
+                    </div>
                     <div class="col">
                         <img class="logo" src="images/logo/logo.png">
                     </div>

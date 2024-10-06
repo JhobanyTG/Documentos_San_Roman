@@ -1,33 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Documentos</title>
     <style>
+        body {
+            font-family: system-ui;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        table, th, td {
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+            background-color: #00C2EC
+        }
+
+        table,
+        th,
+        td {
             border: 1px solid black;
         }
-        th, td {
+
+        th,
+        td {
             padding: 8px;
             text-align: center;
         }
+
         .badge {
             padding: 5px;
             border-radius: 5px;
         }
-        .text-bg-danger { background-color: #dc3545; color: white; }
-        .text-bg-success { background-color: #28a745; color: white; }
-        .text-bg-primary { background-color: #007bff; color: white; }
+
+        .text-bg-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .text-bg-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .text-bg-primary {
+            background-color: #007bff;
+            color: white;
+        }
     </style>
 </head>
+
 <body>
     <h1>Reporte de Documentos</h1>
-    <table>
+    <table id="example1" class="table mt-4 table-hover pt-serif-regular" role="grid" aria-describedby="example1_info">
         <thead>
             <tr>
                 <th>N°</th>
@@ -64,4 +94,5 @@
         </tbody>
     </table>
 </body>
+
 </html>

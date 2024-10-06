@@ -122,7 +122,6 @@
                     </select>
                     <label for="descripcion_modal">Descripción:</label>
                     <textarea id="descripcion_modal" class="form-control" name="descripcion_modal" rows="3" required></textarea>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
@@ -163,126 +162,19 @@
                     success: function(response) {
                         if (response.success) {
                             toastr.success('Estado cambiado exitosamente');
-                            $('#changeStatusModal').modal('hide');
-                            $('#estado').val(nuevoEstado).prop('disabled', true);
+                            // Redireccionar a la página de índice de documentos
+                            window.location.href = "{{ route('documentos.index') }}"; // Asegúrate de que la ruta sea correcta
                         } else {
-                            toastr.error(response.message ||
-                                'Ha ocurrido un error al cambiar el estado.');
+                            toastr.error(response.message || 'Ha ocurrido un error al cambiar el estado.');
                         }
                     },
                     error: function(xhr) {
                         const response = xhr.responseJSON;
                         if (response && response.errors) {
-                            // Mostrar solo el primer error
                             const firstError = Object.values(response.errors)[0];
-                            toastr.error(Array.isArray(firstError) ? firstError[0] :
-                            firstError);
+                            toastr.error(Array.isArray(firstError) ? firstError[0] : firstError);
                         } else {
-                            toastr.error(
-                            'Ha ocurrido un error. Por favor, inténtalo de nuevo.');
-                        }
-                    },
-                    complete: function() {
-                        $('#confirmChangeStatus').prop('disabled', false);
-                        isRequestInProgress = false;
-                    }
-                });
-            });
-
-            // Eliminar el manejo de errores del servidor al inicio del documento
-            // @if ($errors->any())
-            //     toastr.options = {
-            //         "positionClass": "toast-bottom-right",
-            //     };
-            //     toastr.error("{{ $errors->first() }}");
-            // @endif
-        });
-    </script>
-
-    <script>
-        $('#cambiarEstadoModal').on('submit', function(e) {
-            e.preventDefault(); // Prevenir el envío normal del formulario
-
-            var estado = $('#estadoSelect').val(); // Asumiendo que tienes un select para elegir el estado
-            var documentoId = $(this).data('documento-id'); // Asegúrate de que estás pasando el ID del documento
-
-            $.ajax({
-                url: `{{ url('documentos/${documentoId}/cambiarEstado') }}`,
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    estado: nuevoEstado,
-                    descripcion: descripcion
-                },
-
-                success: function(response) {
-                    if (response.success) {
-                        alert(response.message);
-                        location.reload(); // Recargar la página para reflejar los cambios
-                    }
-                },
-                error: function(xhr) {
-                    alert('Error al cambiar el estado: ' + xhr.responseText);
-                }
-            });
-        });
-    </script>
-    <script>
-        $(document).ready(function() {
-            let isRequestInProgress = false;
-
-            $('#confirmChangeStatus').click(function() {
-                if (isRequestInProgress) return;
-
-                const descripcion = $('#descripcion_modal').val().trim();
-
-                // Validación del lado del cliente
-                if (!descripcion) {
-                    toastr.error('La descripción es obligatoria.');
-                    return;
-                }
-
-                isRequestInProgress = true;
-                $(this).prop('disabled', true);
-
-                const documentoId = $('#documento_id').val();
-                const nuevoEstado = $('#nuevo_estado').val();
-
-                $.ajax({
-                    url: `{{ url('documentos/${documentoId}/cambiarEstado') }}`,
-                    method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        estado: nuevoEstado,
-                        descripcion: descripcion
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            toastr.success('Estado cambiado exitosamente');
-                            $('#changeStatusModal').modal('hide');
-                            $('#estado').val(nuevoEstado).prop('disabled', true);
-                        } else {
-                            // Si la respuesta no es exitosa, mostrar mensaje de error específico
-                            toastr.error(response.message ||
-                                'Ha ocurrido un error al cambiar el estado.');
-                        }
-                    },
-                    error: function(xhr) {
-                        const response = xhr.responseJSON;
-                        if (response && response.errors) {
-                            // Priorizar el error de descripción
-                            if (response.errors.descripcion) {
-                                toastr.error(response.errors.descripcion[0]);
-                            } else {
-                                // Si no hay error de descripción, mostrar el primer error encontrado
-                                const firstError = Object.values(response.errors)[0];
-                                toastr.error(Array.isArray(firstError) ? firstError[0] :
-                                    firstError);
-                            }
-                        } else {
-                            // Si no hay errores específicos, mostrar un mensaje genérico
-                            toastr.error(
-                                'Ha ocurrido un error. Por favor, inténtalo de nuevo.');
+                            toastr.error('Ha ocurrido un error. Por favor, inténtalo de nuevo.');
                         }
                     },
                     complete: function() {
@@ -293,7 +185,5 @@
             });
         });
     </script>
-
-
 
 @endsection

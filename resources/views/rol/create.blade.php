@@ -3,49 +3,50 @@
 @section('title', 'Crear Rol')
 
 @section('content')
-    <div class="container mt-4">
+    <div class="container mt-4 form_rol">
         <div class="row">
             <!-- Formulario -->
             <div class="col-md-5">
-                <h2>Crear Nuevo Rol</h2>
+                <h2 class="form_title_gerencia">Crear Nuevo Rol</h2>
                 <form action="{{ route('roles.store') }}" method="POST">
                     @csrf
                     <div class="form-group">
-                        <label for="nombre">Nombre</label>
-                        <input type="text" name="nombre" id="nombre" class="form-control" required>
+                        <label for="nombre" class="form-label label_rol">Nombre</label>
+                        <input type="text" name="nombre" id="nombre" class="form-control rol" required>
                     </div>
                     <div class="form-group">
-                        <label for="descripcion">Descripción</label>
-                        <textarea name="descripcion" id="descripcion" class="form-control" required></textarea>
+                        <label for="descripcion" class="form-label label_rol ">Descripción</label>
+                        <textarea name="descripcion" id="descripcion" class="form-control rol" required></textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="available_privileges">Privilegios Disponibles</label>
-                        <select id="available_privileges" class="form-control" multiple>
-                            @foreach($all_privilegios as $privilegio)
+                        <select id="available_privileges" class="form-control rol" multiple>
+                            @foreach ($all_privilegios as $privilegio)
                                 <option value="{{ $privilegio->id }}">{{ $privilegio->nombre }}</option>
                             @endforeach
                         </select>
-                        <button type="button" class="btn btn-primary mt-2" onclick="addPrivileges()">Agregar Privilegios</button>
+                        <button type="button" class="btn btn-primary mt-2 btn-rol" onclick="addPrivileges()">Agregar
+                            Privilegios</button>
                     </div>
 
-                    <div class="form-group">
-                        <label>Privilegios Asignados</label>
-                        <ul id="assigned_privileges" class="list-group">
-                            <li class="list-group-item">No se han asignado privilegios aún.</li>
+                    <div class="form-group label_rol">
+                        <label class="control-label">Privilegios Asignados</label>
+                        <ul id="assigned_privileges" class="list-group rol">
+                            <li class="list-group-item rol">No se han asignado privilegios aún.</li>
                         </ul>
                     </div>
 
                     <!-- Campo oculto para los IDs de los privilegios -->
                     <input type="hidden" name="privilegios" id="privilegios" value="">
 
-                    <button type="submit" class="btn btn-primary mt-3">Crear Rol</button>
+                    <button type="submit" class="btn btn-primary mt-3 btn-rol">Crear Rol</button>
                 </form>
             </div>
 
             <!-- Columna de Privilegios -->
             <div class="col-md-7">
-                <h2>Lista de Privilegios</h2>
+                <h2 class="form_title_rol2">Lista de Privilegios</h2>
 
                 <table class="table table-bordered">
                     <thead>
@@ -70,7 +71,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             updatePrivilegesInput(); // Asegúrate de que el campo oculto se actualice al cargar la página
         });
 
@@ -78,14 +79,22 @@
             let availablePrivileges = document.getElementById('available_privileges');
             let assignedPrivileges = document.getElementById('assigned_privileges');
 
+            // Remove "No se han asignado privilegios aún" message if it exists
+            let noPrivilegesMessage = assignedPrivileges.querySelector('li.list-group-item.rol:not([data-privilege-id])');
+            if (noPrivilegesMessage) {
+                noPrivilegesMessage.remove();
+            }
+
             Array.from(availablePrivileges.selectedOptions).forEach(option => {
                 let privilegeId = option.value;
                 let privilegeName = option.text;
 
                 // Add to assigned list
                 let listItem = document.createElement('li');
-                listItem.className = 'list-group-item';
-                listItem.innerHTML = `${privilegeName} <button type="button" class="btn btn-danger btn-sm float-right" onclick="removePrivilege(${privilegeId})">Quitar</button>`;
+                listItem.className = 'list-group-item rol';
+                listItem.setAttribute('data-privilege-id', privilegeId);
+                listItem.innerHTML =
+                    `${privilegeName} <button type="button" class="btn btn-danger btn-sm float-right" onclick="removePrivilege(${privilegeId})">Quitar</button>`;
                 assignedPrivileges.appendChild(listItem);
 
                 // Remove from available list
@@ -101,12 +110,11 @@
             let availablePrivileges = document.getElementById('available_privileges');
             let privilegeName = null;
 
-            Array.from(assignedPrivileges.children).forEach(listItem => {
-                if (listItem.innerHTML.includes(`onclick="removePrivilege(${id})"`)) {
-                    privilegeName = listItem.innerText.replace('Quitar', '').trim();
-                    listItem.remove();
-                }
-            });
+            let listItem = assignedPrivileges.querySelector(`li[data-privilege-id="${id}"]`);
+            if (listItem) {
+                privilegeName = listItem.innerText.replace('Quitar', '').trim();
+                listItem.remove();
+            }
 
             // Add to available list
             if (privilegeName) {
@@ -122,22 +130,25 @@
 
         function updatePrivilegesInput() {
             let assignedPrivileges = document.getElementById('assigned_privileges');
-            let privilegeIds = Array.from(assignedPrivileges.children)
-                .filter(listItem => listItem.innerHTML.includes('onclick="removePrivilege'))
-                .map(listItem => listItem.innerHTML.match(/onclick="removePrivilege\((\d+)\)/)[1]);
+            let privilegeItems = assignedPrivileges.querySelectorAll('li[data-privilege-id]');
+
+            let privilegeIds = Array.from(privilegeItems).map(item => item.getAttribute('data-privilege-id'));
 
             document.getElementById('privilegios').value = privilegeIds.join(',');
 
             // Handle empty state
             if (privilegeIds.length === 0) {
-                document.getElementById('assigned_privileges').innerHTML = '<li class="list-group-item">No se han asignado privilegios aún.</li>';
+                if (!assignedPrivileges.querySelector('li:not([data-privilege-id])')) {
+                    assignedPrivileges.innerHTML =
+                        '<li class="list-group-item rol">No se han asignado privilegios aún.</li>';
+                }
             }
         }
     </script>
 
     <script>
         $(document).ready(function() {
-            @if(Session::has('success'))
+            @if (Session::has('success'))
                 toastr.options = {
                     "positionClass": "toast-bottom-right",
                 };

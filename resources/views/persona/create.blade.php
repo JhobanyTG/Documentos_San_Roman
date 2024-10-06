@@ -90,10 +90,13 @@
     <script>
         $(document).ready(function() {
             @if ($errors->any())
-                toastr.options = {
-                    "positionClass": "toast-bottom-right",
-                };
-                toastr.error("{{ $errors->first('password') }}");
+                @foreach ($errors->all() as $error)
+                    toastr.options = {
+                        "positionClass": "toast-top-right",
+                        "timeOut": 5000,
+                    };
+                    toastr.error("{{ $error }}");
+                @endforeach
             @endif
         });
     </script>

@@ -17,7 +17,7 @@ class HistorialCambio extends Model
         'estado_nuevo',
         'descripcion',
         'user_id',
-        'sub_usuarios_id',
+        'sub_usuario_id',
     ];
 
     // Definición de las relaciones
@@ -33,6 +33,6 @@ class HistorialCambio extends Model
 
     public function subusuario()
     {
-        return $this->belongsTo(SubUsuario::class, 'sub_usuarios_id')->withDefault();
+        return $this->belongsTo(SubUsuario::class, 'sub_usuario_id')->withDefault();
     }
 }

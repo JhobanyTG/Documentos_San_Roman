@@ -12,9 +12,14 @@ class HistorialCambioController extends Controller
      */
     public function index()
     {
+        // Obtener el historial de cambios de todos los documentos
         $historialCambios = HistorialCambio::with(['documento', 'usuario', 'subUsuario'])->get();
+
+        // Retornar la vista con la variable $historialCambios
         return view('historial.index', compact('historialCambios'));
     }
+
+
 
     /**
      * Muestra un historial de cambios específico.

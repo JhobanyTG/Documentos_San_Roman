@@ -14,56 +14,56 @@ class PersonaController extends Controller
 {
 
     public function index()
-{
-    $user = auth()->user();
-    $query = Persona::with('user');
+    {
+        $user = auth()->user();
+        $query = Persona::with('user');
 
-    // Verificar si el usuario tiene el rol de 'SuperAdmin'
-    if ($user->rol->nombre == 'SuperAdmin') {
-        // Si es 'SuperAdmin', mostrar todas las personas sin restricciones
-        $personas = $query->get();
-    } else {
-        // Filtrar personas según la gerencia o subgerencia del usuario
-        if ($user->subusuario) {
-            // Si es un subusuario, obtener su subgerencia y gerencia
-            $subgerencia = $user->subusuario->subgerencia;
-            $gerencia = $subgerencia->gerencia;
-
-            // Filtrar personas cuyos usuarios pertenezcan a la misma subgerencia o gerencia
-            $query->whereHas('user', function ($q) use ($subgerencia, $gerencia) {
-                $q->whereHas('subusuario.subgerencia', function ($q) use ($subgerencia) {
-                    $q->where('id', $subgerencia->id);
-                })->orWhereHas('gerencia', function ($q) use ($gerencia) {
-                    $q->where('id', $gerencia->id); // Filtrar por gerencia si es relevante
-                });
-            });
-        } elseif ($user->gerencia) {
-            // Si el usuario está directamente asociado a una gerencia
-            $gerencia = $user->gerencia;
-
-            // Filtrar personas cuyos usuarios pertenezcan a la misma gerencia o subgerencias relacionadas
-            $query->whereHas('user', function ($q) use ($gerencia) {
-                // Filtrar por la gerencia del usuario
-                $q->whereHas('gerencia', function ($q) use ($gerencia) {
-                    $q->where('id', $gerencia->id); // Acceder correctamente a gerencias.id a través de la relación
-                })
-                // Incluir también los subusuarios de las subgerencias de esa gerencia
-                ->orWhereHas('subusuario.subgerencia', function ($q) use ($gerencia) {
-                    $q->where('gerencia_id', $gerencia->id);
-                });
-            });
+        // Verificar si el usuario tiene el rol de 'SuperAdmin'
+        if ($user->rol->nombre == 'SuperAdmin') {
+            // Si es 'SuperAdmin', mostrar todas las personas sin restricciones
+            $personas = $query->get();
         } else {
-            // Si no tiene una gerencia ni subgerencia asociada, mostrar solo su propia persona
-            $query->whereHas('user', function ($q) use ($user) {
-                $q->where('id', $user->id);
-            });
+            // Filtrar personas según la gerencia o subgerencia del usuario
+            if ($user->subusuario) {
+                // Si es un subusuario, obtener su subgerencia y gerencia
+                $subgerencia = $user->subusuario->subgerencia;
+                $gerencia = $subgerencia->gerencia;
+
+                // Filtrar personas cuyos usuarios pertenezcan a la misma subgerencia o gerencia
+                $query->whereHas('user', function ($q) use ($subgerencia, $gerencia) {
+                    $q->whereHas('subusuario.subgerencia', function ($q) use ($subgerencia) {
+                        $q->where('id', $subgerencia->id);
+                    })->orWhereHas('gerencia', function ($q) use ($gerencia) {
+                        $q->where('id', $gerencia->id); // Filtrar por gerencia si es relevante
+                    });
+                });
+            } elseif ($user->gerencia) {
+                // Si el usuario está directamente asociado a una gerencia
+                $gerencia = $user->gerencia;
+
+                // Filtrar personas cuyos usuarios pertenezcan a la misma gerencia o subgerencias relacionadas
+                $query->whereHas('user', function ($q) use ($gerencia) {
+                    // Filtrar por la gerencia del usuario
+                    $q->whereHas('gerencia', function ($q) use ($gerencia) {
+                        $q->where('id', $gerencia->id); // Acceder correctamente a gerencias.id a través de la relación
+                    })
+                        // Incluir también los subusuarios de las subgerencias de esa gerencia
+                        ->orWhereHas('subusuario.subgerencia', function ($q) use ($gerencia) {
+                            $q->where('gerencia_id', $gerencia->id);
+                        });
+                });
+            } else {
+                // Si no tiene una gerencia ni subgerencia asociada, mostrar solo su propia persona
+                $query->whereHas('user', function ($q) use ($user) {
+                    $q->where('id', $user->id);
+                });
+            }
+
+            $personas = $query->get();
         }
 
-        $personas = $query->get();
+        return view('persona.index', compact('personas'));
     }
-
-    return view('persona.index', compact('personas'));
-}
 
 
 
@@ -129,7 +129,7 @@ class PersonaController extends Controller
             'estado' => $validatedData['estado'],
         ]);
 
-        return redirect()->route('personas.index')->with('success', 'Persona y usuario creados exitosamente.');
+        return redirect()->route('personas.index')->with('success', 'Persona y Usuario creados exitosamente.');
     }
 
 
@@ -194,7 +194,7 @@ class PersonaController extends Controller
 
         // $user->update($userData);
 
-        return redirect()->route('personas.index')->with('success', 'Persona y usuario actualizados exitosamente.');
+        return redirect()->route('personas.index')->with('success', 'Persona actualizada exitosamente.');
     }
 
 

@@ -90,6 +90,16 @@ i {
     margin: auto 20px;
 }
 
+.boton_back {
+    color: white;
+    position: absolute;
+    transition: transform 1s;
+}
+.boton_back:hover {
+    transform: scale(1.5);
+}
+
+
 /* .boton_back {
     color: var(--color-blanco);
     position: absolute;
