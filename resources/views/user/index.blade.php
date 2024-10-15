@@ -6,7 +6,7 @@
     <div class="card-body mt-3 p-2">
         <div id="content_ta_wrapper" class="dataTables_wrapper">
             <div class="table-responsive">
-                <a href="{{ route('personas.create') }}" class="btn btn-primary mb-3">Registrar Persona y Usuario</a>
+                <a href="{{ route('personas.create') }}" class="btn btn-doc mb-3"><i class="fa fa-plus" aria-hidden="true"></i> Registrar Persona y Usuario</a>
                 <table id="content_ta" class="table table-striped mt-4 table-hover custom-table pt-serif-regular"
                     role="grid" aria-describedby="content_ta_info">
                     <thead>
@@ -23,17 +23,17 @@
                     <tbody class="text-center">
                         @foreach ($users as $user)
                             <tr class="odd">
-                                <td>
+                                <td class="text-center">
                                     <img src="{{ $user->persona->avatar ? asset('storage/' . $user->persona->avatar) : asset('images/logo/avatar.png') }}"
                                         alt="{{ $user->persona->nombres }}" width="100">
                                 </td>
-                                <td>{{ $user->nombre_usuario }}</td>
-                                <td>{{ $user->email }}</td>
-                                <td>{{ $user->estado }}</td>
-                                <td>{{ $user->rol->nombre }}</td>
-                                <td>{{ $user->persona->nombres }} {{ $user->persona->apellido_p }}
+                                <td class="text-center">{{ $user->nombre_usuario }}</td>
+                                <td class="text-center">{{ $user->email }}</td>
+                                <td class="text-center">{{ $user->estado }}</td>
+                                <td class="text-center">{{ $user->rol->nombre }}</td>
+                                <td class="text-center">{{ $user->persona->nombres }} {{ $user->persona->apellido_p }}
                                     {{ $user->persona->apellido_m }}</td>
-                                <td>
+                                <td class="text-center">
                                     <a class="btn btn-info" href="{{ route('usuarios.show', $user->id) }}">
                                         <i class="fa fa-eye" aria-hidden="true"></i>
                                     </a>

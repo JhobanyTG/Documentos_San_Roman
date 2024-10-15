@@ -3,78 +3,93 @@
 @section('title', 'Editar Usuario')
 
 @section('content')
-    <div class="card-body mt-3 p-2">
-        <h2 class="text-center mb-4">Editar Usuario</h2>
-        <form action="{{ route('usuarios.update', $user->id) }}" method="POST">
+    <div class="container mt-4 form_persona">
+        <h2 class="form_title_persona">Editar Usuario</h2>
+        <form id="editForm" action="{{ route('usuarios.update', $user->id) }}" method="POST" class="form_persona_user" enctype="multipart/form-data">
             @csrf
             @method('PUT')
+            <div class="row forms">
+                <!-- Imagen de Perfil -->
+                <div class="col-md-4 d-flex flex-column align-items-center">
+                    <div class="form-group text-center">
+                        <label for="avatar" class="form-label label_persona">Imagen de Perfil</label>
+                        <!-- Contenedor centrado para la previsualización -->
+                        <div class="d-flex justify-content-center">
+                            <!-- Imagen para previsualización -->
+                            <img id="avatarPreview" src="{{ $user->persona->avatar ? asset('storage/' . $user->persona->avatar) : asset('images/logo/avatar.png') }}" alt="Previsualización" class="img-thumbnail mb-2" style="width: 200px; height: 200px" />
+                        </div>
+                        <input type="file" class="form-control persona" id="avatar" name="avatar" accept="image/*" onchange="previewImage(event)">
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label for="nombre_usuario">Nombre de Usuario:</label>
-                <input type="text" name="nombre_usuario" id="nombre_usuario" class="form-control" value="{{ old('nombre_usuario', $user->nombre_usuario) }}" required>
-                @error('nombre_usuario')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
+                <!-- Formulario Usuario -->
+                <div class="col-md-8">
+                        <!-- Nombre de Usuario -->
+                        <div class="form-group mt-3">
+                            <label for="nombre_usuario" class="form-label label_persona">Nombre de Usuario:</label>
+                            <input type="text" class="form-control persona" id="nombre_usuario" name="nombre_usuario" value="{{ old('nombre_usuario', $user->nombre_usuario) }}" required>
+                            @error('nombre_usuario')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="email" class="form-label label_persona">Correo:</label>
+                            <input type="email" class="form-control persona" id="email" name="email" value="{{ old('email', $user->email) }}" required>
+                            @error('email')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                    <div class="row mt-3">
+                        <!-- Estado -->
+                        <div class="form-group col-md-6">
+                            <label for="estado" class="form-label label_persona">Estado:</label>
+                            <select name="estado" id="estado" class="form-control persona" required>
+                                <option value="Activo" {{ old('estado', $user->estado) == 'Activo' ? 'selected' : '' }}>Activo</option>
+                                <option value="Inactivo" {{ old('estado', $user->estado) == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
+                            </select>
+                            @error('estado')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Rol -->
+                        <div class="form-group col-md-6">
+                            <label for="rol_id" class="form-label label_persona">Rol:</label>
+                            <select name="rol_id" id="rol_id" class="form-control persona" required>
+                                @foreach($roles as $rol)
+                                    <option value="{{ $rol->id }}" {{ old('rol_id', $user->rol_id) == $rol->id ? 'selected' : '' }}>
+                                        {{ $rol->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('rol_id')
+                                <div class="text-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="email">Correo:</label>
-                <input type="email" name="email" id="email" class="form-control" value="{{ old('email', $user->email) }}" required>
-                @error('email')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
-            </div>
-
-            {{-- <div class="form-group">
-                <label for="password">Contraseña (dejar en blanco si no desea cambiarla):</label>
-                <input type="password" name="password" id="password" class="form-control">
-                @error('password')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
-            </div> --}}
-
-            <div class="form-group">
-                <label for="estado">Estado:</label>
-                <select name="estado" id="estado" class="form-control" required>
-                    <!-- Opciones de estado -->
-                    <option value="Activo" {{ old('estado', $user->estado) == 'Activo' ? 'selected' : '' }}>Activo</option>
-                    <option value="Inactivo" {{ old('estado', $user->estado) == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
-                </select>
-                @error('estado')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="rol_id">Rol:</label>
-                <select name="rol_id" id="rol_id" class="form-control" required>
-                    @foreach($roles as $rol)
-                        <option value="{{ $rol->id }}" {{ old('rol_id', $user->rol_id) == $rol->id ? 'selected' : '' }}>
-                            {{ $rol->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('rol_id')
-                    <div class="text-danger">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group text-center">
-                <button type="submit" class="btn btn-primary">Actualizar</button>
-                <a href="{{ route('usuarios.cambiarContrasena', $user->id) }}" class="btn btn-info">Cambiar Contraseña</a>
-                <a href="{{ route('usuarios.index') }}" class="btn btn-secondary">Cancelar</a>
+            <div class="mt-3 botones_form_persona text-center">
+                <a href="{{ route('usuarios.index') }}" class="btn btn-form btn-persona me-2"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
+                <a href="{{ route('usuarios.cambiarContrasena', $user->id) }}" class="btn btn-form btn-persona ms-2"><i class="fa fa-unlock-alt" aria-hidden="true"></i>
+                    Cambiar Contraseña</a>
+                <button type="submit" class="btn btn-form btn-persona ms-2"><i class="fa fa-save" aria-hidden="true"></i> Guardar Cambios</button>
             </div>
         </form>
     </div>
 
+    <!-- Script para previsualización de la imagen -->
     <script>
-    $(document).ready(function() {
-        @if(Session::has('success'))
-            toastr.options = {
-                "positionClass": "toast-bottom-right",
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                var output = document.getElementById('avatarPreview');
+                output.src = reader.result;
             };
-            toastr.success("{{ Session::get('success') }}");
-        @endif
-    });
+            reader.readAsDataURL(event.target.files[0]);
+        }
     </script>
-@stop
+@endsection

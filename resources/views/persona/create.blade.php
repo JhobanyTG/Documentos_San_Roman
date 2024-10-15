@@ -4,90 +4,143 @@
 
 @section('content')
     <div class="container mt-4 form_persona">
-        <h2>Registrar Persona y Usuario</h2>
-        <form id="registrationForm" action="{{ route('personas.store') }}" method="POST" class="form_persona_user" enctype="multipart/form-data">
+        <h2 class="form_title_persona">Registrar Persona y Usuario</h2>
+        <form id="registrationForm" action="{{ route('personas.store') }}" method="POST" class="form_persona_user"
+            enctype="multipart/form-data">
             @csrf
             <div class="row forms">
-                <!-- Formulario Persona -->
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="dni">DNI:</label>
-                        <input type="text" class="form-control" id="dni" name="dni" value="{{ old('dni') }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="nombres">Nombres:</label>
-                        <input type="text" class="form-control" id="nombres" name="nombres" value="{{ old('nombres') }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="apellido_p">Apellido Paterno:</label>
-                        <input type="text" class="form-control" id="apellido_p" name="apellido_p" value="{{ old('apellido_p') }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="apellido_m">Apellido Materno:</label>
-                        <input type="text" class="form-control" id="apellido_m" name="apellido_m" value="{{ old('apellido_m') }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="f_nacimiento">Fecha de Nacimiento:</label>
-                        <input type="date" class="form-control" id="f_nacimiento" name="f_nacimiento" value="{{ old('f_nacimiento') }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="celular">Celular:</label>
-                        <input type="text" class="form-control" id="celular" name="celular" value="{{ old('celular') }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="avatar">Avatar</label>
-                        <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
-                    </div>
-                </div>
-
                 <!-- Formulario Usuario -->
                 <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="direccion">Dirección:</label>
-                        <input type="text" class="form-control" id="direccion" name="direccion" value="{{ old('direccion') }}" required>
+                    <div class="form-group mt-3">
+                        <label for="avatar" class="form-label label_persona">Imagen de Perfil</label>
+                        <!-- Contenedor centrado para la previsualización -->
+                        <div class="d-flex justify-content-center">
+                            <!-- Imagen para previsualización, con una imagen por defecto -->
+                            <img id="avatarPreview" src="{{ asset('images/logo/avatar.png') }}" alt="Previsualización"
+                                class="img-thumbnail mb-2" style="width: 200px; height: 200px" />
+                        </div>
+                        <input type="file" class="form-control persona" id="avatar" name="avatar" accept="image/*"
+                            onchange="previewImage(event)">
                     </div>
-                    <div class="form-group">
-                        <label for="rol_id">Rol:</label>
-                        <select class="form-control" id="rol_id" name="rol_id" required>
-                            @foreach ($roles as $rol)
-                                <option value="{{ $rol->id }}" {{ old('rol_id') == $rol->id ? 'selected' : '' }}>
-                                    {{ $rol->nombre }}</option>
-                            @endforeach
-                        </select>
+                    <div class="row mt-2">
+                        <div class="form-group col-md-6">
+                            <label for="nombre_usuario" class="form-label label_persona mt-2">Nombre de Usuario:</label>
+                            <input type="text" class="form-control persona" id="nombre_usuario" name="nombre_usuario"
+                                value="{{ old('nombre_usuario') }}" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="email" class="form-label label_persona mt-2">Email:</label>
+                            <input type="email" class="form-control persona" id="email" name="email"
+                                value="{{ old('email') }}" required>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="nombre_usuario">Nombre de Usuario:</label>
-                        <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" value="{{ old('nombre_usuario') }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Contraseña:</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="form-group mt-2">
+                        <label for="password" class="form-label label_persona">Contraseña:</label>
+                        <input type="password" class="form-control persona" id="password" name="password" required>
                         @error('password')
                             <div class="text-danger">{{ $message }}</div>
                         @enderror
                     </div>
+                </div>
+                <!-- Formulario Persona -->
+                <div class="col-md-6">
                     <div class="form-group">
-                        <label for="estado">Estado:</label>
-                        <select class="form-control" id="estado" name="estado" required>
-                            <option value="Activo" selected>Activo</option>
-                            <option value="Inactivo" {{ old('estado') == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
-                        </select>
+                        <label for="nombres" class="form-label label_persona">Nombres:</label>
+                        <input type="text" class="form-control persona" id="nombres" name="nombres"
+                            value="{{ old('nombres') }}" required>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="form-group col-md-6">
+                            <label for="apellido_p" class="form-label label_persona">Apellido Paterno:</label>
+                            <input type="text" class="form-control persona" id="apellido_p" name="apellido_p"
+                                value="{{ old('apellido_p') }}" required>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="apellido_m" class="form-label label_persona">Apellido Materno:</label>
+                            <input type="text" class="form-control persona" id="apellido_m" name="apellido_m"
+                                value="{{ old('apellido_m') }}" required>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="form-group col-md-6">
+                            <label for="dni" class="form-label label_persona">DNI:</label>
+                            <input type="number" class="form-control persona" id="dni" name="dni"
+                                value="{{ old('dni') }}" required maxlength="8">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="f_nacimiento" class="form-label label_persona">Fecha de Nacimiento:</label>
+                            <input type="date" class="form-control persona" id="f_nacimiento" name="f_nacimiento"
+                                value="{{ old('f_nacimiento') }}" required>
+                        </div>
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="celular" class="form-label label_persona">Celular:</label>
+                        <input type="number" class="form-control persona" id="celular" name="celular"
+                            value="{{ old('celular') }}" required>
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="direccion" class="form-label label_persona">Dirección:</label>
+                        <input type="text" class="form-control persona" id="direccion" name="direccion"
+                            value="{{ old('direccion') }}" required>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="form-group col-md-6">
+                            <label for="rol_id" class="form-label label_persona">Rol:</label>
+                            <select class="form-control persona" id="rol_id" name="rol_id" required>
+                                @foreach ($roles as $rol)
+                                    <option value="{{ $rol->id }}"
+                                        {{ old('rol_id') == $rol->id ? 'selected' : '' }}>
+                                        {{ $rol->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="estado" class="form-label label_persona">Estado:</label>
+                            <select class="form-control persona" id="estado" name="estado" required>
+                                <option value="Activo" selected>Activo</option>
+                                <option value="Inactivo" {{ old('estado') == 'Inactivo' ? 'selected' : '' }}>Inactivo
+                                </option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-3 botones_form_persona">
-                <button type="submit" class="btn btn-form"><i class="fa fa-plus" aria-hidden="true"></i> Crear</button>
-                <a href="{{ url('personas') }}" class="btn btn-form"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
+            <div class="mt-3 botones_form_persona text-center">
+                <a href="{{ url('personas') }}" class="btn btn-form btn-persona me-2"><i class="fa fa-arrow-circle-left"
+                    aria-hidden="true"></i> Cancelar</a>
+                <button type="submit" class="btn btn-form btn-persona ms-2"><i class="fa fa-plus" aria-hidden="true"></i>
+                    Crear</button>
+
             </div>
         </form>
     </div>
 
     <script>
+        $(document).ready(function() {
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    toastr.options = {
+                        "positionClass": "toast-top-right",
+                        "timeOut": 5000,
+                    };
+                    toastr.error("{{ $error }}");
+                @endforeach
+            @endif
+        });
+    </script>
+    <script>
+        // Función para previsualizar la imagen seleccionada
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                var output = document.getElementById('avatarPreview');
+                output.src = reader.result;
+                output.style.display = 'block'; // Muestra la imagen después de seleccionarla
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
         $(document).ready(function() {
             @if ($errors->any())
                 @foreach ($errors->all() as $error)

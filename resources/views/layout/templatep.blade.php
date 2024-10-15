@@ -27,7 +27,8 @@
             </div>
             <div class="login-button col-md-2 p-end">
                 <!-- <button><a href="https://iestpnunoa.edu.pe/">Página Principal</a></button> -->
-                <button><a href="{{ route('login') }}">Login</a></button>
+                <a href="{{ route('login') }} " class="btn btn-public me-2"><i class="fa fa-sign-in" aria-hidden="true"></i>
+                    Login</a>
             </div>
     </div>
         <div class="contentp">

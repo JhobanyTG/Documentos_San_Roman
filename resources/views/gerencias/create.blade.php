@@ -22,7 +22,7 @@
                                 <label for="descripcion" class="form-label label_gerencia">Descripción:</label>
                                 <textarea name="descripcion" class="form-control gerencia" id="descripcion" rows="4" required></textarea>
                             </div>
-                            <div class="form-group mt-3">
+                            <div class="form-group">
                                 <label for="telefono" class="form-label label_gerencia">Teléfono:</label>
                                 <input type="text" name="telefono" class="form-control gerencia" id="telefono" required>
                             </div>
@@ -32,9 +32,7 @@
 
                         <!-- Segunda columna -->
                         <div class="col-md-6">
-
-
-                            <div class="form-group mt-3">
+                            <div class="form-group">
                                 <label for="direccion" class="form-label label_gerencia">Dirección:</label>
                                 <input type="text" name="direccion" class="form-control gerencia" id="direccion"
                                     required>
@@ -59,9 +57,11 @@
                         </div>
                     </div>
 
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-primary btn-gerencia">Guardar</button>
-                        <a href="{{ route('gerencias.index') }}" class="btn btn-secondary btn-gerencia">Cancelar</a>
+                    <div class="mt-4 text-center">
+                        <a href="{{ route('gerencias.index') }}" class="btn btn-secondary btn-gerencia me-2"><i
+                            class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
+                        <button type="submit" class="btn btn-primary btn-gerencia ms-2"><i class="fa fa-plus" aria-hidden="true"></i>
+                            Crear</button>
                     </div>
                 </form>
 

@@ -7,7 +7,7 @@
         <div class="row">
             <!-- Formulario -->
             <div class="col-md-5">
-                <h2 class="form_title_gerencia">Crear Nuevo Rol</h2>
+                <h2 class="form_title_rol">Crear Nuevo Rol</h2>
                 <form action="{{ route('roles.store') }}" method="POST">
                     @csrf
                     <div class="form-group">
@@ -26,7 +26,7 @@
                                 <option value="{{ $privilegio->id }}">{{ $privilegio->nombre }}</option>
                             @endforeach
                         </select>
-                        <button type="button" class="btn btn-primary mt-2 btn-rol" onclick="addPrivileges()">Agregar
+                        <button type="button" class="btn btn-primary mt-2 btn-rol" onclick="addPrivileges()"><i class="fa fa-arrow-down" aria-hidden="true"></i>Agregar
                             Privilegios</button>
                     </div>
 
@@ -39,8 +39,10 @@
 
                     <!-- Campo oculto para los IDs de los privilegios -->
                     <input type="hidden" name="privilegios" id="privilegios" value="">
-
-                    <button type="submit" class="btn btn-primary mt-3 btn-rol">Crear Rol</button>
+                    <a href="{{ route('roles.index') }}" class="btn btn-secondary mt-3 btn-rol"><i
+                        class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
+                    <button type="submit" class="btn btn-primary mt-3 btn-rol"><i class="fa fa-plus" aria-hidden="true"></i>
+                        Crear</button>
                 </form>
             </div>
 

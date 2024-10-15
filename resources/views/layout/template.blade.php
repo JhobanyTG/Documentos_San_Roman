@@ -51,25 +51,31 @@
                         auth()->user()->rol->nombre === 'SubGerente')
                     <li class="nav-item">
                         <a href="{{ url('usuarios') }}">
-                            <i class="fa fa-users"></i>
+                            <i class="fa fa-address-book" aria-hidden="true"></i>
                             <span class="nav-text">Usuarios</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
                         <a href="{{ url('personas') }}">
-                            <i class="fa fa-users"></i>
+                            <i class="fa fa-address-book-o" aria-hidden="true"></i>
                             <span class="nav-text">Personas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('documentos.historial', ['documentoId' => 0]) }}">
+                            <i class="fa fa-book" aria-hidden="true"></i>
+                            <span class="nav-text">Historial</span>
                         </a>
                     </li>
                 @endif
 
                 <!-- <li class="nav-item">
-                                <a href="#">
-                                    <i class="fa fa-book"></i>
-                                    <span class="nav-text">Otros</span>
-                                </a>
-                            </li> -->
+                                        <a href="#">
+                                            <i class="fa fa-book"></i>
+                                            <span class="nav-text">Otros</span>
+                                        </a>
+                                    </li> -->
                 {{-- @if (auth()->check() && auth()->user()->rols === 'SuperAdmin') --}}
                 {{-- @if (auth()->check() && auth()->user()->rol && auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) --}}
                 @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->nombre === 'Gerente')
@@ -77,12 +83,6 @@
                         <a href="{{ url('roles') }}">
                             <i class="fa fa-users"></i>
                             <span class="nav-text">Roles y Privilegios</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{{ route('documentos.historial',  ['documentoId' => 0]) }}">
-                            <i class="fa fa-users"></i>
-                            <span class="nav-text">Historial</span>
                         </a>
                     </li>
 
@@ -96,7 +96,7 @@
                     </li>
                     <li class="nav-item">
                         <a href="{{ url('tipodocumento') }}">
-                            <i class="fa fa-users"></i>
+                            <i class="fa fa-file-text" aria-hidden="true"></i>
                             <span class="nav-text">Tipo Documento</span>
                         </a>
                     </li>
@@ -127,22 +127,24 @@
                 </div>
                 <div class="header-right pt-serif-bold">
                     <div class="profile" id="profile-div">
-                        @php
-                            $personaLogueada = auth()->user()->persona; // Obtener la persona asociada al usuario logueado
-                        @endphp
-
+                        @php $personaLogueada = auth()->user()->persona; @endphp
                         @if ($personaLogueada && $personaLogueada->avatar)
                             <img src="{{ asset('storage/' . $personaLogueada->avatar) }}"
                                 alt="{{ $personaLogueada->nombres }}" class="img-fluid">
                         @else
                             <img src="{{ asset('images/logo/avatar.png') }}" alt="Avatar" class="img-fluid">
                         @endif
-
-                        {{-- <img src="{{ asset('storage/' . $persona->avatar) }}" alt="{{ $persona->nombres }}" class="img-fluid" width="100"> --}}
                         <p>{{ auth()->user()->nombre_usuario }}<span>{{ auth()->user()->rol->nombre }}</span></p>
                     </div>
-                    <a id="change-password-link" href="{{ route('change-password') }}" class="boton_cambiar_contrasena"><i
-                            class="fa fa-lock" aria-hidden="true"></i>Cambiar Contraseña</a>
+                    <div id="profile-links" class="profile-links text-center">
+                        <a href="{{ route('personas.show', ['persona' => auth()->user()->persona->id]) }}"
+                            class="boton_perfil">
+                            <i class="fa fa-user" aria-hidden="true"></i> Perfil
+                        </a>
+                        <a href="{{ route('change-password') }}" class="boton_cambiar_contrasena">
+                            <i class="fa fa-lock" aria-hidden="true"></i>Cambiar Contraseña
+                        </a>
+                    </div>
                 </div>
             </header>
             <div class="border-dark border-bottom mb-2">
@@ -249,21 +251,23 @@
             }
         </script> -->
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const changePasswordLink = document.getElementById("change-password-link");
-                const profileDiv = document.getElementById("profile-div");
-                changePasswordLink.style.display = "none";
-                profileDiv.addEventListener("click", function(event) {
-                    event.preventDefault();
-                    if (changePasswordLink.style.display === "none") {
-                        changePasswordLink.style.display = "block";
-                    } else {
-                        changePasswordLink.style.display = "none";
+            document.addEventListener('DOMContentLoaded', function() {
+                const profileDiv = document.getElementById('profile-div');
+                const profileLinks = document.getElementById('profile-links');
+
+                profileDiv.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Evita que el clic se propague al documento
+                    profileLinks.style.display = profileLinks.style.display === 'none' ? 'block' : 'none';
+                });
+
+                // Cierra el menú si se hace clic fuera de él
+                document.addEventListener('click', function(e) {
+                    if (!profileDiv.contains(e.target) && !profileLinks.contains(e.target)) {
+                        profileLinks.style.display = 'none';
                     }
                 });
             });
         </script>
-
         <script>
             // var espanol = {
             //     "sProcessing": "Procesando...",

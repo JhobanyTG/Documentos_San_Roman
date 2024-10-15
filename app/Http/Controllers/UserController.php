@@ -77,40 +77,52 @@ class UserController extends Controller
             'nombre_usuario' => 'required|string|max:100',
             'email' => 'required|string|email|max:254',
             'estado' => 'required|string|in:Activo,Inactivo',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validación para el avatar
         ]);
 
         try {
             $user = User::findOrFail($id);
+            $persona = $user->persona; // Relación con la persona
 
-            // Si se ha subido un avatar
+            // Si se ha subido un nuevo avatar
             if ($request->hasFile('avatar')) {
                 // Elimina el avatar viejo si existe
-                if ($user->avatar) {
-                    Storage::delete('public/avatars/' . $user->avatar);
+                if ($persona->avatar && Storage::exists('public/' . $persona->avatar)) {
+                    Storage::delete('public/' . $persona->avatar);
                 }
 
-                // Guarda el nuevo avatar
+                // Guardar el nuevo avatar
                 $file = $request->file('avatar');
-                $filename = time() . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/avatars', $filename);
-                $user->avatar = $filename;
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $extension = $file->getClientOriginalExtension();
+                $timestamp = time();
+                $filename = $originalName . '-' . $timestamp . '.' . $extension;
+
+                // Asegurarse de que el nombre del archivo sea único
+                while (Storage::disk('public')->exists('avatars/' . $filename)) {
+                    $timestamp++;
+                    $filename = $originalName . '-' . $timestamp . '.' . $extension;
+                }
+
+                $avatarPath = $file->storeAs('avatars', $filename, 'public');
+                $persona->avatar = $avatarPath; // Actualizar el avatar en la tabla de persona
+                $persona->save(); // Guardar cambios en persona
             }
 
+            // Actualizar la información del usuario
             $user->update([
                 'rol_id' => $validatedData['rol_id'],
                 'nombre_usuario' => $validatedData['nombre_usuario'],
                 'email' => $validatedData['email'],
-                'estado' => $request->input('estado'),
+                'estado' => $validatedData['estado'],
             ]);
 
-            $user->save();
-
-            return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado exitosamente.');
+            return redirect()->route('usuarios.index')->with('success', 'Usuario y avatar actualizados exitosamente.');
         } catch (\Exception $e) {
-            // Imprime el error para depuración
-            return back()->withErrors(['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Ocurrió un error al actualizar el usuario.');
         }
     }
+
 
     public function show($id)
     {

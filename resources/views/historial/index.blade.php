@@ -6,8 +6,8 @@
     <div class="container">
         <div class="col-md-12 order-md-1">
             <div class="card-body">
-                <h1>Historial de Cambios</h1>
-                <a href="{{ route('historial.exportar', ['q' => request('q'), 'anio' => request('anio'), 'mes' => request('mes')]) }}" class="btn btn-success">Exportar a PDF</a>
+                <a href="{{ route('historial.exportar', ['q' => request('q'), 'anio' => request('anio'), 'mes' => request('mes')]) }}" class="btn btn-doc mb-3"> <i class="fa fa-file-pdf-o" aria-hidden="true"></i>
+                    Exportar a PDF</a>
 
                 @php
                     // Definir el array con los nombres de los meses en español
@@ -39,7 +39,7 @@
                             </a>
                         @endif
 
-                        <button class="btn btn-custom" type="submit">Buscar</button>
+                        <button class="btn btn-doc" type="submit">Buscar</button>
                     </div>
                     <!-- Campos ocultos para mantener los filtros -->
                     <input type="hidden" name="anio" value="{{ $filtroAnio }}">
@@ -117,7 +117,7 @@
                                             <input type="hidden" name="anio" value="{{ $filtroAnio }}">
                                             <input type="hidden" name="q" value="{{ $searchTerm }}">
                                             <div style="display: block; margin-bottom: 10px; width: 100%;">
-                                                <button class="boton-filtro btn btn-primary" type="submit">Ejecutar
+                                                <button class="boton-filtro btn btn-doc" type="submit">Ejecutar
                                                     Filtro</button>
                                             </div>
                                         </form>
@@ -146,9 +146,9 @@
                                 <tbody>
                                     @foreach ($historial as $cambio)
                                         <tr>
-                                            <td>{{ $cambio->id }}</td>
-                                            <td>{{ $cambio->documento->titulo ?? 'Sin título' }}</td>
-                                            <td>
+                                            <td class="text-center">{{ $cambio->id }}</td>
+                                            <td class="text-center">{{ $cambio->documento->titulo ?? 'Sin título' }}</td>
+                                            <td class="text-center">
                                                 @if ($cambio->estado_anterior === 'Creado')
                                                     <span class="badge text-bg-danger">Creado</span>
                                                 @elseif($cambio->estado_anterior === 'Validado')
@@ -157,7 +157,7 @@
                                                     <span class="badge text-bg-primary">Publicado</span>
                                                 @endif
                                             </td>
-                                            <td>
+                                            <td class="text-center">
                                                 @if ($cambio->estado_nuevo === 'Creado')
                                                     <span class="badge text-bg-danger">Creado</span>
                                                 @elseif($cambio->estado_nuevo === 'Validado')
@@ -166,10 +166,9 @@
                                                     <span class="badge text-bg-primary">Publicado</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $cambio->descripcion }}</td>
-                                            <td>{{ $cambio->user->nombre_usuario }}</td>
-                                            <td>{{ $cambio->created_at->format('d/m/Y H:i') }}</td>
-                                            <!-- Formato de fecha -->
+                                            <td class="text-center">{{ $cambio->descripcion }}</td>
+                                            <td class="text-center">{{ $cambio->user->nombre_usuario }}</td>
+                                            <td class="text-center">{{ $cambio->created_at->format('d/m/Y H:i') }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

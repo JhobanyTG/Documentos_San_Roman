@@ -21,8 +21,10 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
-        <button type="submit" class="btn btn-primary  btn-tipo">Guardar</button>
-        <a href="{{ route('tipodocumento.index') }}" class="btn btn-secondary  btn-tipo">Cancelar</a>
+        <a href="{{ route('tipodocumento.index') }}" class="btn btn-secondary  btn-tipo"><i
+            class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
+        <button type="submit" class="btn btn-primary  btn-tipo"><i class="fa fa-plus" aria-hidden="true"></i>
+            Crear</button>
     </form>
 </div>
 @endsection

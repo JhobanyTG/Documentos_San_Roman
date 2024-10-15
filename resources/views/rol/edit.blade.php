@@ -3,55 +3,58 @@
 @section('title', 'Editar Rol')
 
 @section('content')
-            <div class="container mt-4">
-                <h2>Editar Rol</h2>
+    <div class="container mt-4 form_rol">
+        <div class="row">
+            <div class="col-md-5">
+                <h2 class="form_title_rol">Editar Rol</h2>
                 <form action="{{ route('roles.update', $role->id) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <div class="form-group">
-                        <label for="nombre">Nombre</label>
-                        <input type="text" name="nombre" id="nombre" class="form-control" value="{{ $role->nombre }}" required>
+                        <label for="nombre" class="form-label label_rol">Nombre</label>
+                        <input type="text" name="nombre" id="nombre" class="form-control rol"
+                            value="{{ $role->nombre }}" required>
                     </div>
                     <div class="form-group">
-                        <label for="descripcion">Descripción</label>
-                        <textarea name="descripcion" id="descripcion" class="form-control" required>{{ $role->descripcion }}</textarea>
+                        <label for="descripcion" class="form-label label_rol">Descripción</label>
+                        <textarea name="descripcion" id="descripcion" class="form-control rol" required>{{ $role->descripcion }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label for="available_privileges">Privilegios Disponibles</label>
-                        <select id="available_privileges" class="form-control" multiple>
-                            @foreach($all_privilegios as $privilegio)
+                        <select id="available_privileges" class="form-control rol" multiple>
+                            @foreach ($all_privilegios as $privilegio)
                                 <option value="{{ $privilegio->id }}">{{ $privilegio->nombre }}</option>
                             @endforeach
                         </select>
-                        <button type="button" class="btn btn-primary mt-2" onclick="addPrivileges()">Agregar Privilegios</button>
+                        <button type="button" class="btn btn-primary mt-2 btn-rol" onclick="addPrivileges()"><i class="fa fa-arrow-down" aria-hidden="true"></i>Agregar
+                            Privilegios</button>
                     </div>
 
-                    <div class="form-group">
-                        <label>Privilegios Asignados</label>
-                        <ul id="assigned_privileges" class="list-group">
+                    <div class="form-group label_rol">
+                        <label class="control-label">Privilegios Asignados</label>
+                        <ul id="assigned_privileges" class="list-group rol">
                             @forelse($role->privilegios as $privilegio)
-                                <li class="list-group-item">
-                                    {{ $privilegio->nombre }}
-                                    <button type="button" class="btn btn-danger btn-sm float-right" onclick="removePrivilege({{ $privilegio->id }})">Quitar</button>
+                                <li class="list-group-item rol">{{ $privilegio->nombre }}
+                                    <button type="button" class="btn btn-danger btn-sm float-right"
+                                        onclick="removePrivilege({{ $privilegio->id }})">Quitar</button>
                                 </li>
                             @empty
-                                <li class="list-group-item">Este rol no tiene privilegios asignados.</li>
+                                <li class="list-group-item rol">Este rol no tiene privilegios asignados.</li>
                             @endforelse
                         </ul>
                     </div>
 
-                    <!-- Campo oculto para los IDs de los privilegios -->
-                    <input type="hidden" name="privilegios" id="privilegios" value="{{ $role->privilegios->pluck('id')->implode(',') }}">
-
-                    <button type="submit" class="btn btn-primary mt-3">Actualizar Rol</button>
+                    <input type="hidden" name="privilegios" id="privilegios"
+                        value="{{ $role->privilegios->pluck('id')->implode(',') }}">
+                    <a href="{{ route('roles.index') }}" class="btn btn-secondary mt-3 btn-rol"><i
+                        class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
+                    <button type="submit" class="btn btn-primary mt-3 btn-rol"><i class="fa fa-save" aria-hidden="true"></i> Guardar Cambios</button>
                 </form>
             </div>
 
-            <!-- Columna de Privilegios -->
             <div class="col-md-7">
-                <h2>Lista de Privilegios</h2>
-
+                <h2 class="form_title_rol2">Lista de Privilegios</h2>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -75,7 +78,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             updatePrivilegesInput(); // Asegúrate de que el campo oculto se actualice al cargar la página
         });
 
@@ -90,7 +93,8 @@
                 // Add to assigned list
                 let listItem = document.createElement('li');
                 listItem.className = 'list-group-item';
-                listItem.innerHTML = `${privilegeName} <button type="button" class="btn btn-danger btn-sm float-right" onclick="removePrivilege(${privilegeId})">Quitar</button>`;
+                listItem.innerHTML =
+                    `${privilegeName} <button type="button" class="btn btn-danger btn-sm float-right" onclick="removePrivilege(${privilegeId})">Quitar</button>`;
                 assignedPrivileges.appendChild(listItem);
 
                 // Remove from available list
@@ -135,14 +139,15 @@
 
             // Handle empty state
             if (privilegeIds.length === 0) {
-                document.getElementById('assigned_privileges').innerHTML = '<li class="list-group-item">Este rol no tiene privilegios asignados.</li>';
+                document.getElementById('assigned_privileges').innerHTML =
+                    '<li class="list-group-item">Este rol no tiene privilegios asignados.</li>';
             }
         }
     </script>
 
     <script>
         $(document).ready(function() {
-            @if(Session::has('success'))
+            @if (Session::has('success'))
                 toastr.options = {
                     "positionClass": "toast-bottom-right",
                 };

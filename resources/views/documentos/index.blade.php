@@ -6,17 +6,16 @@
 
     <div class="container mt-4">
         <div class="d-flex justify-content-end mb-3">
-            <a href="{{ route('documentos.create') }}" class="btn btn-agregar pt-serif-regular"><i class="fa fa-plus"
+            <a href="{{ route('documentos.create') }}" class="btn btn-doc pt-serif-regular me-2"><i class="fa fa-plus"
                     aria-hidden="true"></i> Registrar</a>
             <form action="{{ route('reporte.documentos') }}" method="GET" style="display: inline;">
                 <input type="hidden" name="q" value="{{ $searchTerm }}">
                 <input type="hidden" name="fecha" value="{{ $fecha }}">
                 <input type="hidden" name="anio" value="{{ $filtroAnio }}">
                 <input type="hidden" name="mes" value="{{ json_encode($filtroMes) }}">
-                <button type="submit" class="btn btn-dark"><i class="fa fa-download"></i> Descargar Reporte PDF</button>
+                <button type="submit" class="btn btn-doc pt-serif-regular"><i class="fa fa-download"></i> Descargar Reporte
+                    PDF</button>
             </form>
-
-
         </div>
         <form action="{{ route('documentos.index') }}" method="GET" class="mb-3">
             <div class="buscador input-group mb-3">
@@ -35,7 +34,7 @@
                         <input type="hidden" name="mes[]" value="{{ $mes }}">
                     @endforeach
                 @endif
-                <button class="btn btn-custom" type="submit">Buscar</button>
+                <button class="btn btn-doc " type="submit">Buscar</button>
             </div>
         </form>
         @if ($searchTerm || $filtroAnio || !empty($filtroMes))
@@ -145,7 +144,7 @@
                                         <input type="hidden" name="anio" value="{{ $filtroAnio }}">
                                         <input type="hidden" name="q" value="{{ $searchTerm }}">
                                         <div style="display: block; margin-bottom: 10px; width: 100%;">
-                                            <button class="boton-filtro btn btn-primary" type="submit">Ejecutar
+                                            <button class="boton-filtro btn btn-doc " type="submit">Ejecutar
                                                 Filtro</button>
                                         </div>
                                     </div>
@@ -205,7 +204,7 @@
                                             @endphp
                                             {!! $highlightedTitle !!}
                                         </td>
-                                        <td>{{ $documento->tipoDocumento->nombre }}</td>
+                                        <td class="text-center">{{ $documento->tipoDocumento->nombre }}</td>
                                         <td class="text-center">
                                             @if (strlen($documento->descripcion) > 370)
                                                 @php
@@ -275,10 +274,12 @@
                                             <img class="img_file_pdf centered-img"
                                                 src="{{ asset('images/icons/pdf.png') }}" alt="PDF" />
                                         </td>
-                                        <td>{{ $documento->gerencia ? $documento->gerencia->nombre : 'Creado Por el administrador' }}
+                                        <td class="text-center">
+                                            {{ $documento->gerencia ? $documento->gerencia->nombre : 'Creado Por el administrador' }}
                                         </td>
-                                        <td>{{ $documento->subgerencia ? $documento->subgerencia->nombre : 'N/A' }}</td>
-                                        <td>
+                                        <td class="text-center">
+                                            {{ $documento->subgerencia ? $documento->subgerencia->nombre : 'N/A' }}</td>
+                                        <td class="text-center">
                                             @if ($documento->estado === 'Creado')
                                                 <span class="badge text-bg-danger">Creado</span>
                                             @elseif($documento->estado === 'Validado')
@@ -300,41 +301,23 @@
                                             <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                                 class="btn btn-primary" download><i class="fa fa-download"
                                                     aria-hidden="true"></i></a>
-                                            @if (
-                                                !(auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Validar Documento') ||
-                                                    auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Publicar Documento') ||
-                                                    auth()->user()->rol->nombre === 'Usuario Validador' ||
-                                                    auth()->user()->rol->nombre === 'Usuario Publicador'
-                                                ) || $documento->estado !== 'Publicado')
-                                                <!-- Verifica que el estado no sea 'Publicado' -->
-                                                <a href="{{ route('documentos.edit', $documento->id) }}"
-                                                    class="btn btn-warning">
-                                                    <i class="fa fa-edit" aria-hidden="true"></i>
-                                                </a>
-                                            @endif
 
-                                            @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
-                                                    auth()->user()->rol->nombre === 'SubGerente' ||
-                                                    auth()->user()->rol->nombre === 'Gerente' ||
-                                                    auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Documentos'))
-                                                @if (
-                                                    !(auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Validar Documento') ||
-                                                        auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Publicar Documento') ||
-                                                        auth()->user()->rol->nombre === 'Usuario Validador' ||
-                                                        auth()->user()->rol->nombre === 'Usuario Publicador'
-                                                    ) || $documento->estado !== 'Publicado')
-                                                    <!-- Verifica que el estado no sea 'Publicado' -->
-                                                    <form action="{{ route('documentos.destroy', $documento->id) }}"
-                                                        method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="button" class="btn btn-danger"
-                                                            onclick="showConfirmationModal()">
-                                                            <i class="fa fa-trash" aria-hidden="true"></i>
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            @endif
+                                            <!-- Verifica que el estado no sea 'Publicado' -->
+                                            <a href="{{ route('documentos.edit', $documento->id) }}"
+                                                class="btn btn-warning">
+                                                <i class="fa fa-edit" aria-hidden="true"></i>
+                                            </a>
+
+                                            <!-- Verifica que el estado no sea 'Publicado' -->
+                                            <form action="{{ route('documentos.destroy', $documento->id) }}"
+                                                method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" class="btn btn-danger"
+                                                    onclick="showConfirmationModal()">
+                                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
 
                                         </td>
                                         <div class="modal fade pt-serif-regular" id="pdfModal-{{ $documento->id }}"

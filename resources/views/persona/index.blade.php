@@ -6,7 +6,7 @@
     <div class="card-body mt-3 p-2">
         <div id="content_ta_wrapper" class="dataTables_wrapper">
             <div class="table-responsive">
-                <a href="{{ route('personas.create') }}" class="btn btn-primary mb-3">Registrar Persona y Usuario</a>
+                <a href="{{ route('personas.create') }}" class="btn btn-doc mb-3"><i class="fa fa-plus" aria-hidden="true"></i> Registrar Persona y Usuario</a>
                 <table id="content_ta" class="table table-striped mt-4 table-hover custom-table pt-serif-regular"
                     role="grid" aria-describedby="content_ta_info">
                     <thead>
@@ -25,18 +25,18 @@
                     <tbody>
                         @foreach ($personas as $persona)
                             <tr class="odd">
-                                <td>{{ $persona->dni }}</td>
-                                <td>
+                                <td class="text-center">{{ $persona->dni }}</td>
+                                <td class="text-center">
                                     <img src="{{ $persona->avatar ? asset('storage/' . $persona->avatar) : asset('images/logo/avatar.png') }}"
                                         alt="{{ $persona->nombres }}" width="100">
                                 </td>
-                                <td>{{ $persona->nombres }}</td>
-                                <td>{{ $persona->apellido_p }}</td>
-                                <td>{{ $persona->apellido_m }}</td>
-                                <td>{{ $persona->f_nacimiento }}</td>
-                                <td>{{ $persona->celular }}</td>
-                                <td>{{ $persona->direccion }}</td>
-                                <td>
+                                <td class="text-center">{{ $persona->nombres }}</td>
+                                <td class="text-center">{{ $persona->apellido_p }}</td>
+                                <td class="text-center">{{ $persona->apellido_m }}</td>
+                                <td class="text-center">{{ $persona->f_nacimiento }}</td>
+                                <td class="text-center">{{ $persona->celular }}</td>
+                                <td class="text-center">{{ $persona->direccion }}</td>
+                                <td class="text-center">
                                     <a class="btn btn-info" href="{{ route('personas.show', $persona->id) }}">
                                         <i class="fa fa-eye" aria-hidden="true"></i>
                                     </a>

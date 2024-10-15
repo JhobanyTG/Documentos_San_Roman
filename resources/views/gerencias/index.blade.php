@@ -6,7 +6,7 @@
     <div class="container mt-4">
         @if ( auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'SuberAdmin')
             <div class="d-flex justify-content-end mb-3">
-                <a href="{{ route('gerencias.create') }}" class="btn btn-agregar pt-serif-regular">
+                <a href="{{ route('gerencias.create') }}" class="btn btn-doc pt-serif-regular">
                     <i class="fa fa-plus" aria-hidden="true"></i> Registrar
                 </a>
             </div>
@@ -34,8 +34,8 @@
                                 <tbody>
                                     @foreach ($gerencias as $gerencia)
                                         <tr>
-                                            <td>{{ $gerencia->id }}</td>
-                                            <td>{{ $gerencia->nombre }}</td>
+                                            <td class="text-center">{{ $gerencia->id }}</td>
+                                            <td class="text-center">{{ $gerencia->nombre }}</td>
                                             <td class="text-center">
                                                 {{ $gerencia->user->persona->nombres }}
                                                 {{ $gerencia->user->persona->apellido_p }}

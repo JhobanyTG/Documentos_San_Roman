@@ -97,17 +97,27 @@ Route::middleware(['auth'])->group(function () {
     Route::group(['middleware' => ['auth', 'privilege:Acceso Total,Acceso a Gerencia']], function () {
         Route::resource('personas', PersonaController::class);
         Route::resource('roles', RolController::class);
-        Route::resource('/usuarios',UserController::class)
-        ->middleware('auth');
+        Route::resource('/usuarios', UserController::class)
+            ->middleware('auth');
         Route::get('/usuarios/{id}/cambiar-contrasena', [UserController::class, 'cambiarContrasena'])
             ->middleware('auth')
             ->name('usuarios.cambiarContrasena');
         Route::put('/usuarios/{id}/actualizar-contrasena', [UserController::class, 'actualizarContrasena'])
             ->middleware('auth')
             ->name('usuarios.actualizarContrasena');
+
+        Route::get('/subusuarios/{id}/cambiar-contrasena', [SubusuarioController::class, 'cambiarContrasena'])
+            ->middleware('auth')
+            ->name('subusuarios.cambiarContrasena');
+
+        Route::put('/subusuarios/{id}/actualizar-contrasena', [SubusuarioController::class, 'actualizarContrasena'])
+            ->middleware('auth')
+            ->name('subusuarios.actualizarContrasena');
+
         Route::get('/register', [UserController::class, 'create'])
             ->middleware('auth')
             ->name('register.create');
+
         Route::post('/register', [UserController::class, 'store'])
             ->middleware('auth')
             ->name('register.store');
@@ -119,7 +129,6 @@ Route::middleware(['auth'])->group(function () {
             ->middleware('auth');
         route::get('/gerencias/{id}', [GerenciaController::class, 'show'])
             ->middleware(['auth', 'checkGerenciaOwnership']);
-
     });
 
     Route::get('/reporte-documentos', [DocumentosController::class, 'generarReporte'])->name('reporte.documentos');
@@ -127,8 +136,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/documentos/{id}/cambiarEstado', [DocumentosController::class, 'cambiarEstado'])->name('documentos.cambiarEstado');
     Route::get('/documentos/{documentoId}/historial', [DocumentosController::class, 'mostrarHistorial'])
-    ->name('documentos.historial')
-    ->where('documentoId', '0');
+        ->name('documentos.historial')
+        ->where('documentoId', '0');
     Route::get('/historial/exportar', [DocumentosController::class, 'exportarPDF'])->name('historial.exportar');
-
 });

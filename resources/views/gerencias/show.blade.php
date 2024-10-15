@@ -3,7 +3,7 @@
 @section('content')
     <div class="container mt-4">
 
-        <a href="{{ route('gerencias.index') }}" class="btn btn-secondary mb-3"><i class="fa fa-arrow-left"
+        <a href="{{ route('gerencias.index') }}" class="btn btn-doc mb-3"><i class="fa fa-arrow-left"
                 aria-hidden="true"></i> Volver</a>
 
         <h4 class="d-flex justify-content-center">Detalles de la Gerencia</h4>
@@ -20,13 +20,13 @@
 
                 <div class="mt-4 d-flex justify-content-end">
                     @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->nombre === 'Gerente')
-                        <a href="{{ route('gerencias.edit', $gerencia->id) }}" class="btn btn-info mx-1">
+                        <a href="{{ route('gerencias.edit', $gerencia->id) }}" class="btn btn-doc mx-1">
                             <i class="fa fa-edit"></i> Editar
                         </a>
                     @endif
                     @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
                             auth()->user()->rol->nombre === 'SuberAdmin')
-                        <button type="button" class="btn btn-secondary" onclick="showConfirmationModal()">
+                        <button type="button" class="btn btn-danger" onclick="showConfirmationModal()">
                             <i class="fa fa-trash" aria-hidden="true"></i> Eliminar
                         </button>
                     @endif
@@ -64,7 +64,7 @@
         @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente')
             <div class="d-flex justify-content-end mb-3">
                 <a href="{{ route('subusuarios.create', ['gerencia' => $gerencia->id]) }}"
-                    class="btn btn-agregar pt-serif-regular">
+                    class="btn btn-doc pt-serif-regular">
                     <i class="fa fa-plus" aria-hidden="true"></i> Registrar
                 </a>
             </div>
@@ -95,10 +95,10 @@
                             @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente')
                                 <td>
                                     <a href="{{ route('subusuarios.edit', [$gerencia->id, $subusuario->id]) }}"
-                                        class="btn btn-sm btn-info">
+                                        class="btn btn-sm btn-doc">
                                         <i class="fa fa-edit" style="line-height: 1;"></i> Editar
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-secondary"
+                                    <button type="button" class="btn btn-sm btn-danger"
                                         onclick="showSubusuarioConfirmationModal('{{ route('subusuarios.destroy', [$gerencia->id, $subusuario->id]) }}')">
                                         <i class="fa fa-trash" style="line-height: 1;"></i> Eliminar
                                     </button>
@@ -137,7 +137,7 @@
         <h4 class="d-flex justify-content-center pt-serif-bold mt-5">Sub Gerencias</h4>
         @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->nombre === 'Gerente')
             <div class="d-flex justify-content-end mb-3">
-                <a href="{{ route('subgerencias.create', $gerencia->id) }}" class="btn btn-agregar pt-serif-regular">
+                <a href="{{ route('subgerencias.create', $gerencia->id) }}" class="btn btn-doc pt-serif-regular">
                     <i class="fa fa-plus" aria-hidden="true"></i> Registrar
                 </a>
             </div>
@@ -167,12 +167,12 @@
                         <td>
                             @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente')
                                 <a href="{{ route('subgerencias.edit', [$gerencia->id, $subgerencia->id]) }}"
-                                    class="btn btn-sm btn-info">
+                                    class="btn btn-sm btn-doc">
                                     <i class="fa fa-edit" style="line-height: 1;"></i> Editar
                                 </a>
                             @endif
                             @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->nombre === 'Gerente')
-                                <button type="button" class="btn btn-sm btn-secondary"
+                                <button type="button" class="btn btn-sm btn-danger"
                                     onclick="showSubgerenciaConfirmationModal('{{ route('subgerencias.destroy', [$gerencia->id, $subgerencia->id]) }}')">
                                     <i class="fa fa-trash" style="line-height: 1;"></i> Eliminar
                                 </button>

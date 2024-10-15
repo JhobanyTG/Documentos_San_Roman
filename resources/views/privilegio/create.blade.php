@@ -22,9 +22,11 @@
                     <div class="text-danger">{{ $message }}</div>
                 @enderror
             </div>
-            <a href="{{ route('privilegios.index') }}" class="btn btn-secondary mb-3 btn-privi">Cancelar</a>
+            <a href="{{ route('privilegios.index') }}" class="btn btn-secondary mb-3 btn-privi"><i
+                class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
 
-            <button type="submit" class="btn btn-primary mb-3 btn-privi">Guardar</button>
+            <button type="submit" class="btn btn-primary mb-3 btn-privi"><i class="fa fa-plus" aria-hidden="true"></i>
+                Crear</button>
 
         </form>
     </div>

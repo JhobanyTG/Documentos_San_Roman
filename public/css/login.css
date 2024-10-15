@@ -8,7 +8,7 @@
 }
 
 body {
-    background-image: url("../images/fondo/fondo_login.jpg");
+    background-image: url("../images/fondo/Municipalidad-de-San-Roman.jpg");
     background-repeat: no-repeat;
     background-size: cover;
 }
@@ -73,7 +73,7 @@ p {
 }
 
 .boton_inicio {
-    background-color: var(--color-principal);
+    background: linear-gradient(to bottom right, #00BDEE, #005CD7);
     width: 90%;
     margin: 20px auto;
     border-radius: 7px;
@@ -83,7 +83,7 @@ p {
     height: 50px;
 }
 .boton_inicio:hover {
-    background-color: var(--color-principal-hover);
+    background: linear-gradient(to bottom right, #005CD7, #00BDEE);
 }
 
 i {

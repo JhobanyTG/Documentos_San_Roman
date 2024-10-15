@@ -219,7 +219,7 @@ class PersonaController extends Controller
     {
         $persona = Persona::with('user')->findOrFail($id);
         $user = User::where('persona_id', $id)->firstOrFail();
-        return view('user.show', compact('user', 'persona'));
+        return view('persona.show', compact('user', 'persona'));
     }
 
 

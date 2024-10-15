@@ -6,7 +6,7 @@
     <div class="container mt-4">
         <form action="{{ route('public.index') }}" method="GET" class="mb-3">
             <div class="buscador input-group mb-3">
-                <input type="text" class="form-control" placeholder="Buscar..." name="q" value="{{ $searchTerm }}">
+                <input type="text" class="form-control" placeholder="Buscar..." nasme="q" value="{{ $searchTerm }}">
                 @if ($filtroAnio || $searchTerm || !empty($filtroMes))
                     <a class="border border-2" href="{{ route('public.index') }}">
                         <i class="fa fa-times m-4" style="color: red;" aria-hidden="true"></i>
@@ -20,7 +20,7 @@
                         <input type="hidden" name="mes[]" value="{{ $mes }}">
                     @endforeach
                 @endif
-                <button class="btn btn-custom" type="submit">Buscar</button>
+                <button class="btn btn-public" type="submit">Buscar</button>
             </div>
         </form>
         @if ($searchTerm || $filtroAnio || !empty($filtroMes))
@@ -132,7 +132,7 @@
                                         <input type="hidden" name="anio" value="{{ $filtroAnio }}">
                                         <input type="hidden" name="q" value="{{ $searchTerm }}">
                                         <div style="display: block; margin-bottom: 10px; width: 100%;">
-                                            <button class="boton-filtro btn btn-primary" type="submit">Ejecutar
+                                            <button class="btn btn-public" type="submit">Ejecutar
                                                 Filtro</button>
                                         </div>
                                     </div>

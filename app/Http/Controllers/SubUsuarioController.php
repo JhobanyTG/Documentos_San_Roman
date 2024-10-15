@@ -218,6 +218,7 @@ class SubUsuarioController extends Controller
             'estado' => 'required|string|max:20',
             'subgerencia_id' => 'required|integer',
             'cargo' => 'required|string|max:100',
+            'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048' // Validación para el avatar
         ]);
 
         // Actualizar la persona
@@ -230,6 +231,23 @@ class SubUsuarioController extends Controller
             'celular' => $request->celular,
             'direccion' => $request->direccion,
         ]);
+
+        // Verificar si se ha subido un nuevo avatar
+        if ($request->hasFile('avatar')) {
+            // Obtener el archivo subido
+            $avatarFile = $request->file('avatar');
+
+            // Generar un nombre único para el archivo
+            $avatarName = time() . '_' . $avatarFile->getClientOriginalName();
+
+            // Mover el archivo al directorio de almacenamiento
+            $avatarPath = $avatarFile->storeAs('avatars', $avatarName, 'public');
+
+            // Actualizar el avatar en el modelo Persona
+            $subusuario->user->persona->update([
+                'avatar' => $avatarPath,
+            ]);
+        }
 
         // Actualizar el usuario asociado a la persona
         $subusuario->user->update([
