@@ -34,12 +34,6 @@ class TipoDocumentoController extends Controller
             ->with('success', 'Tipo de documento creado con éxito.');
     }
 
-    // Muestra un registro específico
-    public function show(TipoDocumento $tipodocumento)
-    {
-        return view('tipodocumento.show', compact('tipodocumento'));
-    }
-
     // Muestra el formulario para editar un registro específico
     public function edit(TipoDocumento $tipodocumento)
     {

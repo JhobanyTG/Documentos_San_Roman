@@ -5,7 +5,7 @@
 @section('content')
 
 <div class="container mt-4 form_persona">
-    <h2 class="form_title_persona text-center">Detalles de Persona</h2>
+    <h2 class="form_title_persona text-center">Detalles del Perfil</h2>
     <div class="row forms">
         <!-- Columna izquierda (Detalles de Persona) -->
         <div class="col-md-6">

@@ -1,5 +1,5 @@
 <nav aria-label="Page navigation">
-    <ul class="pagination">
+    <ul class="pagination justify-content-center">
         <!-- Enlace a la página anterior -->
         <li class="page-item{{ $paginator->onFirstPage() ? ' disabled' : '' }}">
             @if ($paginator->onFirstPage())

@@ -1,5 +1,8 @@
 @extends('layout.template')
 
+@section('title', 'Crear Subgerencia')
+
+
 @section('content')
     <div class="container mt-4">
         <div class="container col-md-4 card form_subgerencia">
@@ -28,9 +31,11 @@
 
                             <div class="form-group">
                                 <label for="telefono" class="form-label label_subgerencia">Teléfono:</label>
-                                <input type="text" name="telefono" class="form-control subgerencia" id="telefono"
-                                    required>
+                                <input type="tel" name="telefono" class="form-control subgerencia" id="telefono"
+                                    required pattern="[0-9]+" maxlength="15"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                             </div>
+
                             <div class="row">
                                 <div class="form-group mt-1 col-md-8">
                                     <label for="usuario_id" class="form-label label_subgerencia">Encargado:</label>
@@ -58,9 +63,10 @@
                     </div>
                     <div class="mt-4 text-center">
                         <a href="{{ route('gerencias.show', $gerencia->id) }}"
-                            class="btn btn-secondary btn-subgerencia me-2"><i
-                            class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
-                        <but type="submit" class="btn btn-primary btn-subgerencia ms-2"><i class="fa fa-plus" aria-hidden="true"></i>
+                            class="btn btn-secondary btn-subgerencia me-2"><i class="fa fa-arrow-circle-left"
+                                aria-hidden="true"></i> Cancelar</a>
+                        <button type="submit" class="btn btn-primary btn-subgerencia ms-2"><i class="fa fa-plus"
+                                aria-hidden="true"></i>
                             Crear</button>
                     </div>
                 </form>

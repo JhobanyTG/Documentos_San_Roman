@@ -11,6 +11,8 @@ use App\Models\Persona;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+
 
 
 class SubUsuarioController extends Controller
@@ -31,7 +33,7 @@ class SubUsuarioController extends Controller
      */
     public function create(Gerencia $gerencia)
     {
-        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente') {
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia')) {
 
             // Obtener el ID del usuario autenticado
             $usuarioId = Auth::id();
@@ -96,6 +98,7 @@ class SubUsuarioController extends Controller
             'estado' => 'required|string|max:20',
             'subgerencia_id' => 'required|integer',
             'cargo' => 'required|string|max:100',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Validar la longitud de la contraseña
@@ -105,16 +108,26 @@ class SubUsuarioController extends Controller
                 ->withInput();
         }
 
-        // Crear la persona
-        $persona = Persona::create([
-            'dni' => $validatedData['dni'],
-            'nombres' => $validatedData['nombres'],
-            'apellido_p' => $validatedData['apellido_p'],
-            'apellido_m' => $validatedData['apellido_m'],
-            'f_nacimiento' => $validatedData['f_nacimiento'],
-            'celular' => $validatedData['celular'],
-            'direccion' => $validatedData['direccion'],
-        ]);
+        // Crear la persona asociada al subusuario
+        $persona = new Persona();
+        // Asignar otros campos de persona
+        $persona->nombres = $request->nombres;
+        $persona->apellido_p = $request->apellido_p;
+        $persona->apellido_m = $request->apellido_m;
+        $persona->dni = $request->dni;
+        $persona->f_nacimiento = $request->f_nacimiento;
+        $persona->celular = $request->celular;
+        $persona->direccion = $request->direccion;
+
+        // Manejar el avatar
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public'); // Guarda en el directorio de public/avatars
+            $persona->avatar = $avatarPath; // Guarda la ruta en el campo 'avatar'
+        } else {
+            $persona->avatar = null; // Ruta por defecto si no se sube ninguna imagen
+        }
+
+        $persona->save(); // Guarda la persona
 
         // Crear el usuario asociado a la persona
         $user = User::create([
@@ -148,46 +161,42 @@ class SubUsuarioController extends Controller
      */
     public function edit(Gerencia $gerencia, Subgerencia $subgerencia, Subusuario $subusuario)
     {
-        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente') {
+        // Obtener el ID del usuario autenticado
+        $usuarioId = Auth::id();
 
-            // Obtener el ID del usuario autenticado
-            $usuarioId = Auth::id();
+        // Comprobar si el usuario tiene acceso
+        if (
+            auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
+            auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia') ||
+            auth()->user()->rol->nombre === 'SubGerente'
+        ) {
 
             // Verificar si el usuario autenticado es el propietario de la gerencia
             if ($gerencia->usuario_id === $usuarioId) {
-                // Obtener todos los roles disponibles
-                $roles = Rol::all();
-                // Obtener las subgerencias que pertenecen a la gerencia actual
-                $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
-                // Obtener los usuarios disponibles para seleccionar
-                $users = User::with('persona')->get();
-                return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+                return $this->loadEditView($gerencia, $subgerencia, $subusuario);
             }
 
-            // Verificar si el usuario tiene el privilegio de "Acceso Total"
+            // Verificar si el usuario tiene privilegio de "Acceso Total"
             if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
-                // Obtener todos los roles disponibles
-                $roles = Rol::all();
-                // Obtener las subgerencias que pertenecen a la gerencia actual
-                $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
-                // Obtener los usuarios disponibles para seleccionar
-                $users = User::with('persona')->get();
-                return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+                return $this->loadEditView($gerencia, $subgerencia, $subusuario);
             }
 
-            // Verificar si el usuario es un subusuario relacionado con alguna subgerencia de la gerencia
-            $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+            // Verificar si el usuario autenticado es un subusuario de la gerencia
+            $subusuarioRelacionado = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
                 $query->where('gerencia_id', $gerencia->id);
             })->where('user_id', $usuarioId)->first();
 
-            if ($subusuario) {
-                // Obtener todos los roles disponibles
-                $roles = Rol::all();
-                // Obtener las subgerencias que pertenecen a la gerencia actual
-                $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
-                // Obtener los usuarios disponibles para seleccionar
-                $users = User::with('persona')->get();
-                return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
+            // Verificar si el subusuario relacionado existe
+            if ($subusuarioRelacionado) {
+                return $this->loadEditView($gerencia, $subgerencia, $subusuario);
+            }
+
+            // Verificar si el usuario es un subgerente y pertenece a la subgerencia del subusuario que se está editando
+            if (
+                $subgerencia->id === $subusuario->subgerencia_id &&
+                $subusuario->subgerencia->gerencia_id === $gerencia->id
+            ) {
+                return $this->loadEditView($gerencia, $subgerencia, $subusuario);
             }
 
             // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
@@ -196,6 +205,18 @@ class SubUsuarioController extends Controller
             // Si no tiene los permisos, bloquea el acceso
             abort(403, 'No tienes permiso para realizar esta acción');
         }
+    }
+
+    private function loadEditView($gerencia, $subgerencia, $subusuario)
+    {
+        // Obtener todos los roles disponibles
+        $roles = Rol::all();
+        // Obtener las subgerencias que pertenecen a la gerencia actual
+        $subgerencias = Subgerencia::where('gerencia_id', $gerencia->id)->get();
+        // Obtener los usuarios disponibles para seleccionar
+        $users = User::with('persona')->get();
+
+        return view('subusuarios.edit', compact('gerencia', 'subgerencia', 'subusuario', 'users', 'roles', 'subgerencias'));
     }
 
 
@@ -222,7 +243,8 @@ class SubUsuarioController extends Controller
         ]);
 
         // Actualizar la persona
-        $subusuario->user->persona->update([
+        $persona = $subusuario->user->persona;
+        $persona->update([
             'dni' => $request->dni,
             'nombres' => $request->nombres,
             'apellido_p' => $request->apellido_p,
@@ -234,19 +256,31 @@ class SubUsuarioController extends Controller
 
         // Verificar si se ha subido un nuevo avatar
         if ($request->hasFile('avatar')) {
+            // Eliminar el avatar anterior si existe y no es el predeterminado
+            if ($persona->avatar && $persona->avatar !== 'default.png') {
+                Storage::disk('public')->delete($persona->avatar);
+            }
+
             // Obtener el archivo subido
             $avatarFile = $request->file('avatar');
 
             // Generar un nombre único para el archivo
-            $avatarName = time() . '_' . $avatarFile->getClientOriginalName();
+            $originalName = pathinfo($avatarFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $avatarFile->getClientOriginalExtension();
+            $timestamp = time();
+            $avatarName = $originalName . '-' . $timestamp . '.' . $extension;
+
+            // Asegurarse de que el nombre del archivo sea único
+            while (Storage::disk('public')->exists('avatars/' . $avatarName)) {
+                $timestamp++;
+                $avatarName = $originalName . '-' . $timestamp . '.' . $extension;
+            }
 
             // Mover el archivo al directorio de almacenamiento
             $avatarPath = $avatarFile->storeAs('avatars', $avatarName, 'public');
 
             // Actualizar el avatar en el modelo Persona
-            $subusuario->user->persona->update([
-                'avatar' => $avatarPath,
-            ]);
+            $persona->update(['avatar' => $avatarPath]);
         }
 
         // Actualizar el usuario asociado a la persona
@@ -266,12 +300,13 @@ class SubUsuarioController extends Controller
         return redirect()->route('gerencias.show', $gerencia->id)->with('success', 'Subusuario actualizado exitosamente.');
     }
 
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Gerencia $gerencia, Subgerencia $subgerencia, Subusuario $subusuario)
     {
-        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente') {
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia')) {
 
             $user = $subusuario->user;
             $persona = $user->persona;

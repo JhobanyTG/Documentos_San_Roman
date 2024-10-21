@@ -64,19 +64,23 @@
                     <div class="row mt-2">
                         <div class="form-group col-md-6">
                             <label for="dni" class="form-label label_persona">DNI:</label>
-                            <input type="number" class="form-control persona" id="dni" name="dni"
-                                value="{{ old('dni') }}" required maxlength="8">
+                            <input type="text" class="form-control persona" id="dni" name="dni"
+                                value="{{ old('dni', $persona->dni ?? '') }}" required pattern="[0-9]+" maxlength="8"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
                         <div class="form-group col-md-6">
                             <label for="f_nacimiento" class="form-label label_persona">Fecha de Nacimiento:</label>
                             <input type="date" class="form-control persona" id="f_nacimiento" name="f_nacimiento"
-                                value="{{ old('f_nacimiento') }}" required>
+                                value="{{ old('f_nacimiento', $persona->f_nacimiento ?? '') }}" required
+                                max="{{ \Carbon\Carbon::now()->subYears(15)->format('Y-m-d') }}"
+                                min="{{ \Carbon\Carbon::now()->subYears(100)->format('Y-m-d') }}">
                         </div>
                     </div>
                     <div class="form-group mt-2">
                         <label for="celular" class="form-label label_persona">Celular:</label>
-                        <input type="number" class="form-control persona" id="celular" name="celular"
-                            value="{{ old('celular') }}" required>
+                        <input type="text" class="form-control persona" id="celular" name="celular"
+                            value="{{ old('celular', $persona->celular ?? '') }}" required pattern="[0-9]+"
+                            maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                     </div>
                     <div class="form-group mt-2">
                         <label for="direccion" class="form-label label_persona">Dirección:</label>
@@ -88,9 +92,12 @@
                             <label for="rol_id" class="form-label label_persona">Rol:</label>
                             <select class="form-control persona" id="rol_id" name="rol_id" required>
                                 @foreach ($roles as $rol)
-                                    <option value="{{ $rol->id }}"
-                                        {{ old('rol_id') == $rol->id ? 'selected' : '' }}>
-                                        {{ $rol->nombre }}</option>
+                                    @if ($rol->nombre === 'SuperAdmin' || $rol->nombre === 'Gerente')
+                                        <option value="{{ $rol->id }}"
+                                            {{ old('rol_id') == $rol->id ? 'selected' : '' }}>
+                                            {{ $rol->nombre }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -108,8 +115,9 @@
 
             <div class="mt-3 botones_form_persona text-center">
                 <a href="{{ url('personas') }}" class="btn btn-form btn-persona me-2"><i class="fa fa-arrow-circle-left"
-                    aria-hidden="true"></i> Cancelar</a>
-                <button type="submit" class="btn btn-form btn-persona ms-2"><i class="fa fa-plus" aria-hidden="true"></i>
+                        aria-hidden="true"></i> Cancelar</a>
+                <button type="submit" class="btn btn-form btn-persona ms-2"><i class="fa fa-plus"
+                        aria-hidden="true"></i>
                     Crear</button>
 
             </div>

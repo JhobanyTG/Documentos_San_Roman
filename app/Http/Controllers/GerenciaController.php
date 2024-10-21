@@ -68,7 +68,7 @@ class GerenciaController extends Controller
 
         if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->nombre === 'SuperAdmin') {
             // Obtener todos los usuarios que pueden ser asignados como gerentes
-            $users = User::all();
+            $users = User::whereDoesntHave('subusuario')->get();
 
             // Pasar los usuarios a la vista
             return view('gerencias.create', compact('users'));
@@ -218,14 +218,15 @@ class GerenciaController extends Controller
         $usuario = auth()->user();
 
         // Si el usuario es SuperAdmin, permitir el acceso
-        if ($usuario->rol->nombre === 'SuperAdmin') {
-            $users = User::with('persona')->get();
+        if ($usuario->rol->nombre === 'SuperAdmin' || $usuario->rol->nombre === 'Gerente') {
+            // Obtener todos los usuarios que no tengan relación con subusuarios
+            $users = User::whereDoesntHave('subusuario')->with('persona')->get();
             return view('gerencias.edit', compact('gerencia', 'users'));
         }
 
         // Si el usuario es el propietario de la gerencia, permitir acceso
         if ($gerencia->usuario_id === $usuario->id) {
-            $users = User::with('persona')->get();
+            $users = User::whereDoesntHave('subusuario')->with('persona')->get();
             return view('gerencias.edit', compact('gerencia', 'users'));
         }
 
@@ -235,7 +236,7 @@ class GerenciaController extends Controller
         })->where('user_id', $usuario->id)->first();
 
         if ($subusuario) {
-            $users = User::with('persona')->get();
+            $users = User::whereDoesntHave('subusuario')->with('persona')->get();
             return view('gerencias.edit', compact('gerencia', 'users')); // Permitir acceso si es subusuario de la subgerencia
         }
 

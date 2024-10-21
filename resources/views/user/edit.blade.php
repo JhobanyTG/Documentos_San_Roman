@@ -58,16 +58,43 @@
                         <div class="form-group col-md-6">
                             <label for="rol_id" class="form-label label_persona">Rol:</label>
                             <select name="rol_id" id="rol_id" class="form-control persona" required>
-                                @foreach($roles as $rol)
-                                    <option value="{{ $rol->id }}" {{ old('rol_id', $user->rol_id) == $rol->id ? 'selected' : '' }}>
-                                        {{ $rol->nombre }}
-                                    </option>
-                                @endforeach
+                                @if(auth()->user()->rol->nombre === 'SuperAdmin')
+                                    @foreach($roles as $rol)
+                                        <option value="{{ $rol->id }}" {{ old('rol_id', $user->rol_id) == $rol->id ? 'selected' : '' }}>
+                                            {{ $rol->nombre }}
+                                        </option>
+                                    @endforeach
+                                @elseif(auth()->user()->rol->nombre === 'Gerente')
+                                    @foreach($roles as $rol)
+                                        @if($rol->nombre !== 'SuperAdmin')
+                                            <option value="{{ $rol->id }}" {{ old('rol_id', $user->rol_id) == $rol->id ? 'selected' : '' }}>
+                                                {{ $rol->nombre }}
+                                            </option>
+                                        @endif
+                                    @endforeach
+                                @elseif(auth()->user()->rol->nombre === 'SubGerente')
+                                    @foreach($roles as $rol)
+                                        @if($rol->nombre !== 'SuperAdmin' && $rol->nombre !== 'Gerente')
+                                            <option value="{{ $rol->id }}" {{ old('rol_id', $user->rol_id) == $rol->id ? 'selected' : '' }}>
+                                                {{ $rol->nombre }}
+                                            </option>
+                                        @endif
+                                    @endforeach
+                                @else
+                                    @foreach($roles as $rol)
+                                        @if($rol->id == auth()->user()->rol_id)
+                                            <option value="{{ $rol->id }}" selected>
+                                                {{ $rol->nombre }}
+                                            </option>
+                                        @endif
+                                    @endforeach
+                                @endif
                             </select>
                             @error('rol_id')
                                 <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
+
                     </div>
                 </div>
             </div>

@@ -5,29 +5,30 @@
 @section('content')
     <div class="container mt-4 form_subusuario">
         <h2 class="form_title_subusuario">Registrar Subusuario</h2>
-        <form id="registrationForm" action="{{ route('subusuarios.store', ['gerencia' => $gerencia->id]) }}" method="POST" class="form_persona_user" enctype="multipart/form-data">
+        <form id="registrationForm" action="{{ route('subusuarios.store', ['gerencia' => $gerencia->id]) }}" method="POST"
+            class="form_persona_user" enctype="multipart/form-data">
             @csrf
             <div class="row forms">
                 <div class="col-md-6">
                     <div class="row">
+                        <!-- Imagen de Perfil -->
                         <div class="form-group mt-3">
-                            <label for="avatar" class="form-label label_subuaurio">Imagen de Perfil</label>
-                            <!-- Contenedor centrado para la previsualización -->
+                            <label for="avatar" class="form-label label_subusuario">Imagen de Perfil</label>
                             <div class="d-flex justify-content-center">
-                                <!-- Imagen para previsualización, con una imagen por defecto -->
                                 <img id="avatarPreview" src="{{ asset('images/logo/avatar.png') }}" alt="Previsualización"
                                     class="img-thumbnail mb-2" style="width: 200px; height: 200px" />
                             </div>
-                            <input type="file" class="form-control subusuario" id="avatar" name="avatar" accept="image/*"
-                                onchange="previewImage(event)">
+                            <input type="file" class="form-control subusuario" id="avatar" name="avatar" accept="image/*" onchange="previewImage(event)">
                         </div>
                         <div class="form-group mt-3 col-md-6">
                             <label for="nombre_usuario" class="form-label label_subusuario">Nombre de Usuario:</label>
-                            <input type="text" class="form-control subusuario" id="nombre_usuario" name="nombre_usuario" value="{{ old('nombre_usuario') }}" required>
+                            <input type="text" class="form-control subusuario" id="nombre_usuario" name="nombre_usuario"
+                                value="{{ old('nombre_usuario') }}" required>
                         </div>
                         <div class="form-group mt-3 col-md-6">
                             <label for="email" class="form-label label_subusuario">Email:</label>
-                            <input type="email" class="form-control subusuario" id="email" name="email" value="{{ old('email') }}" required>
+                            <input type="email" class="form-control subusuario" id="email" name="email"
+                                value="{{ old('email') }}" required>
                         </div>
                     </div>
                     <div class="form-group mt-2">
@@ -41,16 +42,23 @@
                         <div class="form-group mt-2 col-md-6">
                             <label for="rol_id" class="form-label label_subusuario">Rol:</label>
                             <select class="form-control subusuario" id="rol_id" name="rol_id" required>
-                                @foreach($roles as $rol)
-                                    <option value="{{ $rol->id }}" {{ old('rol_id') == $rol->id ? 'selected' : '' }}>{{ $rol->nombre }}</option>
+                                @foreach ($roles as $rol)
+                                    @if ($rol->nombre !== 'SuperAdmin' && $rol->nombre !== 'Gerente')
+                                        <option value="{{ $rol->id }}"
+                                            {{ old('rol_id') == $rol->id ? 'selected' : '' }}>
+                                            {{ $rol->nombre }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
+
                         <div class="form-group mt-2 col-md-6">
                             <label for="estado" class="form-label label_subusuario">Estado:</label>
                             <select class="form-control subusuario" id="estado" name="estado" required>
                                 <option value="activo" selected>Activo</option>
-                                <option value="inactivo" {{ old('estado') == 'inactivo' ? 'selected' : '' }}>Inactivo</option>
+                                <option value="inactivo" {{ old('estado') == 'inactivo' ? 'selected' : '' }}>Inactivo
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -58,49 +66,64 @@
                 <div class="col-md-6">
                     <div class="form-group mt-2">
                         <label for="nombres" class="form-label label_subusuario">Nombres:</label>
-                        <input type="text" class="form-control subusuario" id="nombres" name="nombres" value="{{ old('nombres') }}" required>
+                        <input type="text" class="form-control subusuario" id="nombres" name="nombres"
+                            value="{{ old('nombres') }}" required>
                     </div>
                     <div class="row mt-2">
                         <div class="form-group col-md-6">
                             <label for="apellido_p" class="form-label label_subusuario">Apellido Paterno:</label>
-                            <input type="text" class="form-control subusuario" id="apellido_p" name="apellido_p" value="{{ old('apellido_p') }}" required>
+                            <input type="text" class="form-control subusuario" id="apellido_p" name="apellido_p"
+                                value="{{ old('apellido_p') }}" required>
                         </div>
                         <div class="form-group col-md-6">
                             <label for="apellido_m" class="form-label label_subusuario">Apellido Materno:</label>
-                            <input type="text" class="form-control subusuario" id="apellido_m" name="apellido_m" value="{{ old('apellido_m') }}" required>
+                            <input type="text" class="form-control subusuario" id="apellido_m" name="apellido_m"
+                                value="{{ old('apellido_m') }}" required>
                         </div>
                     </div>
                     <div class="row mt-2">
                         <div class="form-group col-md-6">
                             <label for="dni" class="form-label label_subusuario">DNI:</label>
-                            <input type="text" class="form-control subusuario" id="dni" name="dni" value="{{ old('dni') }}" required>
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label for="f_nacimiento" class="form-label label_subusuario">Fecha de Nacimiento:</label>
-                            <input type="date" class="form-control subusuario" id="f_nacimiento" name="f_nacimiento" value="{{ old('f_nacimiento') }}" required>
+                            <input type="text" class="form-control subusuario" id="dni" name="dni"
+                                value="{{ old('dni') }}" required pattern="[0-9]+" maxlength="8"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
 
+                        <div class="form-group col-md-6">
+                            <label for="f_nacimiento" class="form-label label_subusuario">Fecha de Nacimiento:</label>
+                            <input type="date" class="form-control subusuario" id="f_nacimiento" name="f_nacimiento"
+                                value="{{ old('f_nacimiento') }}" required
+                                max="{{ \Carbon\Carbon::now()->subYears(15)->format('Y-m-d') }}"
+                                min="{{ \Carbon\Carbon::now()->subYears(100)->format('Y-m-d') }}">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="celular" class="form-label label_subusuario">Celular:</label>
-                        <input type="text" class="form-control subusuario" id="celular" name="celular" value="{{ old('celular') }}" required>
+                        <input type="text" class="form-control subusuario" id="celular" name="celular"
+                            value="{{ old('celular') }}" required pattern="[0-9]+" maxlength="9"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                     </div>
+
                     <div class="form-group mt-2">
                         <label for="direccion" class="form-label label_subusuario">Dirección:</label>
-                        <input type="text" class="form-control subusuario" id="direccion" name="direccion" value="{{ old('direccion') }}" required>
+                        <input type="text" class="form-control subusuario" id="direccion" name="direccion"
+                            value="{{ old('direccion') }}" required>
                     </div>
 
                     <div class="form-group mt-2">
                         <label for="subgerencia_id" class="form-label label_subusuario">Subgerencia:</label>
                         <select class="form-control subusuario" id="subgerencia_id" name="subgerencia_id" required>
-                            @foreach($subgerencias as $subgerencia)
-                                <option value="{{ $subgerencia->id }}" {{ old('subgerencia_id') == $subgerencia->id ? 'selected' : '' }}>{{ $subgerencia->nombre }}</option>
+                            @foreach ($subgerencias as $subgerencia)
+                                <option value="{{ $subgerencia->id }}"
+                                    {{ old('subgerencia_id') == $subgerencia->id ? 'selected' : '' }}>
+                                    {{ $subgerencia->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group mt-2">
                         <label for="cargo" class="form-label label_subusuario">Cargo:</label>
-                        <input type="text" class="form-control subusuario" id="cargo" name="cargo" value="{{ old('cargo') }}" required>
+                        <input type="text" class="form-control subusuario" id="cargo" name="cargo"
+                            value="{{ old('cargo') }}" required>
                     </div>
                 </div>
             </div>

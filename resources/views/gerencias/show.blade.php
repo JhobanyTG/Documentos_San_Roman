@@ -3,8 +3,8 @@
 @section('content')
     <div class="container mt-4">
 
-        <a href="{{ route('gerencias.index') }}" class="btn btn-doc mb-3"><i class="fa fa-arrow-left"
-                aria-hidden="true"></i> Volver</a>
+        <a href="{{ route('gerencias.index') }}" class="btn btn-doc mb-3"><i class="fa fa-arrow-left" aria-hidden="true"></i>
+            Volver</a>
 
         <h4 class="d-flex justify-content-center">Detalles de la Gerencia</h4>
 
@@ -61,14 +61,19 @@
         </div>
 
         <h4 class="d-flex justify-content-center mt-5 pt-serif-bold">Sub Usuarios</h4>
-        @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente')
-            <div class="d-flex justify-content-end mb-3">
-                <a href="{{ route('subusuarios.create', ['gerencia' => $gerencia->id]) }}"
-                    class="btn btn-doc pt-serif-regular">
-                    <i class="fa fa-plus" aria-hidden="true"></i> Registrar
-                </a>
-            </div>
+        @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
+                auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia'))
+            @if ($gerencia->subgerencias->count() > 0)
+                {{-- Verifica si hay subgerencias --}}
+                <div class="d-flex justify-content-end mb-3">
+                    <a href="{{ route('subusuarios.create', ['gerencia' => $gerencia->id]) }}"
+                        class="btn btn-doc pt-serif-regular">
+                        <i class="fa fa-plus" aria-hidden="true"></i> Registrar
+                    </a>
+                </div>
+            @endif
         @endif
+
         <table class="table">
             <thead>
                 <tr class="pt-serif-bold">
@@ -77,7 +82,8 @@
                     <th class="">DNI</th>
                     <th class="">Rol</th>
                     <th class="">Sub Gerencia</th>
-                    @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente')
+                    @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
+                            auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia'))
                         <th class="col-2">Acciones</th>
                     @endif
                 </tr>
@@ -86,14 +92,15 @@
                 @foreach ($gerencia->subgerencias as $subgerencia)
                     @foreach ($subgerencia->subusuarios as $subusuario)
                         <tr class="pt-serif-regular">
-                            <td>{{ $subusuario->user->persona->nombres }} {{ $subusuario->user->persona->apellido_p }}
+                            <td class="text-center">{{ $subusuario->user->persona->nombres }} {{ $subusuario->user->persona->apellido_p }}
                                 {{ $subusuario->user->persona->apellido_m }}</td>
-                            <td>{{ $subusuario->cargo }}</td>
-                            <td>{{ $subusuario->user->persona->dni }}</td>
-                            <td>{{ $subusuario->user->rol->nombre }}</td>
-                            <td>{{ $subgerencia->nombre }}</td>
-                            @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente')
-                                <td>
+                            <td class="text-center">{{ $subusuario->cargo }}</td>
+                            <td class="text-center">{{ $subusuario->user->persona->dni }}</td>
+                            <td class="text-center">{{ $subusuario->user->rol->nombre }}</td>
+                            <td class="text-center">{{ $subgerencia->nombre }}</td>
+                            @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
+                                    auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia'))
+                                <td class="text-center">
                                     <a href="{{ route('subusuarios.edit', [$gerencia->id, $subusuario->id]) }}"
                                         class="btn btn-sm btn-doc">
                                         <i class="fa fa-edit" style="line-height: 1;"></i> Editar
@@ -150,7 +157,8 @@
                     <th>Teléfono</th>
                     <!-- <th>Dirección</th> -->
                     <th>Estado</th>
-                    @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente')
+                    @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
+                            auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia'))
                         <th class="col-2">Acciones</th>
                     @endif
                 </tr>
@@ -158,14 +166,15 @@
             <tbody>
                 @foreach ($gerencia->subgerencias as $subgerencia)
                     <tr class="pt-serif-regular">
-                        <td>{{ $subgerencia->nombre }}</td>
-                        <td>{{ $subgerencia->user->persona->nombres }} {{ $subgerencia->user->persona->apellido_p }}
+                        <td class="text-center">{{ $subgerencia->nombre }}</td>
+                        <td class="text-center">{{ $subgerencia->user->persona->nombres }} {{ $subgerencia->user->persona->apellido_p }}
                             {{ $subgerencia->user->persona->apellido_m }}</td>
-                        <td>{{ $subgerencia->telefono }}</td>
+                        <td class="text-center">{{ $subgerencia->telefono }}</td>
                         <!-- <td>{{ $subgerencia->direccion }}</td> -->
-                        <td>{{ $subgerencia->estado }}</td>
-                        <td>
-                            @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente')
+                        <td class="text-center">{{ $subgerencia->estado }}</td>
+                        <td class="text-center">
+                            @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
+                                    auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia'))
                                 <a href="{{ route('subgerencias.edit', [$gerencia->id, $subgerencia->id]) }}"
                                     class="btn btn-sm btn-doc">
                                     <i class="fa fa-edit" style="line-height: 1;"></i> Editar

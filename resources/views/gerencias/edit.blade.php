@@ -3,68 +3,78 @@
 @section('title', 'Editar Gerencia')
 
 @section('content')
-<div class="container mt-4">
-    <div class="container col-md-4 card form_gerencia">
-        <h2 class="form_title_gerencia">
-            Editar Gerencia
-        </h2>
-        <div class="card-body">
-            <form action="{{ route('gerencias.update', $gerencia->id) }}" method="POST">
-                @csrf
-                @method('PUT')
+    <div class="container">
+        <div class="container col-md-4 card form_gerencia">
+            <h2 class="form_title_gerencia">
+                Editar Gerencia
+            </h2>
+            <div class="col-md-12">
+                <form action="{{ route('gerencias.update', $gerencia->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
 
-                <div class="row">
-                    <!-- Primera columna -->
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="nombre" class="form-label label_gerencia">Nombre de la Gerencia:</label>
-                            <input type="text" name="nombre" class="form-control gerencia" id="nombre" value="{{ $gerencia->nombre }}" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="descripcion" class="form-label label_gerencia">Descripción:</label>
-                            <textarea name="descripcion" class="form-control gerencia" id="descripcion" rows="4" required>{{ $gerencia->descripcion }}</textarea>
-                        </div>
-                        <div class="form-group mt-3">
-                            <label for="telefono" class="form-label label_gerencia">Teléfono:</label>
-                            <input type="text" name="telefono" class="form-control gerencia" id="telefono" value="{{ $gerencia->telefono }}" required>
-                        </div>
-                    </div>
-
-                    <!-- Segunda columna -->
-                    <div class="col-md-6">
-                        <div class="form-group mt-3">
-                            <label for="direccion" class="form-label label_gerencia">Dirección:</label>
-                            <input type="text" name="direccion" class="form-control gerencia" id="direccion" value="{{ $gerencia->direccion }}" required>
+                    <div class="row">
+                        <!-- Primera columna -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="nombre" class="form-label label_gerencia">Nombre de la Gerencia:</label>
+                                <input type="text" name="nombre" class="form-control gerencia" id="nombre"
+                                    value="{{ $gerencia->nombre }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="descripcion" class="form-label label_gerencia">Descripción:</label>
+                                <textarea name="descripcion" class="form-control gerencia" id="descripcion" rows="4" required>{{ $gerencia->descripcion }}</textarea>
+                            </div>
+                            <div class="form-group mt-3">
+                                <label for="telefono" class="form-label label_gerencia">Teléfono:</label>
+                                <input type="tel" name="telefono" class="form-control gerencia" id="telefono"
+                                    value="{{ $gerencia->telefono }}" required pattern="[0-9]+" maxlength="15"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                            </div>
                         </div>
 
-                        <div class="form-group mt-3">
-                            <label for="gerente_id" class="form-label label_gerencia">Gerente (User):</label>
-                            <select name="gerente_id" class="form-control gerencia" id="gerente_id" required>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ $gerencia->gerente_id == $user->id ? 'selected' : '' }}>
-                                        {{ $user->persona->nombres }} {{ $user->persona->apellido_p }} {{ $user->persona->apellido_m }}
+                        <!-- Segunda columna -->
+                        <div class="col-md-6">
+                            <div class="form-group mt-3">
+                                <label for="direccion" class="form-label label_gerencia">Dirección:</label>
+                                <input type="text" name="direccion" class="form-control gerencia" id="direccion"
+                                    value="{{ $gerencia->direccion }}" required>
+                            </div>
+
+                            <div class="form-group mt-3">
+                                <label for="gerente_id" class="form-label label_gerencia">Gerente (User):</label>
+                                <select name="gerente_id" class="form-control gerencia" id="gerente_id" required>
+                                    @foreach ($users as $user)
+                                        <option value="{{ $user->id }}"
+                                            {{ $gerencia->gerente_id == $user->id ? 'selected' : '' }}>
+                                            {{ $user->persona->nombres }} {{ $user->persona->apellido_p }}
+                                            {{ $user->persona->apellido_m }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group mt-3">
+                                <label for="estado" class="form-label label_gerencia">Estado:</label>
+                                <select name="estado" class="form-control gerencia" id="estado" required>
+                                    <option value="Activo" {{ $gerencia->estado == 'Activo' ? 'selected' : '' }}>Activo
                                     </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="form-group mt-3">
-                            <label for="estado" class="form-label label_gerencia">Estado:</label>
-                            <select name="estado" class="form-control gerencia" id="estado" required>
-                                <option value="Activo" {{ $gerencia->estado == 'Activo' ? 'selected' : '' }}>Activo</option>
-                                <option value="Inactivo" {{ $gerencia->estado == 'Inactivo' ? 'selected' : '' }}>Inactivo</option>
-                            </select>
+                                    <option value="Inactivo" {{ $gerencia->estado == 'Inactivo' ? 'selected' : '' }}>
+                                        Inactivo</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="mt-4 text-center">
-                    <a href="{{ route('gerencias.show', $gerencia->id) }}" class="btn btn-secondary btn-gerencia me-2"><i
-                        class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
-                    <button type="submit" class="btn btn-primary btn-gerencia ms-2"><i class="fa fa-save" aria-hidden="true"></i> Guardar Cambios</button>
-                </div>
+                    <div class="mt-4 text-center">
+                        <a href="{{ route('gerencias.show', $gerencia->id) }}"
+                            class="btn btn-secondary btn-gerencia me-2"><i class="fa fa-arrow-circle-left"
+                                aria-hidden="true"></i> Cancelar</a>
+                        <button type="submit" class="btn btn-primary btn-gerencia ms-2"><i class="fa fa-save"
+                                aria-hidden="true"></i> Guardar Cambios</button>
+                    </div>
 
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 @stop

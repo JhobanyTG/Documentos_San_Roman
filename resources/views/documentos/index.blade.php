@@ -79,7 +79,7 @@
         @endif
         <div class="row">
             <!-- Columna del filtro -->
-            <div class="filtro order-md-2 col-md-2">
+            <div class="filtro order-md-2 col-md-2 col-ms-12">
                 <div class="mb-3">
                     <h4>Listar</h4>
                     <div class="row">

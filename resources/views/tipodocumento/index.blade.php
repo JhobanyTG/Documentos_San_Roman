@@ -20,9 +20,6 @@
                                 <td class="text-center">{{ $tipodocumento->nombre }}</td>
                                 <td class="text-center">{{ $tipodocumento->descripcion }}</td>
                                 <td class="text-center">
-                                    <a href="{{ route('tipodocumento.show', $tipodocumento->id) }}" class="btn btn-info">
-                                        <i class="fa fa-eye" aria-hidden="true"></i>
-                                    </a>
                                     <a href="{{ route('tipodocumento.edit', $tipodocumento->id) }}" class="btn btn-warning">
                                         <i class="fa fa-edit" aria-hidden="true"></i>
                                     </a>

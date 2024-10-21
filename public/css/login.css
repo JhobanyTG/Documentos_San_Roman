@@ -111,9 +111,10 @@ i {
 
 @media (max-width: 576px) {
     body {
-        background-image: url("../images/fondo/fondo_login.jpg");
+        background-image: url("../images/fondo/Municipalidad-de-San-Roman.jpg");
         background-repeat: no-repeat;
         background-size: cover;
+        background-position: center;
     }
 
     .container {
@@ -132,9 +133,10 @@ i {
 
 @media (min-width: 577px) and (max-width: 768px) {
     body {
-        background-image: url("../images/fondo/fondo_login.jpg");
+        background-image: url("../images/fondo/Municipalidad-de-San-Roman.jpg");
         background-repeat: no-repeat;
         background-size: cover;
+        background-position: center;
     }
 
     .container {
@@ -154,9 +156,10 @@ i {
 
 @media (min-width: 769px) and (max-width: 992px) {
     body {
-        background-image: url("../images/fondo/fondo_login.jpg");
+        background-image: url("../images/fondo/Municipalidad-de-San-Roman.jpg");
         background-repeat: no-repeat;
         background-size: cover;
+        background-position: center;
     }
     .container {
         max-width: 100%;

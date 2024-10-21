@@ -66,9 +66,9 @@
                     <tbody>
                         @foreach ($all_privilegios as $privilegio)
                             <tr>
-                                <td>{{ $privilegio->id }}</td>
-                                <td>{{ $privilegio->nombre }}</td>
-                                <td>{{ Str::limit($privilegio->descripcion, 50) }}</td>
+                                <td class="text-center">{{ $privilegio->id }}</td>
+                                <td class="text-center">{{ $privilegio->nombre }}</td>
+                                <td class="text-center">{{ Str::limit($privilegio->descripcion, 50) }}</td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -15,19 +15,23 @@ class SubgerenciaController extends Controller
 
     public function create(Gerencia $gerencia)
     {
-        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'Gerente') {
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia')) {
 
             // Obtener el ID del usuario autenticado
             $usuarioId = Auth::id();
 
-            // Verificar si el usuario autenticado es el propietario de la gerencia
-            if ($gerencia->usuario_id === $usuarioId) {
-                $users = User::with('persona')->get();
-                return view('subgerencias.create', compact('gerencia', 'users'));
-            }
+            // Obtener los usuarios relacionados con subusuarios y el encargado de la gerencia
+            $users = User::whereHas('subusuario', function ($query) use ($gerencia) {
+                $query->whereHas('subgerencia', function ($subQuery) use ($gerencia) {
+                    $subQuery->where('gerencia_id', $gerencia->id);
+                });
+            })
+                ->orWhere('id', $gerencia->usuario_id) // Incluir también al encargado de la gerencia
+                ->with('persona')
+                ->get();
 
-            if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
-                $users = User::with('persona')->get();
+            // Verificar si el usuario autenticado es el propietario de la gerencia
+            if ($gerencia->usuario_id === $usuarioId || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
                 return view('subgerencias.create', compact('gerencia', 'users'));
             }
 
@@ -37,7 +41,6 @@ class SubgerenciaController extends Controller
             })->where('user_id', $usuarioId)->first();
 
             if ($subusuario) {
-                $users = User::with('persona')->get();
                 return view('subgerencias.create', compact('gerencia', 'users'));
             }
 
@@ -48,6 +51,7 @@ class SubgerenciaController extends Controller
             abort(403, 'No tienes permiso para realizar esta acción');
         }
     }
+
 
     public function store(Request $request, Gerencia $gerencia)
     {
@@ -83,20 +87,23 @@ class SubgerenciaController extends Controller
 
     public function edit(Gerencia $gerencia, Subgerencia $subgerencia)
     {
-        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Gerencia') || auth()->user()->rol->nombre === 'SubGerente') {
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia')) {
 
             // Obtener el ID del usuario autenticado
             $usuarioId = Auth::id();
 
-            // Verificar si el usuario autenticado es el propietario de la gerencia
-            if ($gerencia->usuario_id === $usuarioId) {
-                $users = User::with('persona')->get();
-                return view('subgerencias.edit', compact('gerencia', 'subgerencia', 'users'));
-            }
+            // Obtener los usuarios relacionados con subusuarios y el encargado de la gerencia
+            $users = User::whereHas('subusuario', function ($query) use ($gerencia) {
+                $query->whereHas('subgerencia', function ($subQuery) use ($gerencia) {
+                    $subQuery->where('gerencia_id', $gerencia->id);
+                });
+            })
+                ->orWhere('id', $gerencia->usuario_id) // Incluir también al encargado de la gerencia
+                ->with('persona')
+                ->get();
 
-            // Verificar si el usuario tiene el privilegio de "Acceso Total"
-            if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
-                $users = User::with('persona')->get();
+            // Verificar si el usuario autenticado es el propietario de la gerencia
+            if ($gerencia->usuario_id === $usuarioId || auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
                 return view('subgerencias.edit', compact('gerencia', 'subgerencia', 'users'));
             }
 
@@ -106,7 +113,6 @@ class SubgerenciaController extends Controller
             })->where('user_id', $usuarioId)->first();
 
             if ($subusuario) {
-                $users = User::with('persona')->get();
                 return view('subgerencias.edit', compact('gerencia', 'subgerencia', 'users'));
             }
 
@@ -117,6 +123,7 @@ class SubgerenciaController extends Controller
             abort(403, 'No tienes permiso para realizar esta acción');
         }
     }
+
 
 
     public function update(Request $request, Gerencia $gerencia, Subgerencia $subgerencia)
@@ -137,7 +144,7 @@ class SubgerenciaController extends Controller
 
     public function destroy(Gerencia $gerencia, Subgerencia $subgerencia)
     {
-        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'Gerente') {
+        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia')) {
             $subgerencia->delete();
             return redirect()->route('gerencias.show', $gerencia->id)->with('success', 'Subgerencia eliminada correctamente.');
         } else {

@@ -24,9 +24,6 @@
                                 <td class="text-center">{{ $privilegio->nombre }}</td>
                                 <td class="text-center">{{ Str::limit($privilegio->descripcion, 50) }}</td>
                                 <td class="text-center">
-                                    <a href="{{ route('privilegios.show', $privilegio->id) }}" class="btn btn-info">
-                                        <i class="fa fa-eye" aria-hidden="true"></i>
-                                    </a>
                                     <a href="{{ route('privilegios.edit', $privilegio->id) }}" class="btn btn-warning">
                                         <i class="fa fa-edit" aria-hidden="true"></i>
                                     </a>

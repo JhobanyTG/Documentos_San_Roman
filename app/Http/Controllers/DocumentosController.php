@@ -121,9 +121,6 @@ class DocumentosController extends Controller
         }
     }
 
-
-
-
     public function create()
     {
         if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'Gerente' || auth()->user()->rol->nombre === 'SubGerente' || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Crear Documento') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Documentos')) {

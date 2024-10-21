@@ -11,7 +11,7 @@
             <div class="row forms">
                 <div class="col-md-6">
                     <div class="row">
-                        <div class="form-group mt-3">
+                        <div class="form-group mt-3 text-center">
                             <label for="avatar" class="form-label label_subusuario">Imagen de Perfil</label>
                             <div class="d-flex justify-content-center">
                                 <img id="avatarPreview" src="{{ $subusuario->user->persona->avatar ? asset('storage/' . $subusuario->user->persona->avatar) : asset('images/logo/avatar.png') }}" alt="Previsualización"
@@ -34,10 +34,15 @@
                             <label for="rol_id" class="form-label label_subusuario">Rol:</label>
                             <select class="form-control subusuario" id="rol_id" name="rol_id" required>
                                 @foreach($roles as $rol)
-                                    <option value="{{ $rol->id }}" {{ $subusuario->user->rol_id == $rol->id ? 'selected' : '' }}>{{ $rol->nombre }}</option>
+                                    @if ($rol->nombre !== 'SuperAdmin' && $rol->nombre !== 'Gerente')
+                                        <option value="{{ $rol->id }}" {{ $subusuario->user->rol_id == $rol->id ? 'selected' : '' }}>
+                                            {{ $rol->nombre }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
+
                         <div class="form-group mt-2 col-md-6">
                             <label for="estado" class="form-label label_subusuario">Estado:</label>
                             <select class="form-control subusuario" id="estado" name="estado" required>
@@ -66,17 +71,28 @@
                     <div class="row mt-2">
                         <div class="form-group col-md-6">
                             <label for="dni" class="form-label label_subusuario">DNI:</label>
-                            <input type="text" class="form-control subusuario" id="dni" name="dni" value="{{ $subusuario->user->persona->dni }}" required>
+                            <input type="text" class="form-control subusuario" id="dni" name="dni"
+                                value="{{ $subusuario->user->persona->dni }}" required
+                                pattern="\d{8}" title="El DNI debe contener exactamente 8 dígitos numéricos."
+                                maxlength="8"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
                         <div class="form-group col-md-6">
                             <label for="f_nacimiento" class="form-label label_subusuario">Fecha de Nacimiento:</label>
-                            <input type="date" class="form-control subusuario" id="f_nacimiento" name="f_nacimiento" value="{{ $subusuario->user->persona->f_nacimiento }}" required>
+                            <input type="date" class="form-control subusuario" id="f_nacimiento" name="f_nacimiento"
+                                value="{{ $subusuario->user->persona->f_nacimiento }}" required
+                                max="{{ \Carbon\Carbon::now()->subYears(15)->format('Y-m-d') }}"
+                                min="{{ \Carbon\Carbon::now()->subYears(100)->format('Y-m-d') }}">
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-md-5">
+                        <div class="form-group  col-md-5">
                             <label for="celular" class="form-label label_subusuario">Celular:</label>
-                            <input type="text" class="form-control subusuario" id="celular" name="celular" value="{{ $subusuario->user->persona->celular }}" required>
+                            <input type="text" class="form-control subusuario" id="celular" name="celular"
+                                value="{{ $subusuario->user->persona->celular }}" required
+                                pattern="\d{9}" title="El celular debe contener exactamente 9 dígitos numéricos."
+                                maxlength="9"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
                         <div class="form-group col-md-7">
                             <label for="direccion" class="form-label label_subusuario">Dirección:</label>

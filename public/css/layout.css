@@ -57,14 +57,17 @@
     .profile-links {
         display: none;
         position: absolute;
-        top: 100%; /* Posiciona justo debajo del div del perfil */
+        top: 100%;
+        /* Posiciona justo debajo del div del perfil */
         right: 0;
-        background-color: #fff; /* O el color que prefieras */
+        background-color: #fff;
+        /* O el color que prefieras */
         border: 1px solid #ddd;
         border-radius: 4px;
         padding: 10px;
-        z-index: 1000; /* Asegura que esté por encima de otros elementos */
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        z-index: 1000;
+        /* Asegura que esté por encima de otros elementos */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
     .profile-links a {
@@ -102,6 +105,8 @@
 
     .sidebar-closed {
         width: 60px;
+        height: 100%;
+
     }
 
     .sidebar .nav {
@@ -264,7 +269,7 @@
     }
 
     .sidebar .nav-item:hover {
-        background: linear-gradient(to top left, var(--color-muni4),  var(--color-muni3));
+        background: linear-gradient(to top left, var(--color-muni4), var(--color-muni3));
 
     }
 
@@ -1067,14 +1072,23 @@
     }
 
     .btn-doc {
-        background: linear-gradient(to top left, #FFFF00, #FFB500);
+        background: linear-gradient(to top left, var(--color-muni3), var(--color-muni4));
         color: black;
         text-align: center;
         font-weight: bold;
     }
 
     .btn-doc:hover {
-        background: linear-gradient(to top left, #FFB500, #FFFF00);
+        background: linear-gradient(to top left, var(--color-muni4), var(--color-muni3));
+    }
+
+    /* Diseño normal en pantallas grandes */
+    .pagination {
+        justify-content: center;
+    }
+
+    .pagination .page-item .page-link {
+        padding: 10px 15px;
     }
 
 
@@ -1109,6 +1123,7 @@
         .border-table {
             border-color: var(--color-secundario) !important;
         }
+
     }
 
     @media (max-width: 768px) {
@@ -1129,6 +1144,59 @@
         .border-table-row-final {
             padding-bottom: 1em !important;
         }
+
+        .form_gerencia,
+        .form_subgerencia,
+        .form_privilegio,
+        .form_tipodocumento,
+        .form_password,
+        .form_contrasenia {
+            padding: 30px 30px;
+            width: 100%;
+        }
+
+        .form_persona {
+            padding: 30px 30px;
+            width: 100%;
+        }
+
+        .form_rol {
+            padding: 30px 30px;
+            width: 100%;
+
+            .form_title_rol2 {
+                margin-top: 10px;
+            }
+        }
+
+        .pagination {
+        justify-content: space-between;
+    }
+
+    .pagination .page-item {
+        flex: 1; /* Hacer que los elementos ocupen el mismo ancho */
+    }
+
+    .pagination .page-item .page-link {
+        padding: 8px;
+        text-align: center;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(to top left, var(--color-muni3), var(--color-muni4));
+        color: var(--color-negro);
+    }
+
+    /* Colapsar los enlaces de las páginas en pantallas pequeñas */
+    .pagination .page-item:not(:first-child):not(:last-child) {
+        display: none;
+    }
+
+    /* Mostrar un número de página para pantallas pequeñas */
+    .pagination .page-item:nth-child(2) {
+        display: block;
+    }
+
     }
 
     /* logo layout */
@@ -1136,8 +1204,6 @@
         height: 100%;
         width: 40%;
     }
-
-
 
     /* DESCRIPCION */
     .expand-description,

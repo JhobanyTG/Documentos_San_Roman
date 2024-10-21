@@ -34,7 +34,7 @@
                                 <td class="text-center">{{ $user->persona->nombres }} {{ $user->persona->apellido_p }}
                                     {{ $user->persona->apellido_m }}</td>
                                 <td class="text-center">
-                                    <a class="btn btn-info" href="{{ route('usuarios.show', $user->id) }}">
+                                    <a class="btn btn-info" href="{{ route('personas.show', $user->id) }}">
                                         <i class="fa fa-eye" aria-hidden="true"></i>
                                     </a>
                                     <a class="btn btn-warning" href="{{ route('usuarios.edit', $user->id) }}">
