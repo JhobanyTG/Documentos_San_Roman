@@ -60,7 +60,7 @@
                         <a href="{{ route('gerencias.show', $gerencia->id) }}"
                             class="btn btn-secondary btn-subgerencia me-2"><i
                             class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
-                        <but type="submit" class="btn btn-primary btn-subgerencia ms-2"><i class="fa fa-plus" aria-hidden="true"></i>
+                        <button type="submit" class="btn btn-primary btn-subgerencia ms-2"><i class="fa fa-plus" aria-hidden="true"></i>
                             Crear</button>
                     </div>
                 </form>

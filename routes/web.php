@@ -13,6 +13,7 @@ use App\Http\Controllers\GerenciaController;
 use App\Http\Controllers\SubgerenciaController;
 use App\Http\Controllers\SubUsuarioController;
 use App\Http\Controllers\TipoDocumentoController;
+use App\Http\Controllers\DashboardController;
 
 
 
@@ -90,6 +91,10 @@ Route::middleware(['auth'])->group(function () {
     Route::group(['middleware' => ['auth', 'privilege:Acceso Total']], function () {
         Route::resource('privilegios', PrivilegioController::class);
         Route::resource('tipodocumento', TipoDocumentoController::class);
+        // Route::resource('dashboard', DashboardController::class);
+        // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
         Route::resource('rolprivilegios', RolPrivilegioController::class);
     });
 

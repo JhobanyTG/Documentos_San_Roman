@@ -100,6 +100,12 @@
                             <span class="nav-text">Tipo Documento</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ url('dashboard') }}">
+                            <i class="fa fa-file-text" aria-hidden="true"></i>
+                            <span class="nav-text">Dashboard</span>
+                        </a>
+                    </li>
                 @endif
                 {{-- <li class="nav-item">
                         <a href="{{ url('rolprivilegios') }}">
@@ -158,6 +164,8 @@
                 </div>
             </main>
         </div>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
@@ -311,6 +319,7 @@
             //     });
             // });
         </script>
+        @stack('scripts')
 
     </body>
 
