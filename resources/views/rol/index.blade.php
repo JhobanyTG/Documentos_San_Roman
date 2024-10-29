@@ -6,10 +6,10 @@
     <div class="container card-body mt-4">
         <div id="content_ta_wrapper" class="dataTables_wrapper">
             <div class="table-responsive">
-                {{-- @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
-                        auth()->user()->rol->nombre === 'SuberAdmin') --}}
+                @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total'))
                     <a href="{{ route('roles.create') }}" class="btn btn-doc mb-3"><i class="fa fa-plus" aria-hidden="true"></i>
                         Crear Nuevo Rol</a>
+                @endif
                 <table id="content_ta" class="table table-striped table-hover custom-table pt-serif-regular" role="grid"
                     aria-describedby="content_ta_info">
                     <thead>
@@ -18,9 +18,9 @@
                             <th classs="text-center">Nombre</th>
                             <th classs="text-center">Descripción</th>
                             <th classs="text-center">Privilegios</th>
-                            {{-- @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
-                                    auth()->user()->rol->nombre === 'SuberAdmin') --}}
+                            @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total'))
                                 <th>Acciones</th>
+                            @endif
 
                         </tr>
                     </thead>
@@ -37,16 +37,17 @@
                                         <span class="text-muted">Sin privilegios</span>
                                     @endforelse
                                 </td>
-                                {{-- @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->nombre === 'SuberAdmin') --}}
-                                <td class="text-center">
-                                    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-warning">
-                                        <i class="fa fa-edit" aria-hidden="true"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-danger"
-                                        onclick="showUserConfirmationModal('{{ route('roles.destroy', $role->id) }}')">
-                                        <i class="fa fa-trash" aria-hidden="true"></i>
-                                    </button>
-                                </td>
+                                @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total'))
+                                    <td class="text-center">
+                                        <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-warning">
+                                            <i class="fa fa-edit" aria-hidden="true"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-danger"
+                                            onclick="showUserConfirmationModal('{{ route('roles.destroy', $role->id) }}')">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                                @endif
                                 <!-- Modal para confirmar la eliminación -->
                                 <div class="modal fade" tabindex="-1" role="dialog" id="userConfirmationModal">
                                     <div class="modal-dialog" role="document">

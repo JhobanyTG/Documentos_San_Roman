@@ -43,7 +43,7 @@
                             <label for="rol_id" class="form-label label_subusuario">Rol:</label>
                             <select class="form-control subusuario" id="rol_id" name="rol_id" required>
                                 @foreach ($roles as $rol)
-                                    @if ($rol->nombre !== 'SuperAdmin' && $rol->nombre !== 'Gerente')
+                                    @if ($rol->nombre !== 'SuperAdmin' && $rol->nombre !== 'Gerente' && $rol->nombre !== 'SubGerente')
                                         <option value="{{ $rol->id }}"
                                             {{ old('rol_id') == $rol->id ? 'selected' : '' }}>
                                             {{ $rol->nombre }}

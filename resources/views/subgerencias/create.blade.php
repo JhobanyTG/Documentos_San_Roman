@@ -32,7 +32,7 @@
                             <div class="form-group">
                                 <label for="telefono" class="form-label label_subgerencia">Teléfono:</label>
                                 <input type="tel" name="telefono" class="form-control subgerencia" id="telefono"
-                                    required pattern="[0-9]+" maxlength="15"
+                                    required pattern="^\d{9}$" maxlength="9"
                                     oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                             </div>
 

@@ -46,11 +46,11 @@
                                 </div>
                                 <div class="modal-body" id="pdfModalBody"></div>
                                 <div class="modal-footer">
-                                    <a href="{{ asset('storage/archivos/' . basename($documento->archivo)) }}"
+                                    <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                         class="btn btn-info" target="_blank">
                                         <i class="fa fa-external-link-square" aria-hidden="true"></i> Abrir en otra ventana
                                     </a>
-                                    <a href="{{ asset('storage/archivos/' . basename($documento->archivo)) }}"
+                                    <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                         download="{{ basename($documento->archivo) }}" class="btn btn-dark">
                                         <i class="fa fa-download" aria-hidden="true"></i> Descargar
                                     </a>
@@ -104,9 +104,10 @@
                     <div class="mt-0">
                         <a href="{{ route('documentos.index') }}" class="btn btn-warning btn-documento me-2"><i
                                 class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar</a>
-                        <button type="submit" class="btn btn-success btn-documento ms-2"><i class="fa fa-save" aria-hidden="true"></i> Guardar Cambios</button>
+                        <button type="submit" class="btn btn-success btn-documento ms-2"><i class="fa fa-save"
+                                aria-hidden="true"></i> Guardar Cambios</button>
+                    </div>
                 </div>
-            </div>
         </form>
     </div>
 
@@ -122,11 +123,36 @@
                 <div class="modal-body">
                     <input type="hidden" id="documento_id" name="documento_id" value="{{ $documento->id }}">
                     <label for="nuevo_estado">Nuevo Estado:</label>
+                    @php
+                        // Obtener el usuario autenticado
+                        $usuarioAutenticado = auth()->user();
+
+                        // Verificar si el usuario tiene el rol "Usuario Validador" con el privilegio "Acceso a Validar Documento"
+                        $esUsuarioValidadorConPrivilegio =
+                            $usuarioAutenticado->rol->nombre === 'UsuarioValidador' &&
+                            $usuarioAutenticado->rol->privilegios->contains('nombre', 'Acceso a Validar Documento');
+
+                        // Verificar si el usuario tiene el rol "Usuario Publicador" con el privilegio "Acceso a Publicar Documento"
+                        $esUsuarioPublicadorConPrivilegio =
+                            $usuarioAutenticado->rol->nombre === 'UsuarioPublicador' &&
+                            $usuarioAutenticado->rol->privilegios->contains('nombre', 'Acceso a Publicar Documento');
+                    @endphp
+
                     <select id="nuevo_estado" class="form-control" name="nuevo_estado" required>
-                        <option value="Validado">Validado</option>
-                        <option value="Publicado">Publicado</option>
-                        <!-- Agrega otros estados si es necesario -->
+                        {{-- Mostrar solo "Validado" si es "Usuario Validador" con privilegio de validar --}}
+                        @if ($esUsuarioValidadorConPrivilegio)
+                            <option value="Validado" style="color: green">Validado</option>
+                            {{-- Mostrar solo "Publicado" si es "Usuario Publicador" con privilegio de publicar --}}
+                        @elseif ($esUsuarioPublicadorConPrivilegio)
+                            <option value="Publicado" style="color: blue">Publicado</option>
+                        @else
+                            {{-- Mostrar todas las opciones para otros usuarios --}}
+                            <option value="Creado" style="color: red">Creado</option>
+                            <option value="Validado" style="color: green">Validado</option>
+                            <option value="Publicado" style="color: blue">Publicado</option>
+                        @endif
                     </select>
+
                     <label for="descripcion_modal">Descripción:</label>
                     <textarea id="descripcion_modal" class="form-control" name="descripcion_modal" rows="3" required></textarea>
                 </div>

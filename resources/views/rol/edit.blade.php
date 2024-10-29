@@ -24,7 +24,9 @@
                         <label for="available_privileges">Privilegios Disponibles</label>
                         <select id="available_privileges" class="form-control rol" multiple>
                             @foreach ($all_privilegios as $privilegio)
-                                <option value="{{ $privilegio->id }}">{{ $privilegio->nombre }}</option>
+                                @if (!$role->privilegios->contains('id', $privilegio->id)) <!-- Filtra los privilegios ya asignados -->
+                                    <option value="{{ $privilegio->id }}">{{ $privilegio->nombre }}</option>
+                                @endif
                             @endforeach
                         </select>
                         <button type="button" class="btn btn-primary mt-2 btn-rol" onclick="addPrivileges()"><i class="fa fa-arrow-down" aria-hidden="true"></i>Agregar
@@ -155,7 +157,4 @@
             @endif
         });
     </script>
-
-
-
 @endsection

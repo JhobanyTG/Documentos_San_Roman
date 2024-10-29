@@ -129,14 +129,16 @@ Route::middleware(['auth'])->group(function () {
             ->middleware('auth');
         route::get('/gerencias/{id}', [GerenciaController::class, 'show'])
             ->middleware(['auth', 'checkGerenciaOwnership']);
+
+        Route::get('/documentos/{documentoId}/historial', [DocumentosController::class, 'mostrarHistorial'])
+            ->name('documentos.historial')
+            ->where('documentoId', '0');
     });
 
     Route::get('/reporte-documentos', [DocumentosController::class, 'generarReporte'])->name('reporte.documentos');
 
 
     Route::post('/documentos/{id}/cambiarEstado', [DocumentosController::class, 'cambiarEstado'])->name('documentos.cambiarEstado');
-    Route::get('/documentos/{documentoId}/historial', [DocumentosController::class, 'mostrarHistorial'])
-        ->name('documentos.historial')
-        ->where('documentoId', '0');
+
     Route::get('/historial/exportar', [DocumentosController::class, 'exportarPDF'])->name('historial.exportar');
 });

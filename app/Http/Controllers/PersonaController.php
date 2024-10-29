@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Persona;
 use App\Models\Subgerencia;
+use App\Models\Gerencia;
 use App\Models\Rol;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -69,9 +70,16 @@ class PersonaController extends Controller
 
     public function create()
     {
+        // Verificar si el usuario tiene el privilegio de "Acceso Total"
+        if (!auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) {
+            abort(403, 'Acceso denegado');
+        }
+
+        // Cargar los roles si se pasa la verificación de acceso
         $roles = Rol::all();
         return view('persona.create', compact('roles'));
     }
+
 
     public function store(Request $request)
     {
@@ -203,23 +211,128 @@ class PersonaController extends Controller
         // Obtener la persona con el ID proporcionado
         $persona = Persona::findOrFail($id);
 
-        // Obtener los roles disponibles para seleccionar en el formulario
-        $roles = Rol::all();
-
-        // Obtener el usuario asociado a la persona para completar el formulario
+        // Obtener el usuario asociado a la persona
         $user = User::where('persona_id', $id)->firstOrFail();
 
-        // Pasar los datos a la vista de edición
-        return view('persona.edit', compact('persona', 'roles', 'user'));
+        // Obtener los roles disponibles
+        $roles = Rol::all();
+
+        // Obtener el usuario autenticado
+        $usuarioAutenticado = auth()->user();
+
+        // Verificar si el usuario es SubUsuario
+        if ($usuarioAutenticado->rol->nombre === 'SubUsuario') {
+            // Solo permitir editar su propio registro
+            if ($usuarioAutenticado->id == $persona->id) {
+                return view('persona.edit', compact('persona', 'roles', 'user'));
+            }
+            // Si no es su propio registro, denegar acceso
+            abort(403, 'No tienes permiso para editar este registro.');
+        }
+
+        // Verificar si el usuario tiene el privilegio de "Acceso Total"
+        if ($usuarioAutenticado->rol->privilegios->contains('nombre', 'Acceso Total')) {
+            return view('persona.edit', compact('persona', 'roles', 'user'));
+        }
+
+        // Verificar si el usuario está editando su propia persona
+        if ($usuarioAutenticado->persona_id === $persona->id) {
+            return view('persona.edit', compact('persona', 'roles', 'user'));
+        }
+
+        // Verificar si el usuario autenticado es gerente de alguna gerencia
+        $gerenciaDelGerente = Gerencia::where('usuario_id', $usuarioAutenticado->id)->first();
+
+        if ($gerenciaDelGerente) {
+            // Verificar si el usuario asociado a la persona pertenece a su gerencia
+            if ($user->gerencia && $user->gerencia->id === $gerenciaDelGerente->id) {
+                return view('persona.edit', compact('persona', 'roles', 'user'));
+            }
+
+            // Verificar si el usuario asociado a la persona pertenece a alguna subgerencia de su gerencia
+            if (
+                $user->subusuario &&
+                $user->subusuario->subgerencia &&
+                $user->subusuario->subgerencia->gerencia_id === $gerenciaDelGerente->id
+            ) {
+                return view('persona.edit', compact('persona', 'roles', 'user'));
+            }
+        }
+
+        // Verificar si el usuario autenticado es subgerente de la misma subgerencia
+        if (
+            $user->subusuario &&
+            $usuarioAutenticado->subusuario &&
+            $usuarioAutenticado->subusuario->subgerencia_id === $user->subusuario->subgerencia_id
+        ) {
+            return view('persona.edit', compact('persona', 'roles', 'user'));
+        }
+
+        // Si ninguna de las condiciones se cumple, denegar el acceso
+        abort(403, 'No tienes permiso para editar esta persona.');
     }
 
 
 
     public function show($id)
     {
+        // Obtener la persona con el ID proporcionado y su usuario asociado
         $persona = Persona::with('user')->findOrFail($id);
         $user = User::where('persona_id', $id)->firstOrFail();
-        return view('persona.show', compact('user', 'persona'));
+
+        // Obtener el usuario autenticado
+        $usuarioAutenticado = auth()->user();
+
+        // Verificar si el usuario es SubUsuario
+        if ($usuarioAutenticado->rol->nombre === 'SubUsuario') {
+            // Solo permitir ver su propio registro
+            if ($usuarioAutenticado->id == $persona->id) {
+                return view('persona.show', compact('persona', 'user'));
+            }
+            // Si no es su propio registro, denegar acceso
+            abort(403, 'No tienes permiso para ver este registro.');
+        }
+
+        // Verificar si el usuario tiene el privilegio de "Acceso Total"
+        if ($usuarioAutenticado->rol->privilegios->contains('nombre', 'Acceso Total')) {
+            return view('persona.show', compact('persona', 'user'));
+        }
+
+        // Verificar si el usuario está viendo su propia persona
+        if ($usuarioAutenticado->persona_id === $persona->id) {
+            return view('persona.show', compact('persona', 'user'));
+        }
+
+        // Verificar si el usuario autenticado es gerente de alguna gerencia
+        $gerenciaDelGerente = Gerencia::where('usuario_id', $usuarioAutenticado->id)->first();
+
+        if ($gerenciaDelGerente) {
+            // Verificar si el usuario asociado a la persona pertenece a su gerencia
+            if ($user->gerencia && $user->gerencia->id === $gerenciaDelGerente->id) {
+                return view('persona.show', compact('persona', 'user'));
+            }
+
+            // Verificar si el usuario asociado a la persona pertenece a alguna subgerencia de su gerencia
+            if (
+                $user->subusuario &&
+                $user->subusuario->subgerencia &&
+                $user->subusuario->subgerencia->gerencia_id === $gerenciaDelGerente->id
+            ) {
+                return view('persona.show', compact('persona', 'user'));
+            }
+        }
+
+        // Verificar si el usuario autenticado es subgerente de la misma subgerencia
+        if (
+            $user->subusuario &&
+            $usuarioAutenticado->subusuario &&
+            $usuarioAutenticado->subusuario->subgerencia_id === $user->subusuario->subgerencia_id
+        ) {
+            return view('persona.show', compact('persona', 'user'));
+        }
+
+        // Si ninguna de las condiciones se cumple, denegar el acceso
+        abort(403, 'No tienes permiso para ver esta persona.');
     }
 
 

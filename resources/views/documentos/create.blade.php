@@ -117,13 +117,32 @@
                                     </div>
                                     <div class="form-group mt-2 col-md-6">
                                         <label for="estado" class="form-label label_documento">Estado:</label>
+                                        @php
+                                            // Obtener el usuario autenticado
+                                            $usuarioAutenticado = auth()->user();
+
+                                            // Verificar si el usuario tiene el rol de "Usuario creador"
+                                            $esUsuarioCreador = $usuarioAutenticado->rol->nombre === 'UsuarioCreador';
+
+                                            // Verificar si el usuario tiene el privilegio "Acceso a Crear Documento"
+                                            $tienePrivilegioCrearDocumento = $usuarioAutenticado->rol->privilegios->contains(
+                                                'nombre',
+                                                'Acceso a Crear Documento',
+                                            );
+                                        @endphp
+
                                         <select name="estado"
                                             class="form-control documento @error('estado') is-invalid @enderror"
                                             id="estado" required>
-                                            <option value="Creado" style="color: red">Creado</option>
-                                            <option value="Validado" style="color: green">Validado</option>
-                                            <option value="Publicado" style="color: blue">Publicado</option>
+                                            @if ($esUsuarioCreador && $tienePrivilegioCrearDocumento)
+                                                <option value="Creado" style="color: red">Creado</option>
+                                            @else
+                                                <option value="Creado" style="color: red">Creado</option>
+                                                <option value="Validado" style="color: green">Validado</option>
+                                                <option value="Publicado" style="color: blue">Publicado</option>
+                                            @endif
                                         </select>
+
                                         @error('estado')
                                             <div class="text-danger">{{ $message }}</div>
                                         @enderror
@@ -144,8 +163,9 @@
                                 <div class="mt-3">
                                     <a href="{{ route('documentos.index') }}"
                                         class="btn btn-warning btn-documento me-2"><i class="fa fa-arrow-circle-left"
-                                        aria-hidden="true"></i> Cancelar</a>
-                                    <button type="submit" class="btn btn-success btn-documento ms-2"><i class="fa fa-plus" aria-hidden="true"></i>
+                                            aria-hidden="true"></i> Cancelar</a>
+                                    <button type="submit" class="btn btn-success btn-documento ms-2"><i
+                                            class="fa fa-plus" aria-hidden="true"></i>
                                         Crear</button>
                                 </div>
                             </div>
@@ -315,12 +335,12 @@
                     modalPdfViewer.src = currentPdfUrl; // Cargar el archivo en el iframe
                     downloadPdfBtn.href = currentPdfUrl; // Configurar enlace de descarga
                     openInNewWindowBtn.href =
-                    currentPdfUrl; // Configurar enlace para abrir en nueva ventana
+                        currentPdfUrl; // Configurar enlace para abrir en nueva ventana
 
                     // Establecer el título del modal al nombre del archivo
                     var fileName = file.name; // Obtener el nombre del archivo
                     document.getElementById('pdfModalLabel').textContent =
-                    fileName; // Actualizar el título del modal
+                        fileName; // Actualizar el título del modal
 
                     pdfModal.show(); // Mostrar el modal
                 } else {

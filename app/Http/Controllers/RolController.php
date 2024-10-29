@@ -12,8 +12,17 @@ class RolController extends Controller
     // Muestra la lista de roles
     public function index()
     {
-        $roles = Rol::with('privilegios')->get();
-        return view('rol.index', compact('roles'));
+
+        $user = auth()->user();
+
+        if ($user->rol->nombre === 'Gerente' || $user->rol->privilegios->contains('nombre', 'Acceso Total')) {
+            // Acciones específicas para Gerentes o usuarios con el privilegio 'Acceso Total'
+            $roles = Rol::with('privilegios')->get();
+            return view('rol.index', compact('roles'));
+        } else {
+            // Redirigir o denegar acceso si no tiene los permisos adecuados
+            return redirect()->back()->with('error', 'No tienes permiso para acceder a esta sección.');
+        }
     }
 
     // Muestra el formulario para crear un nuevo rol
@@ -113,6 +122,5 @@ class RolController extends Controller
             // Si no tiene los permisos, bloquea el acceso
             abort(403, 'No tienes permiso para realizar esta acción');
         }
-
     }
 }

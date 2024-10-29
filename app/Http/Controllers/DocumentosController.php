@@ -123,6 +123,14 @@ class DocumentosController extends Controller
 
     public function create()
     {
+
+        $user = auth()->user();
+
+        // Bloquear acceso si el rol del usuario es "Usuario Creador"
+        if ($user->rol->nombre === 'UsuarioValidador' || $user->rol->nombre === 'UsuarioPublicador') {
+            abort(403, 'No tienes permiso para crear documentos');
+        }
+
         if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')  || auth()->user()->rol->nombre === 'Gerente' || auth()->user()->rol->nombre === 'SubGerente' || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Crear Documento') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Documentos')) {
             $tiposDocumento = TipoDocumento::all();
             $subUsuarios = SubUsuario::all(); // Obtén todos los subusuarios
@@ -138,13 +146,28 @@ class DocumentosController extends Controller
     {
         $user = auth()->user();
 
+        // Bloquear acceso si el rol del usuario es "Usuario Creador"
+        if ($user->rol->nombre === 'UsuarioCreador') {
+            abort(403, 'No tienes permiso para editar documentos');
+        }
+
         // Verificar si el documento existe
         $documento = Documento::findOrFail($id);
+
+        // Si el usuario tiene el rol "Usuario Validador", solo permitir editar si el documento está en estado "Creado"
+        if ($user->rol->nombre === 'UsuarioValidador' && $documento->estado !== 'Creado') {
+            abort(403, 'Solo puedes editar documentos en estado Creado');
+        }
+
+        // Si el usuario tiene el rol "Usuario Publicador", solo permitir editar si el documento está en estado "Validado"
+        if ($user->rol->nombre === 'UsuarioPublicador' && $documento->estado !== 'Validado') {
+            abort(403, 'Solo puedes editar documentos en estado Validado');
+        }
 
         // Verificar si el usuario tiene privilegios o es 'SuperAdmin'
         $privilegiosNecesarios = [
             'Acceso Total',
-            'Acceso Gerencia',
+            'Acceso a Gerencia',
             'Acceso a Documentos',
             'Acceso a Validar Documento',
             'Acceso a Publicar Documento'
@@ -162,11 +185,19 @@ class DocumentosController extends Controller
         $subgerencia = $user->subusuario ? $user->subusuario->subgerencia : null;
         $gerencia = $subgerencia ? $subgerencia->gerencia : $user->gerencia;
 
-        // Verificar si el documento pertenece a la gerencia o subgerencia del usuario
-        $esDocumentoValido = ($documento->gerencia_id == ($gerencia ? $gerencia->id : null)) &&
-            ($documento->subgerencia_id == ($subgerencia ? $subgerencia->id : null) || $documento->subgerencia_id === null);
+        // Verificar si el usuario es gerente
+        $esGerente = $user->rol->nombre === 'Gerente';
 
-        // Permitir acceso si tiene privilegios y el documento pertenece a su gerencia o subgerencia
+        // Verificar si el documento pertenece a la gerencia del usuario
+        $perteneceAGerencia = $documento->gerencia_id === ($gerencia ? $gerencia->id : null);
+
+        // Verificar si el documento pertenece a la subgerencia del usuario
+        $perteneceASubgerencia = $subgerencia ? $documento->subgerencia_id === $subgerencia->id : false;
+
+        // Validar si el documento es de la gerencia o de la subgerencia
+        $esDocumentoValido = $perteneceAGerencia || $perteneceASubgerencia;
+
+        // Permitir acceso si el usuario tiene privilegios y el documento pertenece a su gerencia o subgerencia
         if ($tienePrivilegios && $esDocumentoValido) {
             $tiposDocumento = TipoDocumento::all();
             return view('documentos.edit', compact('documento', 'tiposDocumento', 'user'));
@@ -175,6 +206,7 @@ class DocumentosController extends Controller
         // Bloquear el acceso si el usuario no tiene permiso para editar el documento
         abort(403, 'No tienes permiso para editar este documento');
     }
+
 
 
 
@@ -311,6 +343,40 @@ class DocumentosController extends Controller
         }
     }
 
+    public function cambiarEstado(Request $request, $id)
+    {
+        $request->validate([
+            'estado' => 'required|string',
+            'descripcion' => 'required|string',
+        ]);
+
+        try {
+            // Encuentra el documento por su ID
+            $documento = Documento::findOrFail($id);
+
+            // Guarda el estado anterior
+            $estadoAnterior = $documento->estado;
+
+            // Cambia el estado del documento
+            $documento->estado = $request->estado;
+            $documento->save();
+
+            // Crea un nuevo historial de cambios
+            HistorialCambio::create([
+                'documento_id' => $documento->id,
+                'estado_anterior' => $estadoAnterior,
+                'estado_nuevo' => $request->estado,
+                'descripcion' => $request->descripcion,
+                'user_id' => auth()->user()->id,
+                'sub_usuario_id' => auth()->user()->subusuario_id,
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error al cambiar el estado.']);
+        }
+    }
+
 
     public function generarReporte(Request $request)
     {
@@ -396,41 +462,6 @@ class DocumentosController extends Controller
         $pdf = Pdf::loadView('reporte', compact('documentos'))->setPaper('A4', 'landscape');
 
         return $pdf->download('reporte_documentos.pdf');
-    }
-
-
-    public function cambiarEstado(Request $request, $id)
-    {
-        $request->validate([
-            'estado' => 'required|string',
-            'descripcion' => 'required|string',
-        ]);
-
-        try {
-            // Encuentra el documento por su ID
-            $documento = Documento::findOrFail($id);
-
-            // Guarda el estado anterior
-            $estadoAnterior = $documento->estado;
-
-            // Cambia el estado del documento
-            $documento->estado = $request->estado;
-            $documento->save();
-
-            // Crea un nuevo historial de cambios
-            HistorialCambio::create([
-                'documento_id' => $documento->id,
-                'estado_anterior' => $estadoAnterior,
-                'estado_nuevo' => $request->estado,
-                'descripcion' => $request->descripcion,
-                'user_id' => auth()->user()->id,
-                'sub_usuario_id' => auth()->user()->subusuario_id,
-            ]);
-
-            return response()->json(['success' => true]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error al cambiar el estado.']);
-        }
     }
 
 
@@ -551,13 +582,48 @@ class DocumentosController extends Controller
 
     public function exportarPDF(Request $request)
     {
+        $user = auth()->user();
+
         // Obtener los filtros del request
         $anio = $request->input('anio');
         $meses = $request->input('mes', []);
         $searchTerm = $request->input('q');
 
-        // Obtener el historial aplicando los filtros
+        // Inicializar la consulta del historial
         $query = HistorialCambio::with('documento.tipoDocumento', 'documento.gerencia', 'documento.subgerencia');
+
+        // Filtrar según el rol del usuario
+        if ($user->rol->nombre != 'SuperAdmin') {
+            // Filtrar según la gerencia o subgerencia del usuario
+            if ($user->subusuario) {
+                $subgerencia = $user->subusuario->subgerencia;
+                $gerencia = $subgerencia->gerencia;
+
+                $query->whereHas('documento', function ($q) use ($gerencia, $subgerencia) {
+                    $q->where('gerencia_id', $gerencia->id)
+                        ->where(function ($q) use ($subgerencia) {
+                            $q->where('subgerencia_id', $subgerencia->id)
+                                ->orWhereNull('subgerencia_id');
+                        });
+                });
+            } elseif ($user->gerencia) {
+                $query->whereHas('documento', function ($q) use ($user) {
+                    $q->where('gerencia_id', $user->gerencia->id);
+                });
+            } elseif ($subgerencia = Subgerencia::where('usuario_id', $user->id)->first()) {
+                $query->whereHas('documento', function ($q) use ($subgerencia) {
+                    $q->where('gerencia_id', $subgerencia->gerencia_id)
+                        ->where(function ($q) use ($subgerencia) {
+                            $q->where('subgerencia_id', $subgerencia->id)
+                                ->orWhereNull('subgerencia_id');
+                        });
+                });
+            } else {
+                $query->whereHas('documento', function ($q) use ($user) {
+                    $q->where('user_id', $user->id);
+                });
+            }
+        }
 
         // Filtro por año
         if ($anio) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Rol;
+use App\Models\Gerencia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -40,13 +41,13 @@ class UserController extends Controller
 
                 // Filtrar usuarios que pertenezcan a la misma gerencia o subgerencias relacionadas
                 $query->whereHas('gerencia', function ($q) use ($gerencia) {
-                    $q->where('id', $gerencia->id); // Acceder correctamente a gerencias.id
+                    $q->where('id', $gerencia->id);
                 })
                     ->orWhereHas('subusuario.subgerencia', function ($q) use ($gerencia) {
                         $q->where('gerencia_id', $gerencia->id);
                     });
             } else {
-                // Si no tiene una gerencia ni subgerencia asociada, mostrar solo su propio registro de usuario
+                // Si no tiene una gerencia ni subgerencia asociada, mostrar solo su propio usuario
                 $query->where('id', $user->id);
             }
 
@@ -61,14 +62,61 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $roles = Rol::all();
-        return view('user.edit', compact('user', 'roles'));
+        $usuarioAutenticado = auth()->user();
+
+        // Verificar si el usuario es SubUsuario
+        if ($usuarioAutenticado->rol->nombre === 'SubUsuario') {
+            // Solo permitir editar su propio registro
+            if ($usuarioAutenticado->id == $user->id) {
+                return view('user.edit', compact('user', 'roles'));
+            }
+            // Si no es su propio registro, denegar acceso
+            abort(403, 'No tienes permiso para editar este registro.');
+        }
+
+        // Verificar si el usuario tiene el privilegio de "Acceso Total"
+        if ($usuarioAutenticado->rol->privilegios->contains('nombre', 'Acceso Total')) {
+            return view('user.edit', compact('user', 'roles'));
+        }
+
+        // Verificar si el usuario está editando su propio registro
+        if ($usuarioAutenticado->id === $user->id) {
+            return view('user.edit', compact('user', 'roles'));
+        }
+
+        // Verificar si el usuario autenticado es gerente de alguna gerencia
+        $gerenciaDelGerente = Gerencia::where('usuario_id', $usuarioAutenticado->id)->first();
+
+        if ($gerenciaDelGerente) {
+            // Verificar usuarios en su gerencia
+            if ($user->gerencia && $user->gerencia->id === $gerenciaDelGerente->id) {
+                return view('user.edit', compact('user', 'roles'));
+            }
+
+            // Verificar usuarios en las subgerencias de su gerencia
+            if (
+                $user->subusuario &&
+                $user->subusuario->subgerencia &&
+                $user->subusuario->subgerencia->gerencia_id === $gerenciaDelGerente->id
+            ) {
+                return view('user.edit', compact('user', 'roles'));
+            }
+        }
+
+        // Verificar si el usuario autenticado es subgerente de la misma subgerencia del usuario a editar
+        if (
+            $user->subusuario &&
+            $usuarioAutenticado->subusuario &&
+            $usuarioAutenticado->subusuario->subgerencia_id === $user->subusuario->subgerencia_id
+        ) {
+            return view('user.edit', compact('user', 'roles'));
+        }
+
+        // Si ninguna de las condiciones se cumple, denegar el acceso
+        abort(403, 'No tienes permiso para editar este usuario.');
     }
 
-    public function create()
-    {
-        $roles = Rol::all();
-        return view('user.create', compact('roles'));
-    }
+
 
     public function update(Request $request, $id)
     {
@@ -140,9 +188,33 @@ class UserController extends Controller
 
     public function cambiarContrasena($id)
     {
-        $user = User::findOrFail($id);
-        return view('user.cambiarContrasena', compact('user'));
+        $userAuth = auth()->user();          // Usuario autenticado
+        $user = User::findOrFail($id);       // Usuario cuyo ID se recibe en el método
+
+        // Permitir si el usuario autenticado es 'SuperAdmin'
+        if ($userAuth->rol->nombre === 'SuperAdmin') {
+            return view('user.cambiarContrasena', compact('user'));
+        }
+
+        // Permitir si el usuario autenticado es el mismo que el usuario a modificar
+        if ($userAuth->id === $user->id) {
+            return view('user.cambiarContrasena', compact('user'));
+        }
+
+        // Permitir si el usuario autenticado es gerente de la misma gerencia del usuario
+        if ($userAuth->rol->nombre === 'Gerente' && $userAuth->gerencia && $user->gerencia && $userAuth->gerencia->id === $user->gerencia->id) {
+            return view('user.cambiarContrasena', compact('user'));
+        }
+
+        // Permitir si el usuario autenticado es subgerente de la misma subgerencia del usuario
+        if ($userAuth->rol->nombre === 'Subgerente' && $userAuth->subusuario && $user->subusuario && $userAuth->subusuario->subgerencia->id === $user->subusuario->subgerencia->id) {
+            return view('user.cambiarContrasena', compact('user'));
+        }
+
+        // Bloquear acceso si ninguna de las condiciones anteriores se cumple
+        abort(403, 'No tienes permiso para cambiar la contraseña de este usuario');
     }
+
 
     public function actualizarContrasena(Request $request, $id)
     {

@@ -6,7 +6,11 @@
     <div class="card-body mt-3 p-2">
         <div id="content_ta_wrapper" class="dataTables_wrapper">
             <div class="table-responsive">
-                <a href="{{ route('personas.create') }}" class="btn btn-doc mb-3"><i class="fa fa-plus" aria-hidden="true"></i> Registrar Persona y Usuario</a>
+                @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total'))
+                    <a href="{{ route('personas.create') }}" class="btn btn-doc mb-3">
+                        <i class="fa fa-plus" aria-hidden="true"></i> Registrar Persona y Usuario
+                    </a>
+                @endif
                 <table id="content_ta" class="table table-striped mt-4 table-hover custom-table pt-serif-regular"
                     role="grid" aria-describedby="content_ta_info">
                     <thead>
@@ -37,16 +41,69 @@
                                 <td class="text-center">{{ $persona->celular }}</td>
                                 <td class="text-center">{{ $persona->direccion }}</td>
                                 <td class="text-center">
-                                    <a class="btn btn-info" href="{{ route('personas.show', $persona->id) }}">
-                                        <i class="fa fa-eye" aria-hidden="true"></i>
-                                    </a>
-                                    <a href="{{ route('personas.edit', $persona->id) }}" class="btn btn-warning">
-                                        <i class="fa fa-edit" aria-hidden="true"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-danger"
-                                        onclick="showUserConfirmationModal('{{ route('personas.destroy', $persona->id) }}')">
-                                        <i class="fa fa-trash" aria-hidden="true"></i>
-                                    </button>
+                                    @php
+                                        // Obtener el usuario autenticado
+                                        $usuarioAutenticado = auth()->user();
+
+                                        // Verificar si el usuario autenticado es el mismo que el usuario listado en personas
+                                        $esSuPropioRegistro = $usuarioAutenticado->id == $persona->id;
+
+                                        // Verificar si el usuario autenticado tiene el privilegio de Acceso Total
+                                        $tieneAccesoTotal = $usuarioAutenticado->rol->privilegios->contains(
+                                            'nombre',
+                                            'Acceso Total',
+                                        );
+
+                                        // Verificar si el usuario autenticado está en la misma gerencia que el usuario de la persona
+                                        $mismaGerencia =
+                                            $usuarioAutenticado->gerencia_id === $persona->user->gerencia_id ||
+                                            ($usuarioAutenticado->subgerencia &&
+                                                $usuarioAutenticado->subgerencia->gerencia_id ===
+                                                    $persona->user->gerencia_id);
+
+                                        // Verificar si el usuario autenticado es encargado de gerencia
+                                        $esEncargadoAutenticado = false;
+                                        if ($usuarioAutenticado->gerencia) {
+                                            $esEncargadoAutenticado =
+                                                $usuarioAutenticado->id === $usuarioAutenticado->gerencia->usuario_id;
+                                        }
+
+                                        // Verificar si la persona listada es el encargado de la gerencia
+                                        $esEncargadoGerencia = false;
+                                        if ($persona->user->gerencia) {
+                                            $esEncargadoGerencia =
+                                                $persona->user->id === $persona->user->gerencia->usuario_id;
+                                        }
+
+                                        // Verificar si el usuario autenticado tiene el rol de SubUsuario
+                                        $esSubUsuario = $usuarioAutenticado->rol->nombre === 'SubUsuario';
+                                    @endphp
+
+                                    {{-- Mostrar los botones si:
+    - El usuario tiene Acceso Total
+    - Es su propio registro
+    - Es encargado de gerencia (nuevo)
+    - O está en la misma gerencia y la persona listada no es el encargado de la gerencia --}}
+                                    @if (!$esSubUsuario && ($tieneAccesoTotal || $esSuPropioRegistro || ($mismaGerencia && !$esEncargadoGerencia)))
+                                        <a class="btn btn-info" href="{{ route('personas.show', $persona->id) }}">
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                        </a>
+                                        <a class="btn btn-warning" href="{{ route('personas.edit', $persona->id) }}">
+                                            <i class="fa fa-edit" aria-hidden="true"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-danger"
+                                            onclick="showUserConfirmationModal('{{ route('personas.destroy', $persona->id) }}')">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </button>
+                                    @elseif ($esSubUsuario && $esSuPropioRegistro)
+                                        <a class="btn btn-info" href="{{ route('personas.show', $persona->id) }}">
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                        </a>
+                                        <a class="btn btn-warning" href="{{ route('personas.edit', $persona->id) }}">
+                                            <i class="fa fa-edit" aria-hidden="true"></i>
+                                        </a>
+                                    @endif
+
                                 </td>
                                 <!-- Modal para confirmar la eliminación -->
                                 <div class="modal fade" tabindex="-1" role="dialog" id="userConfirmationModal">
@@ -62,7 +119,8 @@
                                                 </p>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary btn-no" data-bs-dismiss="modal">No</button>
+                                                <button type="button" class="btn btn-secondary btn-no"
+                                                    data-bs-dismiss="modal">No</button>
                                                 <form id="userDeleteForm" method="POST" class="d-inline-block">
                                                     @csrf
                                                     @method('DELETE')

@@ -33,7 +33,9 @@ class SubUsuarioController extends Controller
      */
     public function create(Gerencia $gerencia)
     {
-        if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia')) {
+        $usuario = auth()->user();
+
+        if ($usuario->rol->privilegios->contains('nombre', 'Acceso Total') || $usuario->rol->nombre === 'Gerente' || $usuario->rol->nombre === 'SubGerente') {
 
             // Obtener el ID del usuario autenticado
             $usuarioId = Auth::id();
@@ -164,12 +166,20 @@ class SubUsuarioController extends Controller
         // Obtener el ID del usuario autenticado
         $usuarioId = Auth::id();
 
+        // Permitir al usuario autenticado editar su propio registro de subusuario
+        if ($subusuario->user_id === $usuarioId) {
+            return $this->loadEditView($gerencia, $subgerencia, $subusuario);
+        }
+
         // Comprobar si el usuario tiene acceso
         if (
-            auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
-            auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia') ||
-            auth()->user()->rol->nombre === 'SubGerente'
+            auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||   auth()->user()->rol->nombre === 'Gerente' || auth()->user()->rol->nombre === 'SubGerente'
         ) {
+
+            // Primero verificar que la subgerencia pertenezca a la gerencia
+            if ($subusuario->subgerencia->gerencia_id !== $gerencia->id) {
+                abort(404, 'La subgerencia no pertenece a esta gerencia.');
+            }
 
             // Verificar si el usuario autenticado es el propietario de la gerencia
             if ($gerencia->usuario_id === $usuarioId) {
@@ -181,28 +191,40 @@ class SubUsuarioController extends Controller
                 return $this->loadEditView($gerencia, $subgerencia, $subusuario);
             }
 
-            // Verificar si el usuario autenticado es un subusuario de la gerencia
-            $subusuarioRelacionado = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+            // Verificar si el usuario autenticado es un subgerente
+            $subusuarioSubgerente = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
                 $query->where('gerencia_id', $gerencia->id);
-            })->where('user_id', $usuarioId)->first();
+            })
+                ->where('user_id', $usuarioId)
+                ->where('subgerencia_id', true) // Asumiendo que tienes un campo es_subgerente
+                ->first();
 
-            // Verificar si el subusuario relacionado existe
-            if ($subusuarioRelacionado) {
-                return $this->loadEditView($gerencia, $subgerencia, $subusuario);
+            if ($subusuarioSubgerente) {
+                // Si es subgerente, solo puede editar subusuarios de su propia subgerencia
+                if ($subusuarioSubgerente->subgerencia_id === $subusuario->subgerencia_id) {
+                    return $this->loadEditView($gerencia, $subgerencia, $subusuario);
+                } else {
+                    abort(403, 'No tienes permiso para editar subusuarios de otras subgerencias.');
+                }
             }
 
-            // Verificar si el usuario es un subgerente y pertenece a la subgerencia del subusuario que se está editando
-            if (
-                $subgerencia->id === $subusuario->subgerencia_id &&
-                $subusuario->subgerencia->gerencia_id === $gerencia->id
-            ) {
-                return $this->loadEditView($gerencia, $subgerencia, $subusuario);
+            // Verificar si el usuario autenticado es un subusuario regular de la gerencia
+            $subusuarioRegular = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
+                $query->where('gerencia_id', $gerencia->id);
+            })
+                ->where('user_id', $usuarioId)
+                ->where('subgerencia_id', false)
+                ->first();
+
+            if ($subusuarioRegular) {
+                // Los subusuarios regulares no deberían poder editar a otros subusuarios
+                abort(403, 'No tienes permiso para editar subusuarios.');
             }
 
-            // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
+            // Si no cumple ninguna de las condiciones anteriores, denegar acceso
             abort(403, 'No tienes permiso para acceder a esta gerencia.');
         } else {
-            // Si no tiene los permisos, bloquea el acceso
+            // Si no tiene los permisos básicos, bloquea el acceso
             abort(403, 'No tienes permiso para realizar esta acción');
         }
     }

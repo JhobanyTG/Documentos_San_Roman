@@ -25,7 +25,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="telefono" class="form-label label_gerencia">Teléfono:</label>
-                                    <input type="tel" name="telefono" class="form-control gerencia" id="telefono" required pattern="[0-9]+" maxlength="15" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                    <input type="tel" name="telefono" class="form-control gerencia" id="telefono" required pattern="^\d{9}$" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                                 </div>
                             </div>
 

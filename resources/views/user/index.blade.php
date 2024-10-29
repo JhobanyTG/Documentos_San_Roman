@@ -6,7 +6,10 @@
     <div class="card-body mt-3 p-2">
         <div id="content_ta_wrapper" class="dataTables_wrapper">
             <div class="table-responsive">
-                <a href="{{ route('personas.create') }}" class="btn btn-doc mb-3"><i class="fa fa-plus" aria-hidden="true"></i> Registrar Persona y Usuario</a>
+                @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total'))
+                    <a href="{{ route('personas.create') }}" class="btn btn-doc mb-3"><i class="fa fa-plus"
+                            aria-hidden="true"></i> Registrar Persona y Usuario</a>
+                @endif
                 <table id="content_ta" class="table table-striped mt-4 table-hover custom-table pt-serif-regular"
                     role="grid" aria-describedby="content_ta_info">
                     <thead>
@@ -18,6 +21,7 @@
                             <th class="text-center">Rol</th>
                             <th class="text-center">Persona</th>
                             <th class="text-center">Acciones</th>
+
                         </tr>
                     </thead>
                     <tbody class="text-center">
@@ -33,47 +37,99 @@
                                 <td class="text-center">{{ $user->rol->nombre }}</td>
                                 <td class="text-center">{{ $user->persona->nombres }} {{ $user->persona->apellido_p }}
                                     {{ $user->persona->apellido_m }}</td>
-                                <td class="text-center">
-                                    <a class="btn btn-info" href="{{ route('personas.show', $user->id) }}">
-                                        <i class="fa fa-eye" aria-hidden="true"></i>
-                                    </a>
-                                    <a class="btn btn-warning" href="{{ route('usuarios.edit', $user->id) }}">
-                                        <i class="fa fa-edit" aria-hidden="true"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-danger"
-                                        onclick="showUserConfirmationModal('{{ route('usuarios.destroy', $user->id) }}')">
-                                        <i class="fa fa-trash" aria-hidden="true"></i>
-                                    </button>
-                                </td>
 
-                                <!-- Modal para confirmar la eliminación -->
-                                <div class="modal fade" tabindex="-1" role="dialog" id="userConfirmationModal">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Confirmar Eliminación</h5>
-                                                <button type="button" class="btn-close" data-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.
-                                                </p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary btn-no"
-                                                    data-dismiss="modal">No</button>
-                                                <form id="userDeleteForm" method="POST" class="d-inline-block">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">
-                                                        <i class="fa fa-trash"></i> Sí
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
+                                <td class="text-center">
+                                    @php
+                                        // Obtener el usuario autenticado
+                                        $usuarioAutenticado = auth()->user();
+
+                                        // Verificar si el usuario autenticado es el mismo que el usuario listado
+                                        $esSuPropioRegistro = $usuarioAutenticado->id == $user->id;
+
+                                        // Verificar si el usuario autenticado tiene el privilegio de Acceso Total
+                                        $tieneAccesoTotal = $usuarioAutenticado->rol->privilegios->contains(
+                                            'nombre',
+                                            'Acceso Total',
+                                        );
+
+                                        // Verificar si el usuario autenticado está en la misma gerencia
+                                        $mismaGerencia =
+                                            $usuarioAutenticado->gerencia_id === $user->gerencia_id ||
+                                            ($usuarioAutenticado->subgerencia &&
+                                                $usuarioAutenticado->subgerencia->gerencia_id === $user->gerencia_id);
+
+                                        // Verificar si el usuario listado es encargado de gerencia
+                                        $esEncargadoGerencia = false;
+                                        if ($user->gerencia) {
+                                            $esEncargadoGerencia = $user->id === $user->gerencia->usuario_id;
+                                        }
+
+                                        // Verificar si el usuario autenticado tiene el rol de SubUsuario
+                                        $esSubUsuario = $usuarioAutenticado->rol->nombre === 'SubUsuario';
+                                    @endphp
+
+                                    {{--
+                                        Mostrar los botones si:
+                                        Para usuarios normales:
+                                        - Es su propio registro O
+                                        - Está en la misma gerencia Y el usuario listado NO es encargado
+                                        Para usuarios con acceso total:
+                                        - Siempre pueden ver los botones
+                                        Para el encargado:
+                                        - Puede ver sus propios botones
+                                    --}}
+                                    @if (!$esSubUsuario && ($tieneAccesoTotal || $esSuPropioRegistro || ($mismaGerencia && !$esEncargadoGerencia)))
+                                        {{-- Mostrar el botón de eliminar solo si tiene Acceso Total Y NO es su propio registro --}}
+                                        {{-- @if ($tieneAccesoTotal && !$esSuPropioRegistro) --}}
+                                        <a class="btn btn-info" href="{{ route('personas.show', $user->id) }}">
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                        </a>
+                                        <a class="btn btn-warning" href="{{ route('usuarios.edit', $user->id) }}">
+                                            <i class="fa fa-edit" aria-hidden="true"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-danger"
+                                            onclick="showUserConfirmationModal('{{ route('usuarios.destroy', $user->id) }}')">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </button>
+                                        {{-- @endif --}}
+                                    @elseif ($esSubUsuario && $esSuPropioRegistro)
+                                        <a class="btn btn-info" href="{{ route('personas.show', $user->id) }}">
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                        </a>
+                                        <a class="btn btn-warning" href="{{ route('usuarios.edit', $user->id) }}">
+                                            <i class="fa fa-edit" aria-hidden="true"></i>
+                                        </a>
+                                    @endif
+
+                        </td>
+                        <!-- Modal para confirmar la eliminación -->
+                        <div class="modal fade" tabindex="-1" role="dialog" id="userConfirmationModal">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirmar Eliminación</h5>
+                                        <button type="button" class="btn-close" data-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary btn-no"
+                                            data-dismiss="modal">No</button>
+                                        <form id="userDeleteForm" method="POST" class="d-inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fa fa-trash"></i> Sí
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
-                            </tr>
+                            </div>
+                        </div>
+                        </tr>
                         @endforeach
                     </tbody>
                 </table>

@@ -62,7 +62,8 @@
 
         <h4 class="d-flex justify-content-center mt-5 pt-serif-bold">Sub Usuarios</h4>
         @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
-                auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia'))
+                auth()->user()->rol->nombre === 'Gerente' ||
+                auth()->user()->rol->nombre === 'SubGerente')
             @if ($gerencia->subgerencias->count() > 0)
                 {{-- Verifica si hay subgerencias --}}
                 <div class="d-flex justify-content-end mb-3">
@@ -92,25 +93,52 @@
                 @foreach ($gerencia->subgerencias as $subgerencia)
                     @foreach ($subgerencia->subusuarios as $subusuario)
                         <tr class="pt-serif-regular">
-                            <td class="text-center">{{ $subusuario->user->persona->nombres }} {{ $subusuario->user->persona->apellido_p }}
+                            <td class="text-center">{{ $subusuario->user->persona->nombres }}
+                                {{ $subusuario->user->persona->apellido_p }}
                                 {{ $subusuario->user->persona->apellido_m }}</td>
                             <td class="text-center">{{ $subusuario->cargo }}</td>
                             <td class="text-center">{{ $subusuario->user->persona->dni }}</td>
                             <td class="text-center">{{ $subusuario->user->rol->nombre }}</td>
                             <td class="text-center">{{ $subgerencia->nombre }}</td>
+                            @php
+                                // Verificar si el usuario es el encargado de la gerencia
+                                $esEncargadoGerencia = auth()->user()->id == $gerencia->usuario_id;
+
+                                // Verificar si el usuario es el encargado de la subgerencia
+                                $esEncargadoSubgerencia = false;
+                                if (
+                                    auth()->user()->subusuario &&
+                                    auth()->user()->subusuario->subgerencia_id == $subusuario->subgerencia_id
+                                ) {
+                                    $esEncargadoSubgerencia =
+                                        $subusuario->subgerencia->usuario_id == auth()->user()->id;
+                                }
+
+                                // Verificar si el usuario autenticado es el mismo que se está listando en la tabla
+                                $esUsuarioActual = auth()->user()->id == $subusuario->user_id;
+                            @endphp
+
                             @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
-                                    auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia'))
+                                    $esEncargadoGerencia ||
+                                    $esEncargadoSubgerencia ||
+                                    $esUsuarioActual)
                                 <td class="text-center">
+                                    <!-- Mostrar el botón de editar siempre que se cumpla alguna de las condiciones -->
                                     <a href="{{ route('subusuarios.edit', [$gerencia->id, $subusuario->id]) }}"
                                         class="btn btn-sm btn-doc">
                                         <i class="fa fa-edit" style="line-height: 1;"></i> Editar
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-danger"
-                                        onclick="showSubusuarioConfirmationModal('{{ route('subusuarios.destroy', [$gerencia->id, $subusuario->id]) }}')">
-                                        <i class="fa fa-trash" style="line-height: 1;"></i> Eliminar
-                                    </button>
+
+                                    <!-- Mostrar el botón de eliminar solo si NO es el propio usuario -->
+                                    @if (!$esUsuarioActual)
+                                        <button type="button" class="btn btn-sm btn-danger"
+                                            onclick="showSubusuarioConfirmationModal('{{ route('subusuarios.destroy', [$gerencia->id, $subusuario->id]) }}')">
+                                            <i class="fa fa-trash" style="line-height: 1;"></i> Eliminar
+                                        </button>
+                                    @endif
                                 </td>
                             @endif
+
                         </tr>
                     @endforeach
                 @endforeach
@@ -167,14 +195,16 @@
                 @foreach ($gerencia->subgerencias as $subgerencia)
                     <tr class="pt-serif-regular">
                         <td class="text-center">{{ $subgerencia->nombre }}</td>
-                        <td class="text-center">{{ $subgerencia->user->persona->nombres }} {{ $subgerencia->user->persona->apellido_p }}
+                        <td class="text-center">{{ $subgerencia->user->persona->nombres }}
+                            {{ $subgerencia->user->persona->apellido_p }}
                             {{ $subgerencia->user->persona->apellido_m }}</td>
                         <td class="text-center">{{ $subgerencia->telefono }}</td>
                         <!-- <td>{{ $subgerencia->direccion }}</td> -->
                         <td class="text-center">{{ $subgerencia->estado }}</td>
                         <td class="text-center">
                             @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') ||
-                                    auth()->user()->rol->privilegios->contains('nombre', 'Acceso a Gerencia'))
+                                    auth()->user()->rol->nombre == 'Gerente' ||
+                                    auth()->user()->id == $subgerencia->usuario_id)
                                 <a href="{{ route('subgerencias.edit', [$gerencia->id, $subgerencia->id]) }}"
                                     class="btn btn-sm btn-doc">
                                     <i class="fa fa-edit" style="line-height: 1;"></i> Editar

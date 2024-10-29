@@ -214,34 +214,26 @@ class GerenciaController extends Controller
      */
     public function edit(Gerencia $gerencia)
     {
-        // Obtener el usuario autenticado
         $usuario = auth()->user();
 
-        // Si el usuario es SuperAdmin, permitir el acceso
-        if ($usuario->rol->nombre === 'SuperAdmin' || $usuario->rol->nombre === 'Gerente') {
-            // Obtener todos los usuarios que no tengan relación con subusuarios
-            $users = User::whereDoesntHave('subusuario')->with('persona')->get();
-            return view('gerencias.edit', compact('gerencia', 'users'));
+        // Verificar si el usuario tiene permiso para editar esta gerencia
+        $tienePermiso =
+            $gerencia->usuario_id === $usuario->id || // Es el gerente asignado
+            $usuario->rol->privilegios->contains('nombre', 'Acceso Total'); // Tiene acceso total
+
+        if (!$tienePermiso) {
+            abort(403, 'No tienes permiso para editar esta gerencia.');
         }
 
-        // Si el usuario es el propietario de la gerencia, permitir acceso
-        if ($gerencia->usuario_id === $usuario->id) {
-            $users = User::whereDoesntHave('subusuario')->with('persona')->get();
-            return view('gerencias.edit', compact('gerencia', 'users'));
-        }
+        // Obtener usuarios que pueden ser asignados como gerentes
+        $users = User::whereDoesntHave('subusuario')
+            ->with('persona')
+            ->get()
+            ->sortByDesc(function ($user) use ($gerencia) {
+                return $user->id === $gerencia->usuario_id ? 1 : 0;
+            });
 
-        // Verificar si el usuario es un subusuario de una subgerencia relacionada
-        $subusuario = Subusuario::whereHas('subgerencia', function ($query) use ($gerencia) {
-            $query->where('gerencia_id', $gerencia->id);
-        })->where('user_id', $usuario->id)->first();
-
-        if ($subusuario) {
-            $users = User::whereDoesntHave('subusuario')->with('persona')->get();
-            return view('gerencias.edit', compact('gerencia', 'users')); // Permitir acceso si es subusuario de la subgerencia
-        }
-
-        // Si no pertenece ni a la gerencia ni a una subgerencia, denegar acceso
-        abort(403, 'No tienes permiso para editar esta gerencia.');
+        return view('gerencias.edit', compact('gerencia', 'users'));
     }
 
 

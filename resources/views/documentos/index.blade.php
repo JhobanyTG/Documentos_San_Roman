@@ -6,8 +6,30 @@
 
     <div class="container mt-4">
         <div class="d-flex justify-content-end mb-3">
-            <a href="{{ route('documentos.create') }}" class="btn btn-doc pt-serif-regular me-2"><i class="fa fa-plus"
-                    aria-hidden="true"></i> Registrar</a>
+            @php
+                // Obtener el usuario autenticado
+                $usuarioAutenticado = auth()->user();
+
+                // Verificar si el usuario tiene el rol de "Usuario Validador"
+                $esUsuarioValidador = $usuarioAutenticado->rol->nombre === 'UsuarioValidador' || $usuarioAutenticado->rol->nombre === 'UsuarioPublicador';
+
+                // Verificar si el usuario tiene el privilegio "Acceso a Validar Documento"
+                $tienePrivilegioValidarDocumento = $usuarioAutenticado->rol->privilegios->contains(
+                    'nombre',
+                    'Acceso a Validar Documento',
+                ) || $usuarioAutenticado->rol->privilegios->contains(
+                    'nombre',
+                    'Acceso a Publicar Documento',
+                );
+            @endphp
+
+            {{-- Mostrar el botón solo si el usuario no es "Usuario Validador" o no tiene el privilegio "Acceso a Validar Documento" --}}
+            @if (!($esUsuarioValidador && $tienePrivilegioValidarDocumento))
+                <a href="{{ route('documentos.create') }}" class="btn btn-doc pt-serif-regular me-2">
+                    <i class="fa fa-plus" aria-hidden="true"></i> Registrar
+                </a>
+            @endif
+
             <form action="{{ route('reporte.documentos') }}" method="GET" style="display: inline;">
                 <input type="hidden" name="q" value="{{ $searchTerm }}">
                 <input type="hidden" name="fecha" value="{{ $fecha }}">
@@ -302,24 +324,61 @@
                                                 class="btn btn-primary" download><i class="fa fa-download"
                                                     aria-hidden="true"></i></a>
 
-                                            <!-- Verifica que el estado no sea 'Publicado' -->
-                                            <a href="{{ route('documentos.edit', $documento->id) }}"
-                                                class="btn btn-warning">
-                                                <i class="fa fa-edit" aria-hidden="true"></i>
-                                            </a>
+                                            @php
+                                                // Obtener el usuario autenticado
+                                                $usuarioAutenticado = auth()->user();
 
-                                            <!-- Verifica que el estado no sea 'Publicado' -->
-                                            <form action="{{ route('documentos.destroy', $documento->id) }}"
-                                                method="POST" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-danger"
-                                                    onclick="showConfirmationModal()">
-                                                    <i class="fa fa-trash" aria-hidden="true"></i>
-                                                </button>
-                                            </form>
+                                                // Verificar si el usuario tiene el privilegio "Acceso a Gerencia"
+                                                $tieneAccesoGerencia = $usuarioAutenticado->rol->privilegios->contains(
+                                                    'nombre',
+                                                    'Acceso a Gerencia',
+                                                );
 
+                                                // Verificar si el usuario tiene el privilegio "Acceso a Subgerencia"
+                                                $tieneAccesoSubgerencia = $usuarioAutenticado->rol->privilegios->contains(
+                                                    'nombre',
+                                                    'Acceso a Subgerencia',
+                                                );
+
+                                                // Verificar si el usuario tiene el rol "UsuarioPublicador"
+                                                $esUsuarioPublicador =
+                                                    $usuarioAutenticado->rol->nombre === 'UsuarioPublicador';
+
+                                                // Verificar si el usuario tiene el rol "UsuarioValidador"
+                                                $esUsuarioValidador =
+                                                    $usuarioAutenticado->rol->nombre === 'UsuarioValidador';
+
+                                                // Determinar si se deben mostrar los botones de edición
+                                                $mostrarBotonEditar =
+                                                    ($esUsuarioPublicador && $documento->estado === 'Validado') ||
+                                                    ($esUsuarioValidador && $documento->estado === 'Creado') ||
+                                                    $tieneAccesoGerencia;
+
+                                                // Determinar si se deben mostrar los botones de eliminación
+                                                $mostrarBotonEliminar = $tieneAccesoGerencia;
+                                            @endphp
+
+                                            @if ($mostrarBotonEditar)
+                                                <a href="{{ route('documentos.edit', $documento->id) }}"
+                                                    class="btn btn-warning">
+                                                    <i class="fa fa-edit" aria-hidden="true"></i>
+                                                </a>
+                                            @endif
+
+                                            @if ($mostrarBotonEliminar)
+                                                <form action="{{ route('documentos.destroy', $documento->id) }}"
+                                                    method="POST" style="display:inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button" class="btn btn-danger"
+                                                        onclick="showConfirmationModal()">
+                                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
                                         </td>
+
+
                                         <div class="modal fade pt-serif-regular" id="pdfModal-{{ $documento->id }}"
                                             tabindex="-1" role="dialog"
                                             aria-labelledby="pdfModalLabel-{{ $documento->id }}" aria-hidden="true">

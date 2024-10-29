@@ -1,8 +1,4 @@
-@extends('layout/template')
 
-@section('title', 'PDF historial de documentos')
-
-@section('content')
 
     <!DOCTYPE html>
     <html lang="es">

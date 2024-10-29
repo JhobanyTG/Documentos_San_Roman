@@ -3,6 +3,12 @@
 @section('title', 'Editar Gerencia')
 
 @section('content')
+    @php
+        $usuario = auth()->user();
+        $tienePermiso =
+            $gerencia->usuario_id === $usuario->id || $usuario->rol->privilegios->contains('nombre', 'Acceso Total');
+    @endphp
+        @if($tienePermiso)
     <div class="container">
         <div class="container col-md-4 card form_gerencia">
             <h2 class="form_title_gerencia">
@@ -28,7 +34,7 @@
                             <div class="form-group mt-3">
                                 <label for="telefono" class="form-label label_gerencia">Teléfono:</label>
                                 <input type="tel" name="telefono" class="form-control gerencia" id="telefono"
-                                    value="{{ $gerencia->telefono }}" required pattern="[0-9]+" maxlength="15"
+                                    value="{{ $gerencia->telefono }}" required pattern="^\d{9}$" maxlength="9"
                                     oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                             </div>
                         </div>
@@ -72,9 +78,15 @@
                         <button type="submit" class="btn btn-primary btn-gerencia ms-2"><i class="fa fa-save"
                                 aria-hidden="true"></i> Guardar Cambios</button>
                     </div>
-
                 </form>
             </div>
         </div>
     </div>
+    @else
+        <div class="container mt-4">
+            <div class="alert alert-danger">
+                No tienes permiso para editar esta gerencia.
+            </div>
+        </div>
+    @endif
 @stop

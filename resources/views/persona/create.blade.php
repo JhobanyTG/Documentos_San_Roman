@@ -65,8 +65,8 @@
                         <div class="form-group col-md-6">
                             <label for="dni" class="form-label label_persona">DNI:</label>
                             <input type="text" class="form-control persona" id="dni" name="dni"
-                                value="{{ old('dni', $persona->dni ?? '') }}" required pattern="[0-9]+" maxlength="8"
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                                value="{{ old('dni', $persona->dni ?? '') }}" required pattern="^\d{8}$"
+                                maxlength="8" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
                         <div class="form-group col-md-6">
                             <label for="f_nacimiento" class="form-label label_persona">Fecha de Nacimiento:</label>
@@ -79,7 +79,7 @@
                     <div class="form-group mt-2">
                         <label for="celular" class="form-label label_persona">Celular:</label>
                         <input type="text" class="form-control persona" id="celular" name="celular"
-                            value="{{ old('celular', $persona->celular ?? '') }}" required pattern="[0-9]+"
+                            value="{{ old('celular', $persona->celular ?? '') }}" required pattern="^\d{9}$"
                             maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                     </div>
                     <div class="form-group mt-2">
