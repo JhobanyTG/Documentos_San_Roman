@@ -34,6 +34,17 @@ class DashboardController extends Controller
                 ];
             });
 
+        $usuariosPorRol = User::select('rol_id', DB::raw('count(*) as total'))
+            ->with('rol')
+            ->groupBy('rol_id')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'rol' => $item->rol,
+                    'total' => $item->total
+                ];
+            });
+
         // $documentosPorFecha = Documento::select(DB::raw('DATE(created_at) as fecha'), DB::raw('count(*) as total'))
         //     ->groupBy(DB::raw('DATE(created_at)'))
         //     ->get();
@@ -91,7 +102,8 @@ class DashboardController extends Controller
             'totalGerencias',
             'totalSubgerencias',
             'documentosPorMes',
-            'documentosPorEstado'
+            'documentosPorEstado',
+            'usuariosPorRol'
         ));
     } catch (\Exception $e) {
         // Registro de error en el log y dd para diagnóstico

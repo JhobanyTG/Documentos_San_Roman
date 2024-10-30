@@ -2,64 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Backupacciones;
+use App\Models\BackupAccion;
 use Illuminate\Http\Request;
 
 class BackupAccionesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $acciones = BackupAccion::orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('backup-acciones.index', compact('acciones'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    // public function show(BackupAccion $backupAccion)
+    // {
+    //     return view('backup-acciones.show', compact('backupAccion'));
+    // }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Backupacciones $backupacciones)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Backupacciones $backupacciones)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Backupacciones $backupacciones)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Backupacciones $backupacciones)
-    {
-        //
-    }
+    // No necesitamos los otros métodos ya que este es un log de solo lectura
 }

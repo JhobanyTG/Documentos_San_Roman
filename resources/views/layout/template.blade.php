@@ -106,6 +106,12 @@
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('backup-acciones.index') }}">
+                            <i class="fa fa-history" aria-hidden="true"></i>
+                            <span>Historial Acciones</span>
+                        </a>
+                    </li>
                 @endif
                 {{-- <li class="nav-item">
                         <a href="{{ url('rolprivilegios') }}">

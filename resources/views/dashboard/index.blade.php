@@ -85,22 +85,9 @@
         </div>
         <div class="row">
             <div class="col-md-6 mb-4">
-                <div class="row">
-                    <div class="col-md-12 mb-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <canvas id="fechasChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 mb-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <canvas id="mesesChart"></canvas>
-                            </div>
-                        </div>
+                <div class="card">
+                    <div class="card-body">
+                        <canvas id="rolesChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -108,6 +95,22 @@
                 <div class="card">
                     <div class="card-body">
                         <canvas id="tiposChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <canvas id="fechasChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <canvas id="mesesChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -147,6 +150,7 @@
 <script>
     // Datos para los gráficos
     const documentosPorGerencia = @json($documentosPorGerencia);
+    const usuariosPorRol = @json($usuariosPorRol);
     const documentosPorTipo = @json($documentosPorTipo);
     const documentosPorFechaUltimoMes = @json($documentosPorFechaUltimoMes);
     const documentosPorFechaHistorico = @json($documentosPorFechaHistorico);
@@ -242,6 +246,31 @@
                 },
                 x: {
                     display: false  // Esto oculta todo el eje X
+                }
+            }
+        }
+    });
+
+    // Gráfico de torta: Usuarios por Rol
+    new Chart(document.getElementById('rolesChart'), {
+        type: 'pie',
+        data: {
+            labels: usuariosPorRol.map(item => item.rol ? item.rol.nombre : 'Sin rol'),
+            datasets: [{
+                label: 'Número de Usuarios por Rol',
+                data: usuariosPorRol.map(item => item.total),
+                backgroundColor: generateRandomColors(usuariosPorRol.length)
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Usuarios por Rol'
                 }
             }
         }

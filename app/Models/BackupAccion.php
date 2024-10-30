@@ -12,8 +12,17 @@ class BackupAccion extends Model
     protected $table = 'backupacciones';
 
     protected $fillable = [
-        'user_id',
-        'titulo_documento',
+        'admin_id',
+        'admin_nombre',
+        'tipo_peticion',
         'accion',
+        'descripcion',
+        'usuario_afectado_id',
+        'usuario_afectado_nombre',
+        'detalles_cambios'
+    ];
+
+    protected $casts = [
+        'detalles_cambios' => 'array'
     ];
 }

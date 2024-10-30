@@ -14,6 +14,7 @@ use App\Http\Controllers\SubgerenciaController;
 use App\Http\Controllers\SubUsuarioController;
 use App\Http\Controllers\TipoDocumentoController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BackupAccionesController;
 
 
 
@@ -96,20 +97,41 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
         // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
         Route::resource('rolprivilegios', RolPrivilegioController::class);
+
+        // Nuevas rutas para el historial de acciones
+        Route::get('/backup-acciones', [BackupAccionesController::class, 'index'])
+            ->name('backup-acciones.index');
+        Route::get('/backup-acciones/{backupAccion}', [BackupAccionesController::class, 'show'])
+            ->name('backup-acciones.show');
     });
 
     // Rutas compartidas entre "Acceso Total" y "Acceso a Gerencia"
     Route::group(['middleware' => ['auth', 'privilege:Acceso Total,Acceso a Gerencia']], function () {
+        // Rutas de usuarios con registro de acciones (solo modificaciones)
+        Route::put('/usuarios/{usuario}', [UserController::class, 'update'])
+            ->middleware(['register.actions'])
+            ->name('usuarios.update');
+
+        Route::delete('/usuarios/{usuario}', [UserController::class, 'destroy'])
+            ->middleware(['register.actions'])
+            ->name('usuarios.destroy');
+
+        Route::put('/usuarios/{usuario}/actualizar-contrasena', [UserController::class, 'actualizarContrasena'])
+            ->middleware(['register.actions'])
+            ->name('usuarios.actualizarContrasena');
+
+        // Rutas sin registro de acciones (creación y lectura)
+        Route::post('/usuarios', [UserController::class, 'store'])->name('usuarios.store');
+        Route::get('/usuarios', [UserController::class, 'index'])->name('usuarios.index');
+        Route::get('/usuarios/create', [UserController::class, 'create'])->name('usuarios.create');
+        Route::get('/usuarios/{usuario}', [UserController::class, 'show'])->name('usuarios.show');
+        Route::get('/usuarios/{usuario}/edit', [UserController::class, 'edit'])->name('usuarios.edit');
+        Route::get('/usuarios/{usuario}/cambiar-contrasena', [UserController::class, 'cambiarContrasena'])
+            ->name('usuarios.cambiarContrasena');
+
+        // Todo el resto de tus rutas sin modificar
         Route::resource('personas', PersonaController::class);
         Route::resource('roles', RolController::class);
-        Route::resource('/usuarios', UserController::class)
-            ->middleware('auth');
-        Route::get('/usuarios/{id}/cambiar-contrasena', [UserController::class, 'cambiarContrasena'])
-            ->middleware('auth')
-            ->name('usuarios.cambiarContrasena');
-        Route::put('/usuarios/{id}/actualizar-contrasena', [UserController::class, 'actualizarContrasena'])
-            ->middleware('auth')
-            ->name('usuarios.actualizarContrasena');
 
         Route::get('/subusuarios/{id}/cambiar-contrasena', [SubusuarioController::class, 'cambiarContrasena'])
             ->middleware('auth')
@@ -126,10 +148,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/register', [UserController::class, 'store'])
             ->middleware('auth')
             ->name('register.store');
+
         Route::prefix('gerencias/{gerencia}')->group(function () {
             Route::resource('subgerencias', SubgerenciaController::class);
             Route::resource('subusuarios', SubUsuarioController::class);
         });
+
         Route::resource('gerencias', GerenciaController::class)
             ->middleware('auth');
         route::get('/gerencias/{id}', [GerenciaController::class, 'show'])
