@@ -128,7 +128,7 @@
                     </div>
 
                     <!-- Tabla del historial filtrado -->
-                    <div class="col-md-10 order-md-1">
+                    <div class="table_doc col-md-10 order-md-1">
                         <div id="example1_wrapper" class="dataTables_wrapper dt-bootstrap4">
                             <table id="example1" class="table mt-4 table-hover pt-serif-regular" role="grid"
                                 aria-describedby="example1_info">

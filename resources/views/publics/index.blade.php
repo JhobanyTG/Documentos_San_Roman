@@ -162,13 +162,13 @@
                             <tbody>
                                 @foreach ($documentos as $documento)
                                     <tr role="row" class="border-table border-bottom-3" data-id="{{ $documento->id }}">
-                                        <td>
+                                        <td class="text-center">
                                             {{ $documento->id }}
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             {{ $documento->created_at->format('Y-m-d') }}<br>
                                         </td>
-                                        <td>
+                                        <td class="text-center">
                                             @php
                                                 if ($searchTerm) {
                                                     // Escapar el término de búsqueda para evitar problemas de HTML
@@ -186,8 +186,8 @@
                                             @endphp
                                             {!! $highlightedTitle !!}
                                         </td>
-                                        <td>{{ $documento->tipoDocumento->nombre }}</td>
-                                        <td>
+                                        <td class="text-center">{{ $documento->tipoDocumento->nombre }}</td>
+                                        <td class="text-center">
                                             @if (strlen($documento->descripcion) > 370)
                                                 @php
                                                     if ($searchTerm) {
@@ -269,11 +269,11 @@
                                                     </div>
                                                     <div class="modal-body" id="pdfModalBody-{{ $documento->id }}"></div>
                                                     <div class="modal-footer">
-                                                        <a href="{{ asset('storage/archivos/' . basename($documento->archivo)) }}"
+                                                        <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                                             class="btn btn-info" target="_blank"><i
                                                                 class="fa fa-external-link-square" aria-hidden="true"></i>
                                                             Abrir en otra ventana</a>
-                                                        <a href="{{ asset('storage/archivos/' . basename($documento->archivo)) }}"
+                                                        <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                                             download="{{ basename($documento->archivo) }}"
                                                             class="btn btn-dark"><i class="fa fa-download"
                                                                 aria-hidden="true"></i> Descargar</a>

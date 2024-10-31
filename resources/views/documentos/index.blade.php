@@ -101,7 +101,7 @@
         @endif
         <div class="row">
             <!-- Columna del filtro -->
-            <div class="filtro order-md-2 col-md-2 col-ms-12">
+            <div class="filtro order-md-2 col-md-2">
                 <div class="mb-3">
                     <h4>Listar</h4>
                     <div class="row">
@@ -176,7 +176,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-10 order-md-1">
+            <div class="table_doc col-md-10 order-md-1">
                 <div class="card-body">
                     <div id="example1_wrapper" class="dataTables_wrapper dt-bootstrap4">
                         <table id="example1" class="table mt-4 table-hover pt-serif-regular" role="grid"
