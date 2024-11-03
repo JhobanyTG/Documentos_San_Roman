@@ -302,6 +302,40 @@
         .toggle-sidebar-btn {
             display: none;
         }
+
+        .sidebar {
+            width: 60px !important; /* Forzar ancho mínimo */
+            transition: none; /* Eliminar transición en móvil */
+        }
+
+        .content {
+            margin-left: 60px !important; /* Forzar margen mínimo */
+            transition: none; /* Eliminar transición en móvil */
+        }
+
+        .sidebar .nav-text,
+        .sidebar .company-name,
+        .sidebar .logo-nombre,
+        .logout-btn button a {
+            display: none !important; /* Ocultar textos en móvil */
+        }
+
+        .sidebar .logo img {
+            width: 40px !important;
+            height: 50px !important;
+        }
+
+        .sidebar .logo {
+            height: 50px !important;
+        }
+
+        /* Asegurar que el botón de logout esté correctamente posicionado */
+        .sidebar .logout-btn {
+            width: 100%;
+            bottom: 90px;
+            display: flex;
+            justify-content: center;
+        }
     }
 
 
@@ -1111,15 +1145,18 @@
             display: block;
         }
 
-        .filtro{
+
+        .table_doc {
+            order: 2 !important;
+            ;
+            width: 100%;
+        }
+
+        .filtro_doc {
             order: 1 !important;
-            width: 90%;
+            width: 500px;
             margin-left: auto;
             margin-right: auto;
-        }
-        .table_doc{
-            order: 2;
-            width: 100%  !important;
         }
     }
 
@@ -1157,6 +1194,7 @@
         }
 
         .form_gerencia,
+        .form_documento,
         .form_subgerencia,
         .form_privilegio,
         .form_tipodocumento,
@@ -1181,32 +1219,42 @@
         }
 
         .pagination {
-        justify-content: space-between;
-    }
+            justify-content: space-between;
 
-    .pagination .page-item {
-        flex: 1; /* Hacer que los elementos ocupen el mismo ancho */
-    }
+        }
 
-    .pagination .page-item .page-link {
-        padding: 8px;
-        text-align: center;
-    }
+        .pagination .page-item {
+            flex: 1;
+            /* Hacer que los elementos ocupen el mismo ancho */
+        }
 
-    .pagination .page-item.active .page-link {
-        background: linear-gradient(to top left, var(--color-muni3), var(--color-muni4));
-        color: var(--color-negro);
-    }
+        .pagination .page-item .page-link {
+            padding: 8px;
+            text-align: center;
+        }
 
-    /* Colapsar los enlaces de las páginas en pantallas pequeñas */
-    .pagination .page-item:not(:first-child):not(:last-child) {
-        display: none;
-    }
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(to top left, var(--color-muni3), var(--color-muni4));
+            color: var(--color-negro);
+        }
 
-    /* Mostrar un número de página para pantallas pequeñas */
-    .pagination .page-item:nth-child(2) {
-        display: block;
-    }
+        /* Colapsar los enlaces de las páginas en pantallas pequeñas */
+        .pagination .page-item:not(:first-child):not(:last-child) {
+            display: none;
+        }
+
+        /* Mostrar un número de página para pantallas pequeñas */
+        .pagination .page-item:nth-child(2) {
+            display: block;
+        }
+
+        .pdf-preview-icon {
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: var(--color-blanco);
+        }
+
 
     }
 
@@ -1222,4 +1270,6 @@
         color: var(--color-icono-eye);
         cursor: pointer;
     }
+
+
 }

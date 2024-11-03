@@ -6,8 +6,8 @@
     <div class="container mt-4">
         <form action="{{ route('public.index') }}" method="GET" class="mb-3">
             <div class="buscador input-group mb-3">
-                <input type="text" class="form-control" placeholder="Buscar..." nasme="q" value="{{ $searchTerm }}">
-                @if ($filtroAnio || $searchTerm || !empty($filtroMes))
+                <input type="text" class="form-control" placeholder="Buscar..." name="q" value="{{ $searchTerm }}">
+                @if ($filtroAnio || $searchTerm || !empty($filtroMes) || !empty($filtroTipoDocumento))
                     <a class="border border-2" href="{{ route('public.index') }}">
                         <i class="fa fa-times m-4" style="color: red;" aria-hidden="true"></i>
                     </a>
@@ -20,48 +20,65 @@
                         <input type="hidden" name="mes[]" value="{{ $mes }}">
                     @endforeach
                 @endif
+                @if (!empty($filtroTipoDocumento))
+                    @foreach ($filtroTipoDocumento as $tipo)
+                        <input type="hidden" name="tipodocumento_id[]" value="{{ $tipo }}">
+                    @endforeach
+                @endif
                 <button class="btn btn-public" type="submit">Buscar</button>
             </div>
         </form>
-        @if ($searchTerm || $filtroAnio || !empty($filtroMes))
+        @if ($searchTerm || $filtroAnio || !empty($filtroMes) || !empty($filtroTipoDocumento))
             <p class="resultado-buscador">
                 Resultados de búsqueda de:
-                @if ($filtroAnio)
-                    @if ($searchTerm || $filtroMes)
+                @if ($searchTerm || $filtroAnio || !empty($filtroMes) || !empty($filtroTipoDocumento))
+
+                    @if ($filtroAnio)
+                        @if ($searchTerm || $filtroMes)
+                        @endif
+                        <strong>Año: {{ $filtroAnio }}</strong>
                     @endif
-                    <strong>Año: {{ $filtroAnio }}</strong>
-                @endif
-                @if ($filtroMes)
-                    @if ($filtroAnio || $searchTerm)
-                        ,
+                    @if ($filtroMes)
+                        @if ($filtroAnio || $searchTerm)
+                            ,
+                        @endif
+                        <strong>Mes:
+                            @php
+                                $mesesEnEspanol = [
+                                    1 => 'Enero',
+                                    2 => 'Febrero',
+                                    3 => 'Marzo',
+                                    4 => 'Abril',
+                                    5 => 'Mayo',
+                                    6 => 'Junio',
+                                    7 => 'Julio',
+                                    8 => 'Agosto',
+                                    9 => 'Septiembre',
+                                    10 => 'Octubre',
+                                    11 => 'Noviembre',
+                                    12 => 'Diciembre',
+                                ];
+                            @endphp
+                            {{ implode(', ', array_map(fn($mes) => $mesesEnEspanol[$mes] ?? $mes, $filtroMes)) }}
+                        </strong>
                     @endif
-                    <strong>Mes:
-                        @php
-                            $mesesEnEspanol = [
-                                1 => 'Enero',
-                                2 => 'Febrero',
-                                3 => 'Marzo',
-                                4 => 'Abril',
-                                5 => 'Mayo',
-                                6 => 'Junio',
-                                7 => 'Julio',
-                                8 => 'Agosto',
-                                9 => 'Septiembre',
-                                10 => 'Octubre',
-                                11 => 'Noviembre',
-                                12 => 'Diciembre',
-                            ];
-                        @endphp
-                        {{ implode(', ', array_map(fn($mes) => $mesesEnEspanol[$mes] ?? $mes, $filtroMes)) }}
-                    </strong>
-                @endif
-                @if ($searchTerm)
-                    @if ($filtroAnio || $filtroMes)
-                        y
+                    @if (!empty($filtroTipoDocumento))
+                        @if ($searchTerm || $filtroAnio || $filtroMes)
+                            ,
+                        @endif
+                        <strong>Tipo:
+                            {{ implode(', ', $tiposDocumento->whereIn('id', $filtroTipoDocumento)->pluck('nombre')->toArray()) ?: 'Ninguno seleccionado' }}
+                        </strong>
                     @endif
-                    <strong>Término: {{ $searchTerm }}</strong>
+                    @if ($searchTerm)
+                        @if ($filtroAnio || $filtroMes)
+                            y
+                        @endif
+                        <strong>Término: {{ $searchTerm }}</strong>
+                    @endif
+                @else
+                    <strong>No se encontraron resultados.</strong>
                 @endif
-            </p>
         @endif
         <div class="row">
             <div class="filtro order-md-2 col-md-2">
@@ -100,35 +117,53 @@
                             <div class="col-12">
                                 <form action="{{ route('public.index') }}" method="GET" id="filtroForm">
                                     <div class="input-group mb-3">
-                                        @if ($filtroAnio)
-                                            @php
-                                                $mesesEnEspanol = [
-                                                    1 => 'Enero',
-                                                    2 => 'Febrero',
-                                                    3 => 'Marzo',
-                                                    4 => 'Abril',
-                                                    5 => 'Mayo',
-                                                    6 => 'Junio',
-                                                    7 => 'Julio',
-                                                    8 => 'Agosto',
-                                                    9 => 'Septiembre',
-                                                    10 => 'Octubre',
-                                                    11 => 'Noviembre',
-                                                    12 => 'Diciembre',
-                                                ];
-                                            @endphp
-                                            @foreach ($availableMonths as $month)
-                                                <div class="form-check">
-                                                    <input type="checkbox" class="form-check-input m-1" name="mes[]"
-                                                        id="mes{{ $month }}" value="{{ $month }}"
-                                                        {{ in_array($month, $filtroMes) ? 'checked' : '' }}>
-                                                    <label class="form-check-label"
-                                                        for="mes{{ $month }}">{{ $mesesEnEspanol[$month] }}</label>
-                                                </div>
-                                            @endforeach
-                                        @else
-                                            <p>Selecciona un año para filtrar los meses.</p>
-                                        @endif
+                                        <div class="col-12">
+                                            @if ($filtroAnio)
+                                                @php
+                                                    $mesesEnEspanol = [
+                                                        1 => 'Enero',
+                                                        2 => 'Febrero',
+                                                        3 => 'Marzo',
+                                                        4 => 'Abril',
+                                                        5 => 'Mayo',
+                                                        6 => 'Junio',
+                                                        7 => 'Julio',
+                                                        8 => 'Agosto',
+                                                        9 => 'Septiembre',
+                                                        10 => 'Octubre',
+                                                        11 => 'Noviembre',
+                                                        12 => 'Diciembre',
+                                                    ];
+                                                @endphp
+                                                @foreach ($availableMonths as $month)
+                                                    <div class="form-check">
+                                                        <input type="checkbox" class="form-check-input m-1" name="mes[]"
+                                                            id="mes{{ $month }}" value="{{ $month }}"
+                                                            {{ in_array($month, $filtroMes) ? 'checked' : '' }}>
+                                                        <label class="form-check-label"
+                                                            for="mes{{ $month }}">{{ $mesesEnEspanol[$month] }}</label>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <p>Selecciona un año para filtrar los meses.</p>
+                                            @endif
+                                        </div>
+                                        <br>
+                                        <div class="mb-3">
+                                            <h4 for="tipodocumento_id" class="form-label">Tipo de Documento</h4>
+                                            <div>
+                                                @foreach ($tiposDocumento as $tipo)
+                                                    <div class="form-check">
+                                                        <input type="checkbox" name="tipodocumento_id[]"
+                                                            value="{{ $tipo->id }}"
+                                                            id="tipodocumento_{{ $tipo->id }}" class="form-check-input"
+                                                            {{ is_array($filtroTipoDocumento) && in_array($tipo->id, $filtroTipoDocumento) ? 'checked' : '' }}>
+                                                        <label for="tipodocumento_{{ $tipo->id }}"
+                                                            class="form-check-label">{{ $tipo->nombre }}</label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                         <input type="hidden" name="anio" value="{{ $filtroAnio }}">
                                         <input type="hidden" name="q" value="{{ $searchTerm }}">
                                         <div style="display: block; margin-bottom: 10px; width: 100%;">
@@ -161,7 +196,8 @@
                             </thead>
                             <tbody>
                                 @foreach ($documentos as $documento)
-                                    <tr role="row" class="border-table border-bottom-3" data-id="{{ $documento->id }}">
+                                    <tr role="row" class="border-table border-bottom-3"
+                                        data-id="{{ $documento->id }}">
                                         <td class="text-center">
                                             {{ $documento->id }}
                                         </td>

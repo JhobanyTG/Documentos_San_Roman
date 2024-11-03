@@ -14,14 +14,18 @@ class PublicController extends Controller
         // Inicializar el query con el filtro de estado 'Publicado'
         $query = Documento::where('estado', 'Publicado');
 
+        $tiposDocumento = TipoDocumento::all(); // Asegúrate de tener el modelo TipoDocumento configurado
+
+
         // Obtener los filtros de búsqueda
         $searchTerm = $request->input('q');
         $fecha = $request->input('fecha');
         $filtroAnio = $request->input('anio');
         $filtroMes = $request->input('mes', []); // Inicializar como array vacío si no hay valor
+        $filtroTipoDocumento = $request->input('tipodocumento_id', []);
 
         // Aplicar filtros de búsqueda
-        if ($searchTerm || $fecha || $filtroAnio || $filtroMes) {
+        if ($searchTerm || $fecha || $filtroAnio || $filtroMes || $filtroTipoDocumento) {
             if ($searchTerm) {
                 $query->where(function ($query) use ($searchTerm) {
                     $query->where('titulo', 'like', '%' . $searchTerm . '%')
@@ -41,6 +45,10 @@ class PublicController extends Controller
                 // Usar whereIn para manejar múltiples meses
                 $query->whereIn(DB::raw('MONTH(created_at)'), $filtroMes);
             }
+
+            if (!empty($filtroTipoDocumento)) {
+                $query->where('tipodocumento_id', $filtroTipoDocumento);
+            }
         }
 
         // Ordenar por la fecha de creación más reciente
@@ -48,7 +56,7 @@ class PublicController extends Controller
 
         // Paginación
         $documentos = $query->paginate(5);
-        $documentos->appends(['q' => $searchTerm, 'fecha' => $fecha, 'anio' => $filtroAnio, 'mes' => $filtroMes]);
+        $documentos->appends(['q' => $searchTerm, 'fecha' => $fecha, 'anio' => $filtroAnio, 'mes' => $filtroMes, 'tipodocumento_id' => $filtroTipoDocumento]);
 
         // Obtener años disponibles para el filtro
         $availableYears = Documento::distinct()
@@ -69,7 +77,7 @@ class PublicController extends Controller
         }
 
         // Retornar la vista con los documentos filtrados
-        return view('publics.index', compact('documentos', 'searchTerm', 'fecha', 'availableYears', 'availableMonths', 'filtroAnio', 'filtroMes'));
+        return view('publics.index', compact('documentos', 'searchTerm', 'fecha', 'availableYears', 'availableMonths', 'filtroAnio', 'filtroMes',  'tiposDocumento', 'filtroTipoDocumento'));
     }
 
 }

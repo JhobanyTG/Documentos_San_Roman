@@ -33,11 +33,15 @@ class DocumentosController extends Controller
             // Inicializar la consulta
             $query = Documento::with('tipoDocumento', 'gerencia', 'subgerencia');
 
+            $tiposDocumento = TipoDocumento::all(); // Asegúrate de tener el modelo TipoDocumento configurado
+
+
             // Aplicar filtros de búsqueda
             $searchTerm = $request->input('q');
             $fecha = $request->input('fecha');
             $filtroAnio = $request->input('anio');
             $filtroMes = $request->input('mes', []);
+            $filtroTipoDocumento = $request->input('tipodocumento_id', []);
 
             // Verificar si el usuario tiene el rol de 'SuperAdmin'
             if ($user->rol->nombre == 'SuperAdmin') {
@@ -71,7 +75,7 @@ class DocumentosController extends Controller
                 }
             }
 
-            if ($searchTerm || $fecha || $filtroAnio || $filtroMes) {
+            if ($searchTerm || $fecha || $filtroAnio || $filtroMes || $filtroTipoDocumento) {
                 if ($searchTerm) {
                     $query->where(function ($query) use ($searchTerm) {
                         $query->where('titulo', 'like', '%' . $searchTerm . '%')
@@ -90,12 +94,16 @@ class DocumentosController extends Controller
                 if ($filtroMes && is_array($filtroMes) && !empty($filtroMes)) {
                     $query->whereIn(DB::raw('MONTH(created_at)'), $filtroMes);
                 }
+
+                if (!empty($filtroTipoDocumento)) {
+                    $query->where('tipodocumento_id', $filtroTipoDocumento);
+                }
             }
 
             $query->orderByDesc('created_at');
             $documentos = $query->paginate(5);
 
-            $documentos->appends(['q' => $searchTerm, 'fecha' => $fecha, 'anio' => $filtroAnio, 'mes' => $filtroMes]);
+            $documentos->appends(['q' => $searchTerm, 'fecha' => $fecha, 'anio' => $filtroAnio, 'mes' => $filtroMes, 'tipodocumento_id' => $filtroTipoDocumento]);
 
             // Obtener años disponibles para el filtro
             $availableYears = Documento::distinct()
@@ -115,7 +123,7 @@ class DocumentosController extends Controller
                     ->pluck('month');
             }
 
-            return view('documentos.index', compact('documentos', 'searchTerm', 'fecha', 'availableYears', 'availableMonths', 'filtroAnio', 'filtroMes'));
+            return view('documentos.index', compact('documentos', 'searchTerm', 'fecha', 'availableYears', 'availableMonths', 'filtroAnio', 'filtroMes', 'tiposDocumento', 'filtroTipoDocumento'));
         } else {
             return redirect()->to('/');
         }
@@ -273,7 +281,7 @@ class DocumentosController extends Controller
                 'max:10000',
                 Rule::unique('documentos', 'archivo')->ignore($documento->id),
             ],
-            'estado' => 'required|in:Creado,Validado,Publicado',
+            'estado' => 'in:Creado,Validado,Publicado',
             'sub_usuarios_id' => 'nullable|exists:subusuarios,id',
         ]);
 
@@ -377,94 +385,6 @@ class DocumentosController extends Controller
         }
     }
 
-
-    public function generarReporte(Request $request)
-    {
-        $user = Auth::user();
-
-        // Inicializar la consulta
-        $query = Documento::with('tipoDocumento', 'gerencia', 'subgerencia');
-
-        // Aplicar filtros de búsqueda
-        $searchTerm = $request->input('q');
-        $fecha = $request->input('fecha');
-        $filtroAnio = $request->input('anio');
-        $filtroMes = $request->input('mes', []); // Array de meses
-
-        // Filtrar según el rol del usuario
-        if ($user->rol->nombre != 'SuperAdmin') {
-            // Filtrar según la gerencia o subgerencia del usuario
-            if ($user->subusuario) {
-                $subgerencia = $user->subusuario->subgerencia;
-                $gerencia = $subgerencia->gerencia;
-
-                $query->where('gerencia_id', $gerencia->id)
-                    ->where(function ($q) use ($subgerencia) {
-                        $q->where('subgerencia_id', $subgerencia->id)
-                            ->orWhereNull('subgerencia_id');
-                    });
-            } elseif ($user->gerencia) {
-                $query->where('gerencia_id', $user->gerencia->id);
-            } elseif ($subgerencia = Subgerencia::where('usuario_id', $user->id)->first()) {
-                $query->where('gerencia_id', $subgerencia->gerencia_id)
-                    ->where(function ($q) use ($subgerencia) {
-                        $q->where('subgerencia_id', $subgerencia->id)
-                            ->orWhereNull('subgerencia_id');
-                    });
-            } else {
-                $query->where('user_id', $user->id);
-            }
-        }
-
-        // Aplicar filtros si existen
-        if ($searchTerm || $fecha || $filtroAnio || $filtroMes) {
-
-            // Filtro por término de búsqueda
-            if ($searchTerm) {
-                $query->where(function ($q) use ($searchTerm) {
-                    $q->where('titulo', 'like', '%' . $searchTerm . '%')
-                        ->orWhere('descripcion', 'like', '%' . $searchTerm . '%')
-                        ->orWhereHas('gerencia', function ($q) use ($searchTerm) {
-                            $q->where('nombre', 'like', '%' . $searchTerm . '%');
-                        })
-                        ->orWhereHas('subgerencia', function ($q) use ($searchTerm) {
-                            $q->where('nombre', 'like', '%' . $searchTerm . '%');
-                        });
-                });
-            }
-
-            // Filtro por fecha exacta
-            if ($fecha) {
-                $query->whereDate('created_at', $fecha);
-            }
-
-            // Filtro por año
-            if ($filtroAnio) {
-                $query->whereYear('created_at', $filtroAnio);
-            }
-
-            // Filtro por mes (junto con el año si está presente)
-            if (!empty($filtroMes) && is_array($filtroMes)) {
-                // Verifica si también hay filtro de año para aplicar ambos juntos
-                $query->whereIn(DB::raw('MONTH(created_at)'), $filtroMes);
-            }
-        }
-
-        // Obtener los documentos filtrados
-        $documentos = $query->orderByDesc('created_at')->get();
-
-        // Si no hay documentos, retornar con un mensaje
-        if ($documentos->isEmpty()) {
-            return redirect()->back()->with('error', 'No se encontraron documentos para exportar.');
-        }
-
-        // Generar el PDF con los documentos filtrados
-        $pdf = Pdf::loadView('reporte', compact('documentos'))->setPaper('A4', 'landscape');
-
-        return $pdf->download('reporte_documentos.pdf');
-    }
-
-
     public function mostrarHistorial(Request $request, $documentoId)
     {
         if (!auth()->user()) {
@@ -481,6 +401,8 @@ class DocumentosController extends Controller
         $fecha = $request->input('fecha');
         $filtroAnio = $request->input('anio');
         $filtroMes = $request->input('mes', []);
+        $filtroTipoDocumento = $request->input('tipodocumento_id', []);
+
 
         // Verificar si el usuario tiene el rol de 'SuperAdmin'
         if ($user->rol->nombre === 'SuperAdmin') {
@@ -521,7 +443,7 @@ class DocumentosController extends Controller
             }
         }
 
-        if ($searchTerm || $fecha || $filtroAnio || $filtroMes) {
+        if ($searchTerm || $fecha || $filtroAnio || $filtroMes || $filtroTipoDocumento) {
 
             // Aplicar filtros de búsqueda si están presentes
             if ($searchTerm) {
@@ -548,6 +470,12 @@ class DocumentosController extends Controller
             if (!empty($filtroMes) && is_array($filtroMes)) {
                 $query->whereIn(DB::raw('MONTH(created_at)'), $filtroMes);
             }
+
+            if (!empty($filtroTipoDocumento)) {
+                $query->whereHas('documento', function ($q) use ($filtroTipoDocumento) {
+                    $q->whereIn('tipodocumento_id', $filtroTipoDocumento);
+                });
+            }
         }
 
         // Ordenar por la fecha de creación
@@ -555,7 +483,7 @@ class DocumentosController extends Controller
 
         // Obtener el historial filtrado y paginar los resultados
         $historial = $query->paginate(7);
-        $historial->appends(['q' => $searchTerm, 'fecha' => $fecha, 'anio' => $filtroAnio, 'mes' => $filtroMes]);
+        $historial->appends(['q' => $searchTerm, 'fecha' => $fecha, 'anio' => $filtroAnio, 'mes' => $filtroMes, 'tipodocumento_id' => $filtroTipoDocumento]);
 
         // Obtener años disponibles para el filtro
         $availableYears = HistorialCambio::distinct()
@@ -576,8 +504,112 @@ class DocumentosController extends Controller
         }
 
         // Devolver la vista con el historial filtrado y los filtros disponibles
-        return view('historial.index', compact('historial', 'searchTerm', 'fecha', 'availableYears', 'availableMonths', 'filtroAnio', 'filtroMes'));
+        return view('historial.index', compact('historial', 'searchTerm', 'fecha', 'availableYears', 'availableMonths', 'filtroAnio', 'filtroMes', 'filtroTipoDocumento'));
     }
+
+    public function generarReporte(Request $request)
+{
+    $user = Auth::user();
+
+    // Inicializar la consulta
+    $query = Documento::with(['tipoDocumento', 'gerencia', 'subgerencia']);
+
+    // Obtener y validar los filtros
+    $searchTerm = trim($request->input('q'));
+    $fecha = $request->input('fecha');
+    $filtroAnio = $request->input('anio');
+    $filtroMes = json_decode($request->input('mes'), true);
+    $filtroTipoDocumento = json_decode($request->input('tipodocumento_id'), true);
+
+
+    // Convertir filtroMes a array si es string
+    if (!is_array($filtroMes)) {
+        $filtroMes = explode(',', $filtroMes);
+    }
+
+    // Convertir filtroTipoDocumento a array si es string
+    if (!is_array($filtroTipoDocumento)) {
+        $filtroTipoDocumento = explode(',', $filtroTipoDocumento);
+    }
+
+    // Filtrar según el rol del usuario
+    if ($user->rol->nombre != 'SuperAdmin') {
+        if ($user->subusuario) {
+            $subgerencia = $user->subusuario->subgerencia;
+            $gerencia = $subgerencia->gerencia;
+
+            $query->where('gerencia_id', $gerencia->id)
+                ->where(function ($q) use ($subgerencia) {
+                    $q->where('subgerencia_id', $subgerencia->id)
+                        ->orWhereNull('subgerencia_id');
+                });
+        } elseif ($user->gerencia) {
+            $query->where('gerencia_id', $user->gerencia->id);
+        } elseif ($subgerencia = Subgerencia::where('usuario_id', $user->id)->first()) {
+            $query->where('gerencia_id', $subgerencia->gerencia_id)
+                ->where(function ($q) use ($subgerencia) {
+                    $q->where('subgerencia_id', $subgerencia->id)
+                        ->orWhereNull('subgerencia_id');
+                });
+        } else {
+            $query->where('user_id', $user->id);
+        }
+    }
+
+    // Aplicar filtros
+    if ($searchTerm) {
+        $query->where(function ($q) use ($searchTerm) {
+            $q->where('titulo', 'like', '%' . $searchTerm . '%')
+                ->orWhere('descripcion', 'like', '%' . $searchTerm . '%')
+                ->orWhereHas('gerencia', function ($q) use ($searchTerm) {
+                    $q->where('nombre', 'like', '%' . $searchTerm . '%');
+                })
+                ->orWhereHas('subgerencia', function ($q) use ($searchTerm) {
+                    $q->where('nombre', 'like', '%' . $searchTerm . '%');
+                });
+        });
+    }
+
+    if ($fecha) {
+        $query->whereDate('created_at', $fecha);
+    }
+
+    if ($filtroAnio) {
+        $query->whereYear('created_at', $filtroAnio);
+    }
+
+    // Aplicar filtro de mes
+    if (!empty($filtroMes)) {
+        $query->where(function ($q) use ($filtroMes) {
+            foreach ($filtroMes as $mes) {
+                if (is_numeric($mes) && $mes >= 1 && $mes <= 12) {
+                    $q->orWhereRaw('MONTH(created_at) = ?', [$mes]);
+                }
+            }
+        });
+    }
+
+    // Aplicar filtro de tipo de documento
+    if (!empty($filtroTipoDocumento)) {
+        $query->where(function ($q) use ($filtroTipoDocumento) {
+            $q->whereIn('tipodocumento_id', array_filter($filtroTipoDocumento, 'is_numeric'));
+        });
+    }
+
+    // Obtener los documentos filtrados
+    $documentos = $query->orderByDesc('created_at')->get();
+
+    // Si no hay documentos, retornar con un mensaje
+    if ($documentos->isEmpty()) {
+        return redirect()->back()->with('error', 'No se encontraron documentos para exportar.');
+    }
+
+    // Generar el PDF con los documentos filtrados
+    $pdf = Pdf::loadView('reporte', compact('documentos'))
+        ->setPaper('A4', 'landscape');
+
+    return $pdf->download('reporte_documentos.pdf');
+}
 
 
     public function exportarPDF(Request $request)
@@ -588,6 +620,7 @@ class DocumentosController extends Controller
         $anio = $request->input('anio');
         $meses = $request->input('mes', []);
         $searchTerm = $request->input('q');
+        $filtroTipoDocumento = $request->input('tipodocumento_id', []);
 
         // Inicializar la consulta del historial
         $query = HistorialCambio::with('documento.tipoDocumento', 'documento.gerencia', 'documento.subgerencia');
@@ -646,6 +679,11 @@ class DocumentosController extends Controller
                     ->orWhereHas('user', function ($q) use ($searchTerm) {
                         $q->where('nombre_usuario', 'LIKE', "%{$searchTerm}%");
                     });
+            });
+        }
+        if (!empty($filtroTipoDocumento)) {
+            $query->whereHas('documento', function ($q) use ($filtroTipoDocumento) {
+                $q->whereIn('tipo_documento_id', $filtroTipoDocumento);
             });
         }
 

@@ -16,6 +16,10 @@
                             <iframe id="pdfIframe" src="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                 style="display: block; border: 1px solid #ccc; pointer-events: auto;" frameborder="0"
                                 loading="lazy" width="100%" height="250px"></iframe>
+                            <!-- Añadir div para el ícono de PDF -->
+                            <div id="pdfIcon" class="pdf-preview-icon text-center" style="display: none;">
+                                <i class="fa fa-file-pdf-o" style="font-size: 64px; color: #d9534f;"></i>
+                            </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-center pt-serif-regular mt-2">
@@ -44,7 +48,17 @@
                                     <button type="button" class="btn-close" data-dismiss="modal"
                                         aria-label="Close"></button>
                                 </div>
-                                <div class="modal-body" id="pdfModalBody"></div>
+                                <div class="modal-body" id="pdfModalBody">
+                                    <!-- Ícono de PDF que se muestra solo en dispositivos móviles -->
+                                    <div id="pdfIcon" class="text-center" style="display: none;">
+                                        <i class="fa fa-file-pdf-o" style="font-size: 5em; color: #D9534F;"></i>
+                                    </div>
+
+                                    <!-- Previsualización del PDF que se muestra en pantallas grandes -->
+                                    <iframe id="pdfPreview"
+                                        src="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
+                                        style="width: 100%; height: 500px; border: none;"></iframe>
+                                </div>
                                 <div class="modal-footer">
                                     <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                         class="btn btn-info" target="_blank">
@@ -58,6 +72,29 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- JavaScript para detectar la resolución de pantalla -->
+                    <script>
+                        function checkScreenSize() {
+                            const pdfIcon = document.getElementById('pdfIcon');
+                            const pdfPreview = document.getElementById('pdfPreview');
+
+                            if (window.innerWidth <= 768) { // Se puede ajustar el tamaño de la resolución
+                                pdfIcon.style.display = 'block';
+                                pdfPreview.style.display = 'none';
+                            } else {
+                                pdfIcon.style.display = 'none';
+                                pdfPreview.style.display = 'block';
+                            }
+                        }
+
+                        // Ejecutar la función cuando el modal se abre
+                        document.getElementById('pdfModal').addEventListener('shown.bs.modal', checkScreenSize);
+
+                        // Detectar cambio de tamaño de pantalla
+                        window.addEventListener('resize', checkScreenSize);
+                    </script>
+
                 </div>
 
 
@@ -87,7 +124,7 @@
                         </div>
                         <div class="form-group mt-3 col-md-6">
                             <label for="estado">Estado:</label>
-                            <select name="estado" class="form-control" id="estado" disabled required>
+                            <select name="estado" class="form-control" id="estado" disabled>
                                 <option value="Creado" {{ $documento->estado == 'Creado' ? 'selected' : '' }}
                                     style="color: red">Creado</option>
                                 <option value="Validado" {{ $documento->estado == 'Validado' ? 'selected' : '' }}
@@ -248,17 +285,87 @@
         });
     </script>
     <script>
-        document.getElementById('archivo').addEventListener('change', function(e) {
-            var fileName = '';
-            if (this.files && this.files.length > 0) {
-                fileName = this.files[0].name;
+        // Función para ajustar la vista según el tamaño de pantalla
+        function adjustPdfView() {
+            const pdfIframe = document.getElementById('pdfIframe');
+            const pdfIcon = document.getElementById('pdfIcon');
+            const currentFile = document.querySelector('.nombre_archivo').textContent;
+
+            if (window.innerWidth < 768) {
+                // Vista móvil
+                if (pdfIframe) pdfIframe.style.display = 'none';
+                if (pdfIcon) {
+                    pdfIcon.style.display = 'block';
+                    // Actualizar el nombre del archivo en el ícono
+                    const fileNameElement = pdfIcon.querySelector('p');
+                    if (fileNameElement) fileNameElement.textContent = currentFile;
+                }
+            } else {
+                // Vista desktop
+                if (pdfIframe) pdfIframe.style.display = 'block';
+                if (pdfIcon) pdfIcon.style.display = 'none';
             }
-            var nombreArchivoElement = document.querySelector('.nombre_archivo');
-            if (nombreArchivoElement) {
-                nombreArchivoElement.textContent = fileName;
+        }
+
+        // Manejar el cambio de archivo
+        document.getElementById('archivo').addEventListener('change', function(e) {
+            const file = this.files[0];
+            const nombreArchivoElement = document.querySelector('.nombre_archivo');
+            const pdfIframe = document.getElementById('pdfIframe');
+            const pdfIcon = document.getElementById('pdfIcon');
+
+            if (file) {
+                const fileName = file.name;
+                const fileURL = URL.createObjectURL(file);
+
+                // Actualizar el nombre del archivo
+                if (nombreArchivoElement) {
+                    nombreArchivoElement.textContent = fileName;
+                }
+
+                // Actualizar la previsualización según el tamaño de pantalla
+                if (window.innerWidth < 768) {
+                    // Vista móvil
+                    if (pdfIframe) pdfIframe.style.display = 'none';
+                    if (pdfIcon) {
+                        pdfIcon.style.display = 'block';
+                        const fileNameElement = pdfIcon.querySelector('p');
+                        if (fileNameElement) fileNameElement.textContent = fileName;
+                    }
+                } else {
+                    // Vista desktop
+                    if (pdfIframe) {
+                        pdfIframe.src = fileURL;
+                        pdfIframe.style.display = 'block';
+                    }
+                    if (pdfIcon) pdfIcon.style.display = 'none';
+                }
             }
         });
-    </script>
 
+        // Ejecutar al cargar la página y al cambiar el tamaño de la ventana
+        document.addEventListener('DOMContentLoaded', adjustPdfView);
+        window.addEventListener('resize', adjustPdfView);
+    </script>
+    <script>
+        function checkScreenSize() {
+            const pdfIcon = document.getElementById('pdfIcon');
+            const pdfPreview = document.getElementById('pdfPreview');
+
+            if (window.innerWidth <= 768) { // Se puede ajustar el tamaño de la resolución
+                pdfIcon.style.display = 'block';
+                pdfPreview.style.display = 'none';
+            } else {
+                pdfIcon.style.display = 'none';
+                pdfPreview.style.display = 'block';
+            }
+        }
+
+        // Ejecutar la función cuando el modal se abre
+        document.getElementById('pdfModal').addEventListener('shown.bs.modal', checkScreenSize);
+
+        // Detectar cambio de tamaño de pantalla
+        window.addEventListener('resize', checkScreenSize);
+    </script>
 
 @endsection

@@ -70,11 +70,11 @@
                 @endif
 
                 <!-- <li class="nav-item">
-                                            <a href="#">
-                                                <i class="fa fa-book"></i>
-                                                <span class="nav-text">Otros</span>
-                                            </a>
-                                        </li> -->
+                                                    <a href="#">
+                                                        <i class="fa fa-book"></i>
+                                                        <span class="nav-text">Otros</span>
+                                                    </a>
+                                                </li> -->
                 {{-- @if (auth()->check() && auth()->user()->rols === 'SuperAdmin') --}}
                 {{-- @if (auth()->check() && auth()->user()->rol && auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total')) --}}
                 @if (auth()->user()->rol->privilegios->contains('nombre', 'Acceso Total') || auth()->user()->rol->nombre === 'Gerente')
@@ -120,7 +120,7 @@
             <header>
                 <div class="header-left">
                     <div class="toggle-sidebar-btn" id="toggleSidebarBtn">
-                        <i class="fa fa-bars fa-2x" aria-hidden="true"></i>
+                        {{-- <i class="fa fa-bars fa-2x" aria-hidden="true"></i> --}}
                     </div>
                 </div>
                 <div class="header-right pt-serif-bold">
@@ -158,54 +158,61 @@
         </div>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
-                const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
-                const sidebar = document.getElementById('sidebar');
-                const content = document.querySelector('.content');
+            const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+            const sidebar = document.getElementById('sidebar');
+            const content = document.querySelector('.content');
 
-                // Función para minimizar el sidebar
-                function minimizeSidebar() {
-                    sidebar.classList.add('sidebar-closed');
-                    content.classList.add('content-closed');
-                    localStorage.setItem('sidebarState', 'closed');
+            // Función para verificar si es dispositivo móvil
+            function isMobile() {
+                return window.innerWidth <= 600;
+            }
+
+            // Función para minimizar el sidebar
+            function minimizeSidebar() {
+                sidebar.classList.add('sidebar-closed');
+                content.classList.add('content-closed');
+                localStorage.setItem('sidebarState', 'closed');
+            }
+
+            // Función para maximizar el sidebar
+            function maximizeSidebar() {
+                sidebar.classList.remove('sidebar-closed');
+                content.classList.remove('content-closed');
+                localStorage.setItem('sidebarState', 'open');
+            }
+
+            // Listener para el botón de toggle
+            toggleSidebarBtn.addEventListener('click', () => {
+                if (sidebar.classList.contains('sidebar-closed')) {
+                    maximizeSidebar();
+                } else {
+                    minimizeSidebar();
                 }
+            });
 
-                // Función para maximizar el sidebar
-                function maximizeSidebar() {
-                    sidebar.classList.remove('sidebar-closed');
-                    content.classList.remove('content-closed');
-                    localStorage.setItem('sidebarState', 'open');
-                }
-
-                // Listener para el botón de toggle
-                toggleSidebarBtn.addEventListener('click', () => {
-                    if (sidebar.classList.contains('sidebar-closed')) {
-                        maximizeSidebar();
-                    } else {
-                        minimizeSidebar();
-                    }
-                });
-
-                // Listener para detectar el cambio de tamaño de pantalla
-                window.addEventListener('resize', () => {
-                    if (window.innerWidth <= 600) {
-                        minimizeSidebar();
-                    } else {
-                        maximizeSidebar();
-                    }
-                });
-
-                // Recuperar el estado del sidebar desde el localStorage
-                const sidebarState = localStorage.getItem('sidebarState');
-                if (sidebarState === 'closed') {
+            // Listener para detectar el cambio de tamaño de pantalla
+            window.addEventListener('resize', () => {
+                if (isMobile()) {
                     minimizeSidebar();
                 } else {
-                    maximizeSidebar();
+                    // Mantener el estado actual incluso al redimensionar
+                    const currentState = localStorage.getItem('sidebarState');
+                    if (currentState === 'closed') {
+                        minimizeSidebar();
+                    } else {
+                        maximizeSidebar();
+                    }
                 }
+            });
 
-                // Si la pantalla es menor a 600px al cargar, minimizar el sidebar
-                if (window.innerWidth <= 600) {
-                    minimizeSidebar();
-                }
+            // Estado inicial
+            if (isMobile()) {
+                minimizeSidebar();
+            } else {
+                const sidebarState = localStorage.getItem('sidebarState');
+                sidebarState === 'closed' ? minimizeSidebar() : maximizeSidebar();
+            }
+            });
             });
         </script>
         <!-- <script>

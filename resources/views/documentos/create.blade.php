@@ -61,16 +61,23 @@
                                                         <!-- Iframe para mostrar el PDF en el modal -->
                                                         <iframe id="modalPdfViewer" src="" width="100%"
                                                             height="500px" style="border: none;"></iframe>
+
+                                                        <!-- Ícono de PDF que se muestra en móviles -->
+                                                        <div id="pdfIcon" style="display: none; text-align: center;">
+                                                            <i class="fa fa-file-pdf-o"
+                                                                style="font-size: 100px; color: #d9534f;"></i>
+                                                        </div>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <!-- Botón de Abrir en Nueva Ventana -->
-                                                        <a id="openInNewWindowBtn" class="btn btn-secondary" href="#"
-                                                            target="_blank">
+                                                        <a id="openInNewWindowBtn" class="btn btn-info" href="#"
+                                                            target="_blank"><i class="fa fa-external-link-square"
+                                                                aria-hidden="true"></i>
                                                             Abrir en Nueva Ventana
                                                         </a>
                                                         <!-- Botón de Descargar -->
-                                                        <a id="downloadPdfBtn" class="btn btn-primary" href="#"
-                                                            download>
+                                                        <a id="downloadPdfBtn" class="btn btn-dark" href="#" download>
+                                                            <i class="fa fa-download" aria-hidden="true"></i>
                                                             Descargar
                                                         </a>
                                                     </div>
@@ -283,20 +290,7 @@
             estadoSelect.addEventListener('change', updateColor);
         });
     </script>
-    <script>
-        document.getElementById('archivo').addEventListener('change', function(event) {
-            var file = event.target.files[0];
-            if (file && file.type === 'application/pdf') {
-                var fileURL = URL.createObjectURL(file);
-                var pdfPreview = document.getElementById('pdfPreview');
-                pdfPreview.src = fileURL;
-                pdfPreview.style.display = 'block'; // Mostrar el iframe
-            } else {
-                // Ocultar la vista previa si el archivo no es PDF
-                document.getElementById('pdfPreview').style.display = 'none';
-            }
-        });
-    </script>
+
     <script>
         document.getElementById('archivo').addEventListener('change', function(event) {
             var file = event.target.files[0];
@@ -305,11 +299,62 @@
 
             if (file) {
                 var fileURL = URL.createObjectURL(file);
-                pdfPreview.src = fileURL;
 
-                // Mostrar previsualización y ocultar imagen de subida
-                pdfPreview.style.display = 'block';
-                uploadImage.style.display = 'none';
+                if (window.innerWidth < 768) {
+                    // En móviles, mostrar ícono de PDF
+                    pdfPreview.style.display = 'none';
+                    uploadImage.style.display = 'none';
+
+                    // Crear y mostrar el ícono de PDF si no existe
+                    let pdfIcon = document.querySelector('.pdf-preview-icon');
+                    if (!pdfIcon) {
+                        pdfIcon = document.createElement('div');
+                        pdfIcon.className = 'pdf-preview-icon text-center mt-3';
+                        pdfIcon.innerHTML =
+                            '<i class="fa fa-file-pdf-o" style="font-size: 64px; color: #d9534f;"></i>' +
+                            '<p class="mt-2">' + file.name + '</p>';
+                        pdfPreview.parentNode.insertBefore(pdfIcon, pdfPreview);
+                    }
+                } else {
+                    // En desktop, mostrar preview
+                    pdfPreview.src = fileURL;
+                    pdfPreview.style.display = 'block';
+                    uploadImage.style.display = 'none';
+
+                    // Remover ícono si existe
+                    const pdfIcon = document.querySelector('.pdf-preview-icon');
+                    if (pdfIcon) {
+                        pdfIcon.remove();
+                    }
+                }
+            }
+        });
+
+        // Agregar listener para cambios de tamaño de ventana
+        window.addEventListener('resize', function() {
+            const file = document.getElementById('archivo').files[0];
+            if (file) {
+                var pdfPreview = document.getElementById('pdfPreview');
+                var pdfIcon = document.querySelector('.pdf-preview-icon');
+
+                if (window.innerWidth < 768) {
+                    // Cambiar a vista móvil
+                    pdfPreview.style.display = 'none';
+                    if (!pdfIcon) {
+                        pdfIcon = document.createElement('div');
+                        pdfIcon.className = 'pdf-preview-icon text-center mt-3';
+                        pdfIcon.innerHTML =
+                            '<i class="fa fa-file-pdf-o" style="font-size: 64px; color: #d9534f;"></i>' +
+                            '<p class="mt-2">' + file.name + '</p>';
+                        pdfPreview.parentNode.insertBefore(pdfIcon, pdfPreview);
+                    }
+                } else {
+                    // Cambiar a vista desktop
+                    pdfPreview.style.display = 'block';
+                    if (pdfIcon) {
+                        pdfIcon.remove();
+                    }
+                }
             }
         });
     </script>
@@ -348,5 +393,21 @@
                 }
             });
         });
+    </script>
+    <script>
+        // Detecta si el ancho de la pantalla es menor a 768px (tamaño típico de móviles)
+        function adjustPdfView() {
+            if (window.innerWidth < 768) {
+                document.getElementById('modalPdfViewer').style.display = 'none';
+                document.getElementById('pdfIcon').style.display = 'block';
+            } else {
+                document.getElementById('modalPdfViewer').style.display = 'block';
+                document.getElementById('pdfIcon').style.display = 'none';
+            }
+        }
+
+        // Llama a la función al cargar la página y al redimensionar la ventana
+        window.addEventListener('load', adjustPdfView);
+        window.addEventListener('resize', adjustPdfView);
     </script>
 @endsection

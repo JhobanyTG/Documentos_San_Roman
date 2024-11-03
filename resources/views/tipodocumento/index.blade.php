@@ -1,5 +1,7 @@
 @extends('layout.template')
 
+@section('title', 'Tipos de Documentos')
+
 @section('content')
     <div class="container">
         <div id="content_ta_wrapper" class="dataTables_wrapper">
