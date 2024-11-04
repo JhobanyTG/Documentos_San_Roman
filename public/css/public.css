@@ -42,3 +42,32 @@
 .btn-public:hover {
     background: linear-gradient(to top left, #FFB500, #FFFF00);
 }
+
+
+/* Estilos para la previsualización del PDF en el modal */
+.pdf-preview-desktop {
+    display: block;
+}
+
+.pdf-preview-mobile {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+.pdf-modal-icon {
+    width: 120px;
+    height: auto;
+    margin: 20px auto;
+}
+
+/* Media query para dispositivos móviles */
+@media screen and (max-width: 768px) {
+    .pdf-preview-desktop {
+        display: none;
+    }
+
+    .pdf-preview-mobile {
+        display: block;
+    }
+}

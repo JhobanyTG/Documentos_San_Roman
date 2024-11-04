@@ -193,7 +193,8 @@
                                                     <div class="form-check">
                                                         <input type="checkbox" name="tipodocumento_id[]"
                                                             value="{{ $tipo->id }}"
-                                                            id="tipodocumento_{{ $tipo->id }}" class="form-check-input"
+                                                            id="tipodocumento_{{ $tipo->id }}"
+                                                            class="form-check-input"
                                                             {{ is_array($filtroTipoDocumento) && in_array($tipo->id, $filtroTipoDocumento) ? 'checked' : '' }}>
                                                         <label for="tipodocumento_{{ $tipo->id }}"
                                                             class="form-check-label">{{ $tipo->nombre }}</label>
@@ -425,20 +426,26 @@
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="pdfModalLabel-{{ $documento->id }}">
-                                                            {{ basename($documento->archivo) }}</h5>
+                                                            {{ $documento->titulo }}
+                                                        </h5>
                                                         <button type="button" class="btn-close" data-dismiss="modal"
                                                             aria-label="Close"></button>
                                                     </div>
-                                                    <div class="modal-body" id="pdfModalBody-{{ $documento->id }}"></div>
+                                                    <div class="modal-body" id="pdfModalBody-{{ $documento->id }}">
+                                                        <!-- El contenido se insertará dinámicamente -->
+                                                    </div>
                                                     <div class="modal-footer">
                                                         <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
-                                                            class="btn btn-info" target="_blank"><i
-                                                                class="fa fa-external-link-square" aria-hidden="true"></i>
-                                                            Abrir en otra ventana</a>
+                                                            class="btn btn-info" target="_blank">
+                                                            <i class="fa fa-external-link-square" aria-hidden="true"></i>
+                                                            Abrir en otra ventana
+                                                        </a>
                                                         <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                                             download="{{ basename($documento->archivo) }}"
-                                                            class="btn btn-dark"><i class="fa fa-download"
-                                                                aria-hidden="true"></i> Descargar</a>
+                                                            class="btn btn-dark">
+                                                            <i class="fa fa-download" aria-hidden="true"></i>
+                                                            Descargar
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -519,26 +526,51 @@
         });
     </script>
     <script>
-        function openPdfModal(pdfUrl, pdfName, modalId) {
-            var modalBody = document.getElementById('pdfModalBody-' + modalId);
-            modalBody.innerHTML = '<embed src="' + pdfUrl + '" type="application/pdf" width="100%" height="500px" />';
-            document.getElementById('pdfModalLabel-' + modalId).innerText = pdfName;
-            $('#pdfModal-' + modalId).modal('show');
-        }
-
         $(document).ready(function() {
+            function openPdfModal(pdfUrl, pdfName, modalId) {
+                var modalBody = document.getElementById('pdfModalBody-' + modalId);
+
+                // Verificar si es dispositivo móvil
+                if (window.innerWidth <= 768) {
+                    // Vista móvil - mostrar ícono PDF y botones
+                    modalBody.innerHTML = `
+                <div class="text-center">
+                    <img src="/images/icons/pdf.png" alt="PDF Icon" class="pdf-icon-modal mb-3" style="width: 100px;">
+                </div>
+            `;
+                } else {
+                    // Vista desktop - mostrar embed del PDF
+                    modalBody.innerHTML = '<embed src="' + pdfUrl +
+                        '" type="application/pdf" width="100%" height="500px" />';
+                }
+
+                document.getElementById('pdfModalLabel-' + modalId).innerText = pdfName;
+                $('#pdfModal-' + modalId).modal('show');
+            }
+
+            // Event listeners existentes
             $('.archivo-preview').on('click', function() {
                 var pdfUrl = $(this).find('iframe').attr('src');
-                var pdfName = $(this).closest('tr').find('td.text-center:first').text().trim();
+                var pdfName = $(this).closest('tr').find('td:nth-child(3)').text().trim();
                 var modalId = $(this).closest('tr').data('id');
                 openPdfModal(pdfUrl, pdfName, modalId);
             });
 
             $('.img_file_pdf').on('click', function() {
                 var pdfUrl = $(this).closest('td').find('.archivo-preview iframe').attr('src');
-                var pdfName = $(this).closest('tr').find('td.text-center:first').text().trim();
+                var pdfName = $(this).closest('tr').find('td:nth-child(3)').text().trim();
                 var modalId = $(this).closest('tr').data('id');
                 openPdfModal(pdfUrl, pdfName, modalId);
+            });
+
+            // Manejar cambios de tamaño de ventana
+            $(window).on('resize', function() {
+                $('.modal.show').each(function() {
+                    var modalId = $(this).attr('id').replace('pdfModal-', '');
+                    var pdfUrl = $(this).find('.modal-footer a').first().attr('href');
+                    var pdfName = $(this).find('.modal-title').text();
+                    openPdfModal(pdfUrl, pdfName, modalId);
+                });
             });
 
             $('.btn-close, .btn-no').click(function() {

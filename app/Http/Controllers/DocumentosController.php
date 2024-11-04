@@ -150,6 +150,53 @@ class DocumentosController extends Controller
         }
     }
 
+
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'titulo' => 'required|string|max:255',
+            'tipodocumento_id' => 'required|exists:tipodocumento,id',
+            'archivo' => [
+                'required',
+                'file',
+                'mimes:pdf',
+                'max:10000',
+                Rule::unique('documentos', 'archivo'),
+            ],
+            'estado' => 'required|in:Creado,Validado,Publicado',
+        ]);
+
+        // Obtener el usuario autenticado
+        $user = Auth::user();
+        $subusuario = $user->subusuario; // Obtener el subusuario del usuario autenticado
+
+        // Determinar la subgerencia y la gerencia
+        $subgerencia = $subusuario ? $subusuario->subgerencia : null; // Obtener la subgerencia si existe
+        $gerencia = $subgerencia ? $subgerencia->gerencia : $user->gerencia; // Obtener la gerencia del subgerencia o del usuario
+
+        $fileName = null;
+        if ($request->hasFile('archivo')) {
+            $file = $request->file('archivo');
+            $fileName = time() . '-' . $file->getClientOriginalName();
+            $file->storeAs('public/documentos', $fileName);
+        }
+
+        Documento::create([
+            'sub_usuarios_id' => $subusuario ? $subusuario->id : null, // Asignar el ID del subusuario o null
+            'user_id' => $user->id,
+            'tipodocumento_id' => $request->input('tipodocumento_id'),
+            'titulo' => $request->input('titulo'),
+            'descripcion' => $request->input('descripcion'),
+            'archivo' => $fileName,
+            'estado' => $request->input('estado'),
+            'gerencia_id' => $gerencia ? $gerencia->id : null, // Asignar la gerencia
+            'subgerencia_id' => $subgerencia ? $subgerencia->id : null, // Asignar la subgerencia o 'NA'
+        ]);
+
+        return redirect()->route('documentos.index')->with('success', 'Documento creado exitosamente.');
+    }
+
     public function edit($id)
     {
         $user = auth()->user();
@@ -216,55 +263,6 @@ class DocumentosController extends Controller
     }
 
 
-
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'titulo' => 'required|string|max:255',
-            'tipodocumento_id' => 'required|exists:tipodocumento,id',
-            'archivo' => [
-                'required',
-                'file',
-                'mimes:pdf',
-                'max:10000',
-                Rule::unique('documentos', 'archivo'),
-            ],
-            'estado' => 'required|in:Creado,Validado,Publicado',
-        ]);
-
-        // Obtener el usuario autenticado
-        $user = Auth::user();
-        $subusuario = $user->subusuario; // Obtener el subusuario del usuario autenticado
-
-        // Determinar la subgerencia y la gerencia
-        $subgerencia = $subusuario ? $subusuario->subgerencia : null; // Obtener la subgerencia si existe
-        $gerencia = $subgerencia ? $subgerencia->gerencia : $user->gerencia; // Obtener la gerencia del subgerencia o del usuario
-
-        $fileName = null;
-        if ($request->hasFile('archivo')) {
-            $file = $request->file('archivo');
-            $fileName = time() . '-' . $file->getClientOriginalName();
-            $file->storeAs('public/documentos', $fileName);
-        }
-
-        Documento::create([
-            'sub_usuarios_id' => $subusuario ? $subusuario->id : null, // Asignar el ID del subusuario o null
-            'user_id' => $user->id,
-            'tipodocumento_id' => $request->input('tipodocumento_id'),
-            'titulo' => $request->input('titulo'),
-            'descripcion' => $request->input('descripcion'),
-            'archivo' => $fileName,
-            'estado' => $request->input('estado'),
-            'gerencia_id' => $gerencia ? $gerencia->id : null, // Asignar la gerencia
-            'subgerencia_id' => $subgerencia ? $subgerencia->id : null, // Asignar la subgerencia o 'NA'
-        ]);
-
-        return redirect()->route('documentos.index')->with('success', 'Documento creado exitosamente.');
-    }
-
-
-
     public function update(Request $request, $id)
     {
         $documento = Documento::findOrFail($id);
@@ -281,7 +279,6 @@ class DocumentosController extends Controller
                 'max:10000',
                 Rule::unique('documentos', 'archivo')->ignore($documento->id),
             ],
-            'estado' => 'in:Creado,Validado,Publicado',
             'sub_usuarios_id' => 'nullable|exists:subusuarios,id',
         ]);
 
@@ -315,19 +312,19 @@ class DocumentosController extends Controller
             'titulo' => $request->input('titulo'),
             'descripcion' => $request->input('descripcion'),
             'archivo' => $documento->archivo, // Asegúrate de guardar el nuevo nombre de archivo
-            'estado' => $request->input('estado'),
+            'estado' => $documento->estado, // Mantener el estado actual
             'gerencia_id' => Auth::user()->gerencia->id ?? null,
             'subgerencia_id' => Auth::user()->subgerencia->id ?? null,
         ]);
 
-        // Registrar el cambio de estado en historial_cambios con más detalles
-        HistorialCambio::create([
-            'documento_id' => $documento->id,
-            'estado_anterior' => $documento->estado,  // Registrar el estado anterior antes de la actualización
-            'nuevo_estado' => $request->input('estado'),
-            'descripcion' => 'Cambio de estado de ' . $documento->estado . ' a ' . $request->input('estado'),
-            'usuario_id' => Auth::user()->id,
-        ]);
+        // // Registrar el cambio de estado en historial_cambios con más detalles
+        // HistorialCambio::create([
+        //     'documento_id' => $documento->id,
+        //     'estado_anterior' => $documento->estado,  // Registrar el estado anterior antes de la actualización
+        //     'nuevo_estado' => $request->input('estado'),
+        //     'descripcion' => 'Cambio de estado de ' . $documento->estado . ' a ' . $request->input('estado'),
+        //     'usuario_id' => Auth::user()->id,
+        // ]);
 
 
         return redirect()->route('documentos.index')->with('success', 'Documento actualizado exitosamente.');
@@ -508,108 +505,108 @@ class DocumentosController extends Controller
     }
 
     public function generarReporte(Request $request)
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    // Inicializar la consulta
-    $query = Documento::with(['tipoDocumento', 'gerencia', 'subgerencia']);
+        // Inicializar la consulta
+        $query = Documento::with(['tipoDocumento', 'gerencia', 'subgerencia']);
 
-    // Obtener y validar los filtros
-    $searchTerm = trim($request->input('q'));
-    $fecha = $request->input('fecha');
-    $filtroAnio = $request->input('anio');
-    $filtroMes = json_decode($request->input('mes'), true);
-    $filtroTipoDocumento = json_decode($request->input('tipodocumento_id'), true);
+        // Obtener y validar los filtros
+        $searchTerm = trim($request->input('q'));
+        $fecha = $request->input('fecha');
+        $filtroAnio = $request->input('anio');
+        $filtroMes = json_decode($request->input('mes'), true);
+        $filtroTipoDocumento = json_decode($request->input('tipodocumento_id'), true);
 
 
-    // Convertir filtroMes a array si es string
-    if (!is_array($filtroMes)) {
-        $filtroMes = explode(',', $filtroMes);
-    }
-
-    // Convertir filtroTipoDocumento a array si es string
-    if (!is_array($filtroTipoDocumento)) {
-        $filtroTipoDocumento = explode(',', $filtroTipoDocumento);
-    }
-
-    // Filtrar según el rol del usuario
-    if ($user->rol->nombre != 'SuperAdmin') {
-        if ($user->subusuario) {
-            $subgerencia = $user->subusuario->subgerencia;
-            $gerencia = $subgerencia->gerencia;
-
-            $query->where('gerencia_id', $gerencia->id)
-                ->where(function ($q) use ($subgerencia) {
-                    $q->where('subgerencia_id', $subgerencia->id)
-                        ->orWhereNull('subgerencia_id');
-                });
-        } elseif ($user->gerencia) {
-            $query->where('gerencia_id', $user->gerencia->id);
-        } elseif ($subgerencia = Subgerencia::where('usuario_id', $user->id)->first()) {
-            $query->where('gerencia_id', $subgerencia->gerencia_id)
-                ->where(function ($q) use ($subgerencia) {
-                    $q->where('subgerencia_id', $subgerencia->id)
-                        ->orWhereNull('subgerencia_id');
-                });
-        } else {
-            $query->where('user_id', $user->id);
+        // Convertir filtroMes a array si es string
+        if (!is_array($filtroMes)) {
+            $filtroMes = explode(',', $filtroMes);
         }
-    }
 
-    // Aplicar filtros
-    if ($searchTerm) {
-        $query->where(function ($q) use ($searchTerm) {
-            $q->where('titulo', 'like', '%' . $searchTerm . '%')
-                ->orWhere('descripcion', 'like', '%' . $searchTerm . '%')
-                ->orWhereHas('gerencia', function ($q) use ($searchTerm) {
-                    $q->where('nombre', 'like', '%' . $searchTerm . '%');
-                })
-                ->orWhereHas('subgerencia', function ($q) use ($searchTerm) {
-                    $q->where('nombre', 'like', '%' . $searchTerm . '%');
-                });
-        });
-    }
+        // Convertir filtroTipoDocumento a array si es string
+        if (!is_array($filtroTipoDocumento)) {
+            $filtroTipoDocumento = explode(',', $filtroTipoDocumento);
+        }
 
-    if ($fecha) {
-        $query->whereDate('created_at', $fecha);
-    }
+        // Filtrar según el rol del usuario
+        if ($user->rol->nombre != 'SuperAdmin') {
+            if ($user->subusuario) {
+                $subgerencia = $user->subusuario->subgerencia;
+                $gerencia = $subgerencia->gerencia;
 
-    if ($filtroAnio) {
-        $query->whereYear('created_at', $filtroAnio);
-    }
-
-    // Aplicar filtro de mes
-    if (!empty($filtroMes)) {
-        $query->where(function ($q) use ($filtroMes) {
-            foreach ($filtroMes as $mes) {
-                if (is_numeric($mes) && $mes >= 1 && $mes <= 12) {
-                    $q->orWhereRaw('MONTH(created_at) = ?', [$mes]);
-                }
+                $query->where('gerencia_id', $gerencia->id)
+                    ->where(function ($q) use ($subgerencia) {
+                        $q->where('subgerencia_id', $subgerencia->id)
+                            ->orWhereNull('subgerencia_id');
+                    });
+            } elseif ($user->gerencia) {
+                $query->where('gerencia_id', $user->gerencia->id);
+            } elseif ($subgerencia = Subgerencia::where('usuario_id', $user->id)->first()) {
+                $query->where('gerencia_id', $subgerencia->gerencia_id)
+                    ->where(function ($q) use ($subgerencia) {
+                        $q->where('subgerencia_id', $subgerencia->id)
+                            ->orWhereNull('subgerencia_id');
+                    });
+            } else {
+                $query->where('user_id', $user->id);
             }
-        });
+        }
+
+        // Aplicar filtros
+        if ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('titulo', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('descripcion', 'like', '%' . $searchTerm . '%')
+                    ->orWhereHas('gerencia', function ($q) use ($searchTerm) {
+                        $q->where('nombre', 'like', '%' . $searchTerm . '%');
+                    })
+                    ->orWhereHas('subgerencia', function ($q) use ($searchTerm) {
+                        $q->where('nombre', 'like', '%' . $searchTerm . '%');
+                    });
+            });
+        }
+
+        if ($fecha) {
+            $query->whereDate('created_at', $fecha);
+        }
+
+        if ($filtroAnio) {
+            $query->whereYear('created_at', $filtroAnio);
+        }
+
+        // Aplicar filtro de mes
+        if (!empty($filtroMes)) {
+            $query->where(function ($q) use ($filtroMes) {
+                foreach ($filtroMes as $mes) {
+                    if (is_numeric($mes) && $mes >= 1 && $mes <= 12) {
+                        $q->orWhereRaw('MONTH(created_at) = ?', [$mes]);
+                    }
+                }
+            });
+        }
+
+        // Aplicar filtro de tipo de documento
+        if (!empty($filtroTipoDocumento)) {
+            $query->where(function ($q) use ($filtroTipoDocumento) {
+                $q->whereIn('tipodocumento_id', array_filter($filtroTipoDocumento, 'is_numeric'));
+            });
+        }
+
+        // Obtener los documentos filtrados
+        $documentos = $query->orderByDesc('created_at')->get();
+
+        // Si no hay documentos, retornar con un mensaje
+        if ($documentos->isEmpty()) {
+            return redirect()->back()->with('error', 'No se encontraron documentos para exportar.');
+        }
+
+        // Generar el PDF con los documentos filtrados
+        $pdf = Pdf::loadView('reporte', compact('documentos'))
+            ->setPaper('A4', 'landscape');
+
+        return $pdf->download('reporte_documentos.pdf');
     }
-
-    // Aplicar filtro de tipo de documento
-    if (!empty($filtroTipoDocumento)) {
-        $query->where(function ($q) use ($filtroTipoDocumento) {
-            $q->whereIn('tipodocumento_id', array_filter($filtroTipoDocumento, 'is_numeric'));
-        });
-    }
-
-    // Obtener los documentos filtrados
-    $documentos = $query->orderByDesc('created_at')->get();
-
-    // Si no hay documentos, retornar con un mensaje
-    if ($documentos->isEmpty()) {
-        return redirect()->back()->with('error', 'No se encontraron documentos para exportar.');
-    }
-
-    // Generar el PDF con los documentos filtrados
-    $pdf = Pdf::loadView('reporte', compact('documentos'))
-        ->setPaper('A4', 'landscape');
-
-    return $pdf->download('reporte_documentos.pdf');
-}
 
 
     public function exportarPDF(Request $request)

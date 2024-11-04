@@ -304,20 +304,25 @@
         }
 
         .sidebar {
-            width: 60px !important; /* Forzar ancho mínimo */
-            transition: none; /* Eliminar transición en móvil */
+            width: 60px !important;
+            /* Forzar ancho mínimo */
+            transition: none;
+            /* Eliminar transición en móvil */
         }
 
         .content {
-            margin-left: 60px !important; /* Forzar margen mínimo */
-            transition: none; /* Eliminar transición en móvil */
+            margin-left: 60px !important;
+            /* Forzar margen mínimo */
+            transition: none;
+            /* Eliminar transición en móvil */
         }
 
         .sidebar .nav-text,
         .sidebar .company-name,
         .sidebar .logo-nombre,
         .logout-btn button a {
-            display: none !important; /* Ocultar textos en móvil */
+            display: none !important;
+            /* Ocultar textos en móvil */
         }
 
         .sidebar .logo img {
@@ -548,6 +553,26 @@
         /* Hereda el color del enlace */
     }
 
+    /* Estilos para el contenido del modal */
+    .pdf-preview-mobile {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .pdf-modal-icon {
+        width: 100px;
+        height: auto;
+        margin: 20px auto;
+    }
+
+    .pdf-filename {
+        word-break: break-all;
+        margin-top: 15px;
+        font-size: 14px;
+    }
+
+
 
     @media (max-width: 767.98px) {
         .table {
@@ -582,6 +607,14 @@
 
         .dataTables_wrapper .dataTables_filter {
             padding-left: 2rem;
+        }
+
+        .pdf-preview-desktop {
+            display: none;
+        }
+
+        .pdf-preview-mobile {
+            display: block;
         }
     }
 
@@ -1253,6 +1286,34 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             background-color: var(--color-blanco);
+        }
+
+        .modal-body {
+            padding: 2rem 1rem;
+        }
+
+        .pdf-icon-modal {
+            transition: all 0.3s ease;
+        }
+
+        .modal-footer {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .modal-footer .btn {
+            width: 100%;
+            margin: 0 !important;
+        }
+
+        .form_documento {
+            padding: 10px;
+            /* Reduce el relleno en pantallas pequeñas */
+        }
+
+        .img_file {
+            width: 100%;
+            /* Asegúrate de que la imagen se ajuste al contenedor */
         }
 
 

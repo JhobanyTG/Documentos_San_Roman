@@ -299,11 +299,20 @@
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title" id="pdfModalLabel-{{ $documento->id }}">
-                                                            {{ basename($documento->archivo) }}</h5>
+                                                            {{ $documento->titulo }}
+                                                        </h5>
                                                         <button type="button" class="btn-close" data-dismiss="modal"
                                                             aria-label="Close"></button>
                                                     </div>
-                                                    <div class="modal-body" id="pdfModalBody-{{ $documento->id }}"></div>
+                                                    <div class="modal-body" id="pdfModalBody-{{ $documento->id }}">
+                                                        <div class="pdf-preview-desktop">
+                                                            <!-- El embed se insertará aquí dinámicamente -->
+                                                        </div>
+                                                        <div class="pdf-preview-mobile">
+                                                            <img src="{{ asset('images/icons/pdf.png') }}" alt="PDF Icon"
+                                                                class="pdf-modal-icon">
+                                                        </div>
+                                                    </div>
                                                     <div class="modal-footer">
                                                         <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                                             class="btn btn-info" target="_blank"><i
@@ -367,26 +376,25 @@
         });
     </script>
     <script>
-        function openPdfModal(pdfUrl, pdfName, modalId) {
+        function openPdfModal(pdfUrl, pdfName, modalId, titulo) {
             var modalBody = document.getElementById('pdfModalBody-' + modalId);
-            modalBody.innerHTML = '<embed src="' + pdfUrl + '" type="application/pdf" width="100%" height="500px" />';
-            document.getElementById('pdfModalLabel-' + modalId).innerText = pdfName;
+            // Actualiza solo la sección de vista de escritorio
+            var desktopPreview = modalBody.querySelector('.pdf-preview-desktop');
+            desktopPreview.innerHTML = '<embed src="' + pdfUrl + '" type="application/pdf" width="100%" height="500px" />';
             $('#pdfModal-' + modalId).modal('show');
         }
 
         $(document).ready(function() {
             $('.archivo-preview').on('click', function() {
                 var pdfUrl = $(this).find('iframe').attr('src');
-                var pdfName = $(this).closest('tr').find('td.text-center:first').text().trim();
                 var modalId = $(this).closest('tr').data('id');
-                openPdfModal(pdfUrl, pdfName, modalId);
+                openPdfModal(pdfUrl, null, modalId);
             });
 
             $('.img_file_pdf').on('click', function() {
                 var pdfUrl = $(this).closest('td').find('.archivo-preview iframe').attr('src');
-                var pdfName = $(this).closest('tr').find('td.text-center:first').text().trim();
                 var modalId = $(this).closest('tr').data('id');
-                openPdfModal(pdfUrl, pdfName, modalId);
+                openPdfModal(pdfUrl, null, modalId);
             });
 
             $('.btn-close, .btn-no').click(function() {

@@ -3,10 +3,9 @@
 @section('title', 'Crear Documento')
 
 @section('content')
-
     <div class="container">
         <div class="row">
-            <div class="container col-md-4 card form_documento">
+            <div class="container col-md-12 card form_documento" style="overflow-x: hidden;">
                 <h2 class="form_title_documento">
                     Crear Documento
                 </h2>
@@ -15,8 +14,7 @@
                         @csrf
                         <div class="row">
                             <!-- Subir archivo a la izquierda -->
-                            <div class="col-md-4 mb-3" style="margin-top:15px">
-                                <div class="row">
+                            <div class="col-md-4 mb-3 text-center" style="margin-top:15px">
                                     <div class="col-md-12 d-flex justify-content-center">
                                         <!-- Imagen para subir archivo -->
                                         <img class="img_file" id="uploadImage"
@@ -64,8 +62,8 @@
 
                                                         <!-- Ícono de PDF que se muestra en móviles -->
                                                         <div id="pdfIcon" style="display: none; text-align: center;">
-                                                            <i class="fa fa-file-pdf-o"
-                                                                style="font-size: 100px; color: #d9534f;"></i>
+                                                            <img class="img_file_pdf centered-img"
+                                                                src="{{ asset('images/icons/pdf.png') }}" alt="PDF" />
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
@@ -84,15 +82,10 @@
                                                 </div>
                                             </div>
                                         </div>
-
-
                                         @error('archivo')
                                             <div class="text-danger">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                </div>
-
-
                             </div>
                             <!-- Formulario a la derecha -->
                             <div class="col-md-8">
@@ -107,7 +100,7 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="form-group mb-2 mt-2 col-md-6">
+                                    <div class="form-group mb-2 mt-2 col-12 col-md-6">
                                         <label for="tipodocumento_id" class="form-label label_documento">Tipo
                                             Documento:</label>
                                         <select name="tipodocumento_id"
@@ -122,7 +115,7 @@
                                             <div class="text-danger">{{ $message }}</div>
                                         @enderror
                                     </div>
-                                    <div class="form-group mt-2 col-md-6">
+                                    <div class="form-group mt-2 col-12 col-md-6">
                                         <label for="estado" class="form-label label_documento">Estado:</label>
                                         @php
                                             // Obtener el usuario autenticado
@@ -165,9 +158,7 @@
                                     @enderror
                                 </div>
 
-
-
-                                <div class="mt-3">
+                                <div class="container-input mt-3">
                                     <a href="{{ route('documentos.index') }}"
                                         class="btn btn-warning btn-documento me-2"><i class="fa fa-arrow-circle-left"
                                             aria-hidden="true"></i> Cancelar</a>
@@ -311,7 +302,7 @@
                         pdfIcon = document.createElement('div');
                         pdfIcon.className = 'pdf-preview-icon text-center mt-3';
                         pdfIcon.innerHTML =
-                            '<i class="fa fa-file-pdf-o" style="font-size: 64px; color: #d9534f;"></i>' +
+                            '<img class="img_file_pdf centered-img" src="{{ asset('images/icons/pdf.png') }}" alt="PDF" />' +
                             '<p class="mt-2">' + file.name + '</p>';
                         pdfPreview.parentNode.insertBefore(pdfIcon, pdfPreview);
                     }
