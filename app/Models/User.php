@@ -32,6 +32,13 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    // Agrega este método
+    public function hasPrivilege($privilegeName)
+    {
+        return $this->rol->privilegios->pluck('nombre')->contains($privilegeName);
+    }
+
+    // El resto de tus métodos...
     public function rol()
     {
         return $this->belongsTo(Rol::class, 'rol_id');
@@ -58,7 +65,6 @@ class User extends Authenticatable
     {
         return $this->hasOne(Subusuario::class, 'user_id');
     }
-
 
     public function gerencia()
     {

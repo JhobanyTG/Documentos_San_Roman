@@ -12,10 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('backupacciones', function (Blueprint $table) {
-            $table->id();
-            $table->string('user_id', 100);
-            $table->string('titulo_documento', 255);
-            $table->string('accion', 20);
+            $table->id()->nullable(false); // El ID primario no puede ser null
+            $table->string('admin_id', 100)->nullable();          // ID del administrador que realizó la acción
+            $table->string('admin_nombre', 255)->nullable();      // Nombre del administrador que realizó la acción
+            $table->string('tipo_peticion', 10)->nullable();      // POST, GET, PUT, DELETE
+            $table->string('accion', 50)->nullable();            // CREATE, UPDATE, DELETE, etc.
+            $table->text('descripcion')->nullable();             // Descripción detallada de la acción
+            $table->string('usuario_afectado_id', 100)->nullable(); // ID del usuario afectado
+            $table->string('usuario_afectado_nombre', 255)->nullable(); // Nombre completo del usuario afectado
+            $table->text('detalles_cambios')->nullable();        // JSON con los detalles de los cambios realizados
             $table->timestamps();
         });
     }

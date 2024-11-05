@@ -41,6 +41,19 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
+        'admin' => [
+            'web',
+            'auth',
+            'privilege:Acceso Total,Acceso a Gerencia',
+        ],
+
+        'register.admin.actions' => [
+            'web',
+            'auth',
+            'privilege:Acceso Total,Acceso a Gerencia',
+            \App\Http\Middleware\RegisterAdminActions::class,
+        ],
+
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
@@ -69,5 +82,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'check.gerencia.ownership' => \App\Http\Middleware\CheckGerenciaOwnership::class,
         'privilege' => \App\Http\Middleware\CheckPrivilege::class,
+        'register.actions' => \App\Http\Middleware\RegisterAdminActions::class,
+        'log.route' => \App\Http\Middleware\LogRoute::class,
     ];
 }
