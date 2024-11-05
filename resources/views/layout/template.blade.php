@@ -172,61 +172,60 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
-            const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
-            const sidebar = document.getElementById('sidebar');
-            const content = document.querySelector('.content');
+                const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+                const sidebar = document.getElementById('sidebar');
+                const content = document.querySelector('.content');
 
-            // Función para verificar si es dispositivo móvil
-            function isMobile() {
-                return window.innerWidth <= 600;
-            }
-
-            // Función para minimizar el sidebar
-            function minimizeSidebar() {
-                sidebar.classList.add('sidebar-closed');
-                content.classList.add('content-closed');
-                localStorage.setItem('sidebarState', 'closed');
-            }
-
-            // Función para maximizar el sidebar
-            function maximizeSidebar() {
-                sidebar.classList.remove('sidebar-closed');
-                content.classList.remove('content-closed');
-                localStorage.setItem('sidebarState', 'open');
-            }
-
-            // Listener para el botón de toggle
-            toggleSidebarBtn.addEventListener('click', () => {
-                if (sidebar.classList.contains('sidebar-closed')) {
-                    maximizeSidebar();
-                } else {
-                    minimizeSidebar();
+                // Función para verificar si es dispositivo móvil
+                function isMobile() {
+                    return window.innerWidth <= 600;
                 }
-            });
 
-            // Listener para detectar el cambio de tamaño de pantalla
-            window.addEventListener('resize', () => {
+                // Función para minimizar el sidebar
+                function minimizeSidebar() {
+                    sidebar.classList.add('sidebar-closed');
+                    content.classList.add('content-closed');
+                    localStorage.setItem('sidebarState', 'closed');
+                }
+
+                // Función para maximizar el sidebar
+                function maximizeSidebar() {
+                    sidebar.classList.remove('sidebar-closed');
+                    content.classList.remove('content-closed');
+                    localStorage.setItem('sidebarState', 'open');
+                }
+
+                // Listener para el botón de toggle
+                toggleSidebarBtn.addEventListener('click', () => {
+                    if (sidebar.classList.contains('sidebar-closed')) {
+                        maximizeSidebar();
+                    } else {
+                        minimizeSidebar();
+                    }
+                });
+
+                // Listener para detectar el cambio de tamaño de pantalla
+                window.addEventListener('resize', () => {
+                    if (isMobile()) {
+                        minimizeSidebar();
+                    } else {
+                        // Mantener el estado actual incluso al redimensionar
+                        const currentState = localStorage.getItem('sidebarState');
+                        if (currentState === 'closed') {
+                            minimizeSidebar();
+                        } else {
+                            maximizeSidebar();
+                        }
+                    }
+                });
+
+                // Estado inicial
                 if (isMobile()) {
                     minimizeSidebar();
                 } else {
-                    // Mantener el estado actual incluso al redimensionar
-                    const currentState = localStorage.getItem('sidebarState');
-                    if (currentState === 'closed') {
-                        minimizeSidebar();
-                    } else {
-                        maximizeSidebar();
-                    }
+                    const sidebarState = localStorage.getItem('sidebarState');
+                    sidebarState === 'closed' ? minimizeSidebar() : maximizeSidebar();
                 }
-            });
-
-            // Estado inicial
-            if (isMobile()) {
-                minimizeSidebar();
-            } else {
-                const sidebarState = localStorage.getItem('sidebarState');
-                sidebarState === 'closed' ? minimizeSidebar() : maximizeSidebar();
-            }
-            });
             });
         </script>
         <!-- <script>

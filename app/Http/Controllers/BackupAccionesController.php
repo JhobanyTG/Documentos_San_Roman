@@ -9,12 +9,9 @@ class BackupAccionesController extends Controller
 {
     public function index()
     {
-        $acciones = BackupAccion::orderBy('created_at', 'desc')
-            ->paginate(15);
-
+        $acciones = BackupAccion::orderBy('created_at', 'desc')->get(); // Quitar paginate()
         return view('backup-acciones.index', compact('acciones'));
     }
-
     // public function show(BackupAccion $backupAccion)
     // {
     //     return view('backup-acciones.show', compact('backupAccion'));

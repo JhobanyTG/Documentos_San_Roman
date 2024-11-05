@@ -54,10 +54,6 @@
                         @endforeach
                     </tbody>
                 </table>
-
-                <div class="mt-3">
-                    {{ $acciones->links() }}
-                </div>
             </div>
         </div>
     </div>
@@ -179,10 +175,31 @@
             // Inicializar DataTables
             $('#content_ta').DataTable({
                 "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json"
+                    "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Spanish.json",
+                    "paginate": {
+                        "previous": "<i class='fa fa-angle-left'></i>",
+                        "next": "<i class='fa fa-angle-right'></i>"
+                    }
                 },
-                "order": [[0, "desc"]], // Ordenar por fecha descendente
-                "pageLength": 15
+                "order": [[0, "desc"]], // Esto ordena la primera columna (fecha) de forma descendente
+                "pageLength": 15,
+                "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                "lengthMenu": [[10, 15, 25, 50, -1], [10, 15, 25, 50, "Todos"]],
+                "columnDefs": [
+                    {
+                        "targets": 0, // La columna de fecha (índice 0)
+                        "type": "date", // Especifica que es una fecha
+                        "render": function(data, type, row) {
+                            if (type === 'sort') {
+                                // Para ordenamiento, convierte la fecha a un formato que se pueda ordenar correctamente
+                                return new Date(data).getTime();
+                            }
+                            return data;
+                        }
+                    }
+                ]
             });
 
             @if ($errors->any())
