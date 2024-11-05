@@ -105,9 +105,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('backup-acciones.index') }}">
+                        <a href="{{ url('backup-acciones') }}">
                             <i class="fa fa-history" aria-hidden="true"></i>
-                            <span>Historial Acciones</span>
+                            <span class="nav-text">Acciones</span>
                         </a>
                     </li>
                 @endif
@@ -168,18 +168,12 @@
                 </div>
             </main>
         </div>
-        <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
                 const sidebar = document.getElementById('sidebar');
                 const content = document.querySelector('.content');
-
-                // Función para verificar si es dispositivo móvil
-                function isMobile() {
-                    return window.innerWidth <= 600;
-                }
 
                 // Función para minimizar el sidebar
                 function minimizeSidebar() {
@@ -206,68 +200,28 @@
 
                 // Listener para detectar el cambio de tamaño de pantalla
                 window.addEventListener('resize', () => {
-                    if (isMobile()) {
+                    if (window.innerWidth <= 600) {
                         minimizeSidebar();
                     } else {
-                        // Mantener el estado actual incluso al redimensionar
-                        const currentState = localStorage.getItem('sidebarState');
-                        if (currentState === 'closed') {
-                            minimizeSidebar();
-                        } else {
-                            maximizeSidebar();
-                        }
+                        maximizeSidebar();
                     }
                 });
 
-                // Estado inicial
-                if (isMobile()) {
+                // Recuperar el estado del sidebar desde el localStorage
+                const sidebarState = localStorage.getItem('sidebarState');
+                if (sidebarState === 'closed') {
                     minimizeSidebar();
                 } else {
-                    const sidebarState = localStorage.getItem('sidebarState');
-                    sidebarState === 'closed' ? minimizeSidebar() : maximizeSidebar();
-                }
-            });
-        </script>
-        <!-- <script>
-            const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
-            const sidebar = document.getElementById('sidebar');
-            const content = document.querySelector('.content');
-
-            // Función para minimizar el sidebar
-            function minimizeSidebar() {
-                sidebar.classList.add('sidebar-closed');
-                content.classList.add('content-closed');
-            }
-
-            // Función para maximizar el sidebar
-            function maximizeSidebar() {
-                sidebar.classList.remove('sidebar-closed');
-                content.classList.remove('content-closed');
-            }
-
-            // Listener para el botón de toggle
-            toggleSidebarBtn.addEventListener('click', () => {
-                if (sidebar.classList.contains('sidebar-closed')) {
                     maximizeSidebar();
-                } else {
-                    minimizeSidebar();
                 }
-            });
 
-            // Listener para detectar el cambio de tamaño de pantalla
-            window.addEventListener('resize', () => {
+                // Si la pantalla es menor a 600px al cargar, minimizar el sidebar
                 if (window.innerWidth <= 600) {
                     minimizeSidebar();
-                    W
-                } else {
-                    maximizeSidebar();
                 }
             });
-
-            if (window.innerWidth <= 600) {
-                minimizeSidebar();
-            }
-        </script> -->
+        });
+        </script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const profileDiv = document.getElementById('profile-div');
@@ -285,49 +239,6 @@
                     }
                 });
             });
-        </script>
-        <script>
-            // var espanol = {
-            //     "sProcessing": "Procesando...",
-            //     "sLengthMenu": "Mostrar _MENU_ registros",
-            //     "sZeroRecords": "No se encontraron resultados",
-            //     "sEmptyTable": "Ningún dato disponible en esta tabla",
-            //     "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            //     "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-            //     "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            //     "sInfoPostFix": "",
-            //     "sSearch": "Buscar:",
-            //     "sUrl": "",
-            //     "sInfoThousands": ",",
-            //     "sLoadingRecords": "Cargando...",
-            //     "oPaginate": {
-            //         "sFirst": "Primero",
-            //         "sLast": "Último",
-            //         "sNext": "<i class='fa fa-chevron-right' aria-hidden='true'></i>",
-            //         "sPrevious": "<i class='fa fa-chevron-left' aria-hidden='true'></i>"
-            //     },
-            //     "oAria": {
-            //         "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-            //         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            //     }
-            // };
-
-            // $(document).ready(function() {
-            //     $('#content_ta').DataTable({
-            //         "language": espanol,
-            //         "paging": true,
-            //         "ordering": true,
-            //         "order": [[0, "desc"]],
-            //         "lengthMenu": [5, 10, 25, 50],
-            //         "pageLength": 5,
-            //         "dom": '<"row" <"col-sm-12 col-md-6" l><"col-sm-12 col-md-6" f>>rtip',
-            //         "responsive": true
-            //     });
-
-            //     $('#search').on('keyup', function () {
-            //         $('#content_ta').DataTable().search(this.value).draw();
-            //     });
-            // });
         </script>
         @stack('scripts')
 

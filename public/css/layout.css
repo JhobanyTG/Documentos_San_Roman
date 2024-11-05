@@ -1339,7 +1339,7 @@
 
 
 /* DASHBOARD */
-.border-left-primary {
+/* .border-left-primary {
     border-left: .25rem solid #4e73df!important;
 }
 .border-left-success {
@@ -1378,12 +1378,12 @@
 }
 .shadow {
     box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15)!important;
-}
+} */
 
 
 
 /* Backup Acciones */
-.dataTables_wrapper .dataTables_paginate .paginate_button {
+/* .dataTables_wrapper .dataTables_paginate .paginate_button {
     padding: 0.3em 0.8em;
     margin: 0 2px;
     border-radius: 4px;
@@ -1407,4 +1407,4 @@
     padding: 4px;
     border-radius: 4px;
     border: 1px solid #ddd;
-}
+} */
