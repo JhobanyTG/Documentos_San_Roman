@@ -28,70 +28,90 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Crear privilegios
-        $privilegios = Privilegio::insert([
-            [
-                'nombre' => 'Acceso Total',
-                'descripcion' => 'Permite acceso a todas las áreas del sistema.',
-            ],
-            [
-                'nombre' => 'Acceso a Gerencia',
-                'descripcion' => 'Tiene toda la funcionalidad de Gerencia, Subgerencia y Documentos.',
-            ],
-            [
-                'nombre' => 'Acceso a Subgerencia',
-                'descripcion' => 'Tiene acceso a Subgerencia y a Documentos.',
-            ],
-            [
-                'nombre' => 'Acceso a Subusuario',
-                'descripcion' => 'Tiene acceso a Subusuario y a Documentos.',
-            ],
-            [
-                'nombre' => 'Acceso a Documentos',
-                'descripcion' => 'Tiene acceso a crear, validar y publicar documentos.',
-            ],
-            [
-                'nombre' => 'Acceso a Crear Documento',
-                'descripcion' => 'El usuario puede crear documentos.',
-            ],
-            [
-                'nombre' => 'Acceso a Validar Documento',
-                'descripcion' => 'El usuario puede validar el documento.',
-            ],
-            [
-                'nombre' => 'Acceso a Publicar Documento',
-                'descripcion' => 'El usuario puede publicar el documento.',
-            ],
+        Privilegio::insert([
+            ['nombre' => 'Acceso Total', 'descripcion' => 'Permite acceso a todas las áreas del sistema.'],
+            ['nombre' => 'Acceso a Gerencia', 'descripcion' => 'Tiene toda la funcionalidad de Gerencia, Subgerencia y Documentos.'],
+            ['nombre' => 'Acceso a Subgerencia', 'descripcion' => 'Tiene acceso a Subgerencia y a Documentos.'],
+            ['nombre' => 'Acceso a Subusuario', 'descripcion' => 'Tiene acceso a Subusuario y a Documentos.'],
+            ['nombre' => 'Acceso a Documentos', 'descripcion' => 'Tiene acceso a crear, validar y publicar documentos.'],
+            ['nombre' => 'Acceso a Crear Documento', 'descripcion' => 'El usuario puede crear documentos.'],
+            ['nombre' => 'Acceso a Validar Documento', 'descripcion' => 'El usuario puede validar el documento.'],
+            ['nombre' => 'Acceso a Publicar Documento', 'descripcion' => 'El usuario puede publicar el documento.'],
         ]);
 
         // Crear roles
-        $roles = Rol::insert([
-            [
-                'nombre' => 'SuperAdmin',
-                'descripcion' => 'Rol con acceso completo al sistema.',
-            ],
-            [
-                'nombre' => 'Gerente',
-                'descripcion' => 'Rol con acceso a funcionalidades de gerencia, subgerencia y documentos.',
-            ],
-            [
-                'nombre' => 'SubGerente',
-                'descripcion' => 'Rol con acceso a funcionalidades de subgerencia y documentos.',
-            ],
-            [
-                'nombre' => 'SubUsuario',
-                'descripcion' => 'Rol con acceso limitado a funcionalidades específicas.',
-            ],
+        Rol::insert([
+            ['nombre' => 'SuperAdmin', 'descripcion' => 'Rol con acceso completo al sistema.'],
+            ['nombre' => 'Gerente', 'descripcion' => 'Rol con acceso a funcionalidades de gerencia, subgerencia, subusuarios y documentos.'],
+            ['nombre' => 'SubGerente', 'descripcion' => 'Rol con acceso a funcionalidades de subgerencia, subusuarios y documentos.'],
+            ['nombre' => 'SubUsuario', 'descripcion' => 'Rol con acceso limitado a crear, validar y publicar documentos.'],
+            ['nombre' => 'UsuarioCreador', 'descripcion' => 'Rol con acceso limitado a crear documentos.'],
+            ['nombre' => 'UsuarioValidador', 'descripcion' => 'Rol con acceso limitado a validar el documento.'],
+            ['nombre' => 'UsuarioPublicador', 'descripcion' => 'Rol con acceso limitado a publicar el documento.'],
         ]);
 
-        // Crear un rol y asociar privilegios
-        $rol = Rol::where('nombre', 'SuperAdmin')->first();
-        $privilegio = Privilegio::where('nombre', 'Acceso Total')->first();
+        // Asociar privilegios a roles
+        $rolesPrivilegios = [
+            'SuperAdmin' => [
+                'Acceso Total',
+                'Acceso a Gerencia',
+                'Acceso a Subgerencia',
+                'Acceso a Subusuario',
+                'Acceso a Documentos',
+                'Acceso a Crear Documento',
+                'Acceso a Validar Documento',
+                'Acceso a Publicar Documento',
+            ],
+            'Gerente' => [
+                'Acceso a Gerencia',
+                'Acceso a Subgerencia',
+                'Acceso a Subusuario',
+                'Acceso a Documentos',
+                'Acceso a Crear Documento',
+                'Acceso a Validar Documento',
+                'Acceso a Publicar Documento',
+            ],
+            'SubGerente' => [
+                'Acceso a Gerencia',
+                'Acceso a Subgerencia',
+                'Acceso a Subusuario',
+                'Acceso a Documentos',
+                'Acceso a Crear Documento',
+                'Acceso a Validar Documento',
+                'Acceso a Publicar Documento',
+            ],
+            'SubUsuario' => [
+                'Acceso a Gerencia',
+                'Acceso a Documentos',
+                'Acceso a Crear Documento',
+                'Acceso a Validar Documento',
+                'Acceso a Publicar Documento',
+            ],
+            'UsuarioCreador' => [
+                'Acceso a Documentos',
+                'Acceso a Crear Documento',
+            ],
+            'UsuarioValidador' => [
+                'Acceso a Documentos',
+                'Acceso a Validar Documento',
+            ],
+            'UsuarioPublicador' => [
+                'Acceso a Documentos',
+                'Acceso a Publicar Documento',
+            ],
+        ];
 
-        // Asociar el privilegio al rol
-        RolPrivilegio::create([
-            'privilegio_id' => $privilegio->id,
-            'rol_id' => $rol->id,
-        ]);
+        // Vincular roles con sus privilegios
+        foreach ($rolesPrivilegios as $rolNombre => $privilegios) {
+            $rol = Rol::where('nombre', $rolNombre)->first();
+            foreach ($privilegios as $privilegioNombre) {
+                $privilegio = Privilegio::where('nombre', $privilegioNombre)->first();
+                RolPrivilegio::create([
+                    'rol_id' => $rol->id,
+                    'privilegio_id' => $privilegio->id,
+                ]);
+            }
+        }
 
         // Crear un usuario
         User::create([
@@ -99,7 +119,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'atisanroman@gmail.com',
             'password' => bcrypt('atisanroman2024'),
             'estado' => 'activo',
-            'rol_id' => $rol->id,
+            'rol_id' => Rol::where('nombre', 'SuperAdmin')->first()->id,
             'persona_id' => $persona->id,
         ]);
     }

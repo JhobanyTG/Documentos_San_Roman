@@ -314,10 +314,12 @@
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
-                                                            class="btn btn-info" target="_blank"><i
-                                                                class="fa fa-external-link-square" aria-hidden="true"></i>
-                                                            Abrir en otra ventana</a>
+                                                        <a
+                                                            onclick="getPublicDocumentUrl({{ $documento->id }})"
+                                                            class="btn btn-info" target="_blank">
+                                                            <i class="fa fa-external-link-square" aria-hidden="true"></i>
+                                                            Abrir en otra ventana
+                                                        </a>
                                                         <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                                             download="{{ basename($documento->archivo) }}"
                                                             class="btn btn-dark"><i class="fa fa-download"
@@ -352,7 +354,34 @@
             </div>
         </div>
     </div>
-
+    <script>
+        function getPublicDocumentUrl(documentId) {
+            fetch(`/public-documento/get-url/${documentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener la URL del documento');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.url) {
+                        console.log('URL del documento:', data.url); // Para verificar que es la URL completa
+                        // Abre la URL en una nueva pestaña
+                        window.open(data.url, '_blank');
+                    } else {
+                        throw new Error('URL no válida');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo acceder al documento'
+                    });
+                });
+        }
+    </script>
     <script>
         $(document).ready(function() {
             @if (Session::has('success'))

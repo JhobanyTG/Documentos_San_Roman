@@ -435,8 +435,8 @@
                                                         <!-- El contenido se insertará dinámicamente -->
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
-                                                            class="btn btn-info" target="_blank">
+                                                        <a href="#" onclick="getDocumentUrl({{ $documento->id }})"
+                                                            class="btn btn-info">
                                                             <i class="fa fa-external-link-square" aria-hidden="true"></i>
                                                             Abrir en otra ventana
                                                         </a>
@@ -503,6 +503,19 @@
             </div>
         </div>
     </div>
+    <script>
+        function getDocumentUrl(documentId) {
+            fetch(`/documento/get-url/${documentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    window.open(data.url, '_blank');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al acceder al documento');
+                });
+        }
+    </script>
     <script>
         $(document).ready(function() {
             @if (Session::has('success'))

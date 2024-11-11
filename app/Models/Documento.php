@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Str;
 class Documento extends Model
 {
     use HasFactory;
@@ -21,7 +21,22 @@ class Documento extends Model
         'estado',
         'gerencia_id',
         'subgerencia_id',
+        'access_token',
+        'token_expires_at'
     ];
+
+    protected $dates = [
+        'token_expires_at'
+    ];
+
+    public function generateAccessToken()
+    {
+        $this->access_token = Str::random(64);
+        $this->token_expires_at = now()->addMinutes(30); // Token válido por 30 minutos
+        $this->save();
+
+        return $this->access_token;
+    }
 
     public function subusuario()
     {

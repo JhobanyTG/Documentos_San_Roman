@@ -71,10 +71,10 @@
                                                     style="width: 100%; height: 500px; border: none; display: none;"></iframe>
                                             </div>
                                             <div class="modal-footer">
-                                                <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
-                                                    class="btn btn-info" target="_blank">
-                                                    <i class="fa fa-external-link-square" aria-hidden="true"></i> Abrir en
-                                                    otra ventana
+                                                <a href="#" onclick="getDocumentUrl({{ $documento->id }})"
+                                                    class="btn btn-info">
+                                                    <i class="fa fa-external-link-square" aria-hidden="true"></i>
+                                                    Abrir en otra ventana
                                                 </a>
                                                 <a href="{{ asset('storage/documentos/' . basename($documento->archivo)) }}"
                                                     download="{{ basename($documento->archivo) }}" class="btn btn-dark">
@@ -215,6 +215,19 @@
 
         </div>
     </div>
+    <script>
+        function getDocumentUrl(documentId) {
+            fetch(`/documento/get-url/${documentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    window.open(data.url, '_blank');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al acceder al documento');
+                });
+        }
+    </script>
     <script>
         // Función para mostrar el ícono de PDF cuando la pantalla es móvil
         function showPdfIcon() {
@@ -407,5 +420,39 @@
         window.addEventListener('load', adjustPdfView);
         window.addEventListener('resize', adjustPdfView);
     </script>
+    <script>
+        function getSecureDocumentUrl(documentId) {
+            fetch(`/documento/get-url/${documentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener la URL del documento');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.url) {
+                        window.open(data.url, '_blank');
+                    } else {
+                        throw new Error('URL no válida');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo acceder al documento'
+                    });
+                });
+        }
 
+        // Si estás usando jQuery (opcional, para prevenir el comportamiento por defecto)
+        $(document).ready(function() {
+            $('.documento-link').click(function(e) {
+                e.preventDefault();
+                const documentId = $(this).data('documento-id');
+                getSecureDocumentUrl(documentId);
+            });
+        });
+    </script>
 @endsection

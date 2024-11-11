@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Response;
 
 
 
@@ -692,5 +693,90 @@ class DocumentosController extends Controller
 
         // Descargar el PDF
         return $pdf->download('historial_cambios_filtrado.pdf');
+    }
+
+    public function getDocumentoUrl($id)
+    {
+        $documento = Documento::findOrFail($id);
+        $user = auth()->user();
+
+        // Verificar permisos
+        if (!$this->tieneAcceso($user, $documento)) {
+            abort(403, 'No tiene permiso para acceder a este documento');
+        }
+
+        // Generar token de acceso temporal
+        $token = $documento->generateAccessToken();
+
+        // Generar URL segura
+        $url = route('documento.ver', [
+            'id' => Crypt::encrypt($documento->id),
+            'token' => $token
+        ]);
+
+        return response()->json(['url' => $url]);
+    }
+
+    public function verDocumento($id, $token)
+    {
+        try {
+            $documentoId = Crypt::decrypt($id);
+            $documento = Documento::where('id', $documentoId)
+                                ->where('access_token', $token)
+                                ->where('token_expires_at', '>', now())
+                                ->firstOrFail();
+
+            // Verificar si el archivo existe
+            $path = storage_path('app/public/documentos/' . basename($documento->archivo));
+            if (!file_exists($path)) {
+                abort(404, 'Archivo no encontrado');
+            }
+
+            // Invalidar el token después de usarlo
+            $documento->update([
+                'access_token' => null,
+                'token_expires_at' => null
+            ]);
+
+            // Obtener el tipo de contenido
+            $type = mime_content_type($path);
+
+            // Retornar el archivo directamente
+            return Response::file($path, [
+                'Content-Type' => $type
+            ]);
+
+        } catch (\Exception $e) {
+            abort(403, 'Link inválido o expirado');
+        }
+    }
+
+    private function tieneAcceso($user, $documento)
+    {
+        if ($user->rol->nombre === 'SuperAdmin') {
+            return true;
+        }
+
+        if ($user->subusuario) {
+            $subgerencia = $user->subusuario->subgerencia;
+            $gerencia = $subgerencia->gerencia;
+
+            return $documento->gerencia_id == $gerencia->id &&
+                   ($documento->subgerencia_id == $subgerencia->id ||
+                    $documento->subgerencia_id === null);
+        }
+
+        if ($user->gerencia) {
+            return $documento->gerencia_id == $user->gerencia->id;
+        }
+
+        $subgerencia = Subgerencia::where('usuario_id', $user->id)->first();
+        if ($subgerencia) {
+            return $documento->gerencia_id == $subgerencia->gerencia_id &&
+                   ($documento->subgerencia_id == $subgerencia->id ||
+                    $documento->subgerencia_id === null);
+        }
+
+        return $documento->user_id == $user->id;
     }
 }

@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Documento;
 use App\Models\TipoDocumento;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Crypt;
 
 class PublicController extends Controller
 {
@@ -78,6 +80,56 @@ class PublicController extends Controller
 
         // Retornar la vista con los documentos filtrados
         return view('publics.index', compact('documentos', 'searchTerm', 'fecha', 'availableYears', 'availableMonths', 'filtroAnio', 'filtroMes',  'tiposDocumento', 'filtroTipoDocumento'));
+    }
+
+    public function getDocumentUrl($id)
+    {
+        $documento = Documento::findOrFail($id);
+
+        // Generar token de acceso temporal
+        $token = $documento->generateAccessToken();
+
+        // Generar URL segura
+        $url = route('public.documento.ver', [
+            'id' => Crypt::encrypt($documento->id),
+            'token' => $token
+        ]);
+
+        return response()->json(['url' => $url]);
+    }
+
+    public function viewDocument($id, $token)
+    {
+        try {
+            $documentoId = Crypt::decrypt($id);
+            $documento = Documento::where('id', $documentoId)
+                                ->where('access_token', $token)
+                                ->where('token_expires_at', '>', now())
+                                ->firstOrFail();
+
+            // Verificar si el archivo existe
+            $path = storage_path('app/public/documentos/' . basename($documento->archivo));
+            if (!file_exists($path)) {
+                abort(404, 'Archivo no encontrado');
+            }
+
+            // Invalidar el token después de usarlo
+            $documento->update([
+                'access_token' => null,
+                'token_expires_at' => null
+            ]);
+
+            // Obtener el tipo de contenido
+            $type = mime_content_type($path);
+
+            // Retornar el archivo
+            return Response::file($path, [
+                'Content-Type' => $type
+            ]);
+
+        } catch (\Exception $e) {
+            abort(403, 'Link inválido o expirado');
+        }
     }
 
 }

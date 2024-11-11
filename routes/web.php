@@ -63,6 +63,18 @@ Route::post('/register', [AuthController::class, 'register'])->middleware('auth'
 Route::resource('documentos', DocumentosController::class);
 Route::get('/documentos/{id}', [DocumentosController::class, 'show'])->name('documentos.show');
 
+Route::get('documento/get-url/{id}', [DocumentosController::class, 'getDocumentoUrl'])
+    ->name('documento.get-url')
+    ->middleware('auth');
+
+Route::get('documento/ver/{id}/{token}', [DocumentosController::class, 'verDocumento'])
+    ->name('documento.ver');
+
+Route::get('public-documento/get-url/{id}', [PublicController::class, 'getDocumentUrl'])
+    ->name('public.documento.get-url');
+
+Route::get('public-documento/ver/{id}/{token}', [PublicController::class, 'viewDocument'])
+    ->name('public.documento.ver');
 
 Route::middleware(['auth'])->group(function () {
     // Otras rutas protegidas por autenticación...
