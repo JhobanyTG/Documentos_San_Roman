@@ -461,8 +461,7 @@
                                                         aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <p class="text-center">¿Estás seguro de eliminar este trabajo de
-                                                        aplicación? Esta acción no se puede deshacer.</p>
+                                                    <p class="text-center">¿Estás seguro de eliminar este Documento? Esta acción no se puede deshacer.</p>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary btn-no"

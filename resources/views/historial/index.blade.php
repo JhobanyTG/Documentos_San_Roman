@@ -54,13 +54,13 @@
                     <p class="resultado-buscador">
                         Resultados de búsqueda de:
                         @if ($filtroAnio)
-                            <strong>Año: {{ $filtroAnio }}</strong>
+                            <strong>Año: {{ $filtroAnio }}</strong>,
                         @endif
                         @if ($filtroMes)
                             <strong>Mes:
                                 {{ implode(', ', array_map(fn($mes) => $mesesEnEspanol[$mes] ?? $mes, $filtroMes)) }}</strong>
                         @endif
-                        @if ($searchTerm)
+                        @if ($searchTerm)y
                             <strong>Término: {{ $searchTerm }}</strong>
                         @endif
                     </p>
