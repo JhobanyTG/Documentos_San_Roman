@@ -119,8 +119,9 @@
                                             disabled>
                                         <!-- Botón para abrir el modal de cambio de estado -->
                                         <button type="button" class="btn btn-warning mt-2 btn-documento"
-                                            data-bs-toggle="modal" data-bs-target="#changeStatusModal">Cambiar
-                                            Estado</button>
+                                            data-bs-toggle="modal" data-bs-target="#changeStatusModal"> <i class="fa fa-exchange" aria-hidden="true"></i>
+                                            Cambiar
+                                            Estado </button>
                                     </div>
                                 </div>
 
@@ -142,12 +143,12 @@
                 aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="changeStatusLabel">Cambiar Estado</h5>
+                        <div class="modal-header titulo_cambiar_estado text-center">
+                            <h5 class="modal-title mx-auto" id="changeStatusLabel"><strong>Cambiar Estado</strong></h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                 aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
+                        <div class="modal-body modal_cambiar_estado">
                             <input type="hidden" id="documento_id" name="documento_id" value="{{ $documento->id }}">
                             <label for="nuevo_estado">Nuevo Estado:</label>
                             @php
@@ -204,10 +205,12 @@
                             <label for="descripcion_modal">Descripción:</label>
                             <textarea id="descripcion_modal" class="form-control" name="descripcion_modal" rows="3" required></textarea>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                            <button type="button" class="btn btn-primary" id="confirmChangeStatus">Cambiar
-                                Estado</button>
+                        <div class="modal-footer modal_cambiar_estado">
+                            <button type="button" class="btn btn-doc" data-bs-dismiss="modal">Cerrar <i class="fa fa-times" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="btn btn-doc" id="confirmChangeStatus">Cambiar
+                                Estado <i class="fa fa-exchange" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </div>
                 </div>

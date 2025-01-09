@@ -1158,6 +1158,15 @@
         padding: 10px 15px;
     }
 
+    .modal_cambiar_estado{
+        background: linear-gradient(to bottom right, var(--color-muni1), var(--color-muni2)) !important;
+    }
+
+    .titulo_cambiar_estado {
+        background: linear-gradient(to top left, var(--color-muni3), var(--color-muni4));
+        text-align: center;
+    }
+
 
     @media (min-width: 1360px) {
         .img_file_pdf {
