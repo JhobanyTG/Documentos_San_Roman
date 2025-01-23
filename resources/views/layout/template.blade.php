@@ -6,7 +6,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <title>@yield('title')</title>
-        <link rel="icon" href="{{ asset('images/logo/logo1.png') }}">
+        <link rel="icon" href="{{ asset('images/logo/logo.png') }}">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -67,6 +67,7 @@
                             <span class="nav-text">Historial</span>
                         </a>
                     </li>
+
                 @endif
 
                 <!-- <li class="nav-item">
@@ -96,6 +97,12 @@
                         <a href="{{ url('tipodocumento') }}">
                             <i class="fa fa-file-text" aria-hidden="true"></i>
                             <span class="nav-text">Tipo Documento</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url('dashboard') }}">
+                            <i class="fa fa-file-text" aria-hidden="true"></i>
+                            <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
                 @endif
@@ -156,6 +163,7 @@
                 </div>
             </main>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
             const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
@@ -316,6 +324,7 @@
             //     });
             // });
         </script>
+        @stack('scripts')
 
     </body>
 

@@ -13,6 +13,7 @@ use App\Http\Controllers\GerenciaController;
 use App\Http\Controllers\SubgerenciaController;
 use App\Http\Controllers\SubUsuarioController;
 use App\Http\Controllers\TipoDocumentoController;
+use App\Http\Controllers\DashboardController;
 
 
 
@@ -103,6 +104,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('privilegios', PrivilegioController::class);
         Route::resource('tipodocumento', TipoDocumentoController::class);
         Route::resource('rolprivilegios', RolPrivilegioController::class);
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+
     });
 
     // Rutas compartidas entre "Acceso Total" y "Acceso a Gerencia"
@@ -145,6 +148,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/documentos/{documentoId}/historial', [DocumentosController::class, 'mostrarHistorial'])
             ->name('documentos.historial')
             ->where('documentoId', '0');
+
+
     });
 
     Route::get('/reporte-documentos', [DocumentosController::class, 'generarReporte'])->name('reporte.documentos');

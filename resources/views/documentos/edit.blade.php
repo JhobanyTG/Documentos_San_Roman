@@ -311,6 +311,67 @@
     </script>
     <script>
         $(document).ready(function() {
+            $('input[type="file"]').change(function() {
+                var fileInput = $(this);
+                var fileName = fileInput.val().split('\\').pop();
+                var fileExtension = fileName.split('.').pop().toLowerCase();
+                var allowedExtensions = ['pdf'];
+
+                if (allowedExtensions.indexOf(fileExtension) === -1) {
+                    fileInput.val('');
+                    fileName = '';
+
+                    var alertMessage =
+                        'Solo se permiten archivos PDF.<br>Seleccione otro archivo por favor.';
+                    var alertDiv = $(
+                        '<div class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 mt-2 ms-2" role="alert" style="z-index: 999; background-color: #C71E42; color: #FFFFFF;">' +
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                        '<i class="fa fa-exclamation-triangle me-2" aria-hidden="true"></i>' +
+                        alertMessage +
+                        '</div>');
+                    $('body').append(alertDiv);
+                    setTimeout(function() {
+                        alertDiv.fadeOut(500, function() {
+                            $(this).remove();
+                        });
+                    }, 5000);
+                }
+
+                fileInput.siblings('.inputfile').text(fileName);
+            });
+
+            $('form').submit(function() {
+                var fileInput = $('input[type="file"]');
+                var fileName = fileInput.val().split('\\').pop();
+                var fileExtension = fileName.split('.').pop().toLowerCase();
+                var allowedExtensions = ['pdf'];
+
+                if (allowedExtensions.indexOf(fileExtension) === -1) {
+                    fileInput.val('');
+                    fileName = '';
+
+                    var alertMessage =
+                        'Solo se permiten archivos PDF.<br>Seleccione otro archivo por favor.';
+                    var alertDiv = $(
+                        '<div class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 mt-2 ms-2" role="alert" style="z-index: 999; background-color: #C71E42; color: #FFFFFF;">' +
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                        '<i class="fa fa-exclamation-triangle me-2" aria-hidden="true"></i>' +
+                        alertMessage +
+                        '</div>');
+                    $('body').append(alertDiv);
+                    setTimeout(function() {
+                        alertDiv.fadeOut(500, function() {
+                            $(this).remove();
+                        });
+                    }, 5000);
+
+                    return false;
+                }
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function() {
             @if ($errors->any())
                 toastr.options = {
                     "positionClass": "toast-bottom-right",
