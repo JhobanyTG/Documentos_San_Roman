@@ -34,7 +34,7 @@ class AuthController extends Controller
 
     public function changePassword(Request $request)
     {
-        // Lógica de cambio de contraseña
+        // Validación de entrada
         $request->validate([
             'current_password' => 'required',
             'new_password' => 'required|min:8|different:current_password',
@@ -42,13 +42,19 @@ class AuthController extends Controller
         ]);
 
         $user = Auth::user();
-        if (Hash::check($request->current_password, $user->password)) {
-            $user->update(['password' => Hash::make($request->new_password)]);
-            return redirect()->route('documentos.index')->with('success', 'Contraseña cambiada con éxito');
-        } else {
+
+        // Verifica si la contraseña actual es correcta
+        if (!Hash::check($request->current_password, $user->password)) {
             return redirect()->back()->withErrors(['current_password' => 'La contraseña actual es incorrecta']);
         }
+
+        // Si pasa la validación, actualiza la contraseña
+        $user->update(['password' => Hash::make($request->new_password)]);
+
+        // Redirige con éxito
+        return redirect()->route('documentos.index')->with('success', 'Contraseña cambiada con éxito');
     }
+
 
     public function showRegisterForm()
     {

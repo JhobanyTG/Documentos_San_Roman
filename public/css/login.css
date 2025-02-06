@@ -46,14 +46,20 @@ p {
     color: var(--color-blanco);
     text-align: center;
     font-size: 20px;
-    margin: 30px auto;
+    margin: 15px auto;
+}
+
+.nombre_proyecto_2{
+    color: var(--color-blanco);
+    text-align: center;
+    font-size: 15px;
 }
 
 .form-control {
     background-color: var(--color-input);
     border: none;
     width: 90%;
-    margin: 20px auto;
+    margin: 5px auto;
     color: var(--color-blanco);
     font-weight: bold;
 }
@@ -75,7 +81,7 @@ p {
 .boton_inicio {
     background: linear-gradient(to bottom right, #00BDEE, #005CD7);
     width: 90%;
-    margin: 20px auto;
+    margin: auto auto 20px auto;
     border-radius: 7px;
     color: var(--color-blanco);
     font-weight: bold;
@@ -99,6 +105,10 @@ i {
     transform: scale(1.5);
 }
 
+.creditos{
+    color: rgb(201, 201, 201);
+    font-size: 14px;
+}
 
 /* .boton_back {
     color: var(--color-blanco);

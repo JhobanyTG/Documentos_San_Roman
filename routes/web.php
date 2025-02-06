@@ -159,3 +159,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/historial/exportar', [DocumentosController::class, 'exportarPDF'])->name('historial.exportar');
 });
+
+
+Route::fallback(function () {
+    abort(404);
+});

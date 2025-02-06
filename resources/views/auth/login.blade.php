@@ -14,14 +14,16 @@
         <div class="contenido_login">
             <div class="container">
                 <div class="row">
-                    <div>
+                    <div class="mb-2">
                         <a href="{{route('public.index')}}" class="boton_back"><i class="fa fa-arrow-left" aria-hidden="true"></i>
                         </a>
                     </div>
+                    <h2 class="fw-bold nombre_proyecto">MUNICIPALIDAD PROVINCIAL DE SAN ROMÁN JULIACA</h2>
+                    <h2 class="fw-bold nombre_proyecto_2">ÁREA DE TECNOLOGÍA INFORMÁTICA</h2>
                     <div class="col">
                         <img class="logo" src="images/logo/logo.png">
                     </div>
-                    <h2 class="fw-bold nombre_proyecto">ATI SAN ROMÁN</h2>
+                    <h2 class="fw-bold nombre_proyecto">GESTIÓN DE DOCUMENTOS DIGITALES</h2>
                     <!-- Login-->
                     <form action="{{ url('/login') }}" method="POST">
                     @csrf
@@ -37,6 +39,7 @@
                         <div class="d-grid">
                             <button type="submit" class="boton_inicio"> <i class="fa fa-sign-in fa-1g" aria-hidden="true"></i>Iniciar Sesión</button>
                         </div>
+                        <p class="text-center creditos">Desarrollado por <strong>Alan Dagner</strong> & <strong>Jhobany Etduard</strong> &copy; {{ date('Y') }}</p>
                     </form>
                 </div>
             </div>
