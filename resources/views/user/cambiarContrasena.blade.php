@@ -13,13 +13,25 @@
 
                     <div class="form-group mb-2">
                         <label for="password" class="form-label label_contrasenia">Nueva Contraseña:</label>
-                        <input type="password" class="form-control contrasenia" name="password" id="password" required>
+                        <div class="input-group">
+                            <input type="password" class="form-control contrasenia" name="password" id="password" required>
+                            <button type="button" class="btn btn-sm toggle-password" data-target="password">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
+
                     <div class="form-group mb-2">
                         <label for="password_confirmation" class="form-label label_contrasenia">Confirmar Contraseña:</label>
-                        <input type="password" class="form-control contrasenia" name="password_confirmation"
-                            id="password_confirmation" required>
+                        <div class="input-group">
+                            <input type="password" class="form-control contrasenia" name="password_confirmation"
+                                id="password_confirmation" required>
+                            <button type="button" class="btn btn-sm toggle-password" data-target="password_confirmation">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
+
                     <div class="col-md-12 col-12 mt-4 d-flex align-items-center justify-content-center">
                         <a href="{{ route('usuarios.edit', $user->id) }}" class="btn btn-warning btn-cancel btn-contrasenia">
                             <i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Cancelar
@@ -32,8 +44,6 @@
             </div>
         </div>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
             $('#passwordForm').submit(function (event) {
@@ -61,6 +71,20 @@
                             $(this).remove();
                         });
                     }, 5000);
+                }
+            });
+
+            // Alternar visibilidad de la contraseña
+            $('.toggle-password').click(function () {
+                let input = $('#' + $(this).data('target'));
+                let icon = $(this).find('i');
+
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    input.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
                 }
             });
         });

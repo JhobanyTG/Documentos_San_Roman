@@ -298,6 +298,23 @@
         margin-right: 5px;
     }
 
+    .toggle-password {
+        background-color: black !important;
+        color: white !important;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px; /* Ajusta la altura al input */
+        width: 40px;  /* Ajusta el ancho */
+    }
+
+    .toggle-password:hover {
+        background-color: white !important;
+        color: black !important;
+        border: 1px solid black;
+    }
+
     @media (max-width: 600px) {
         .toggle-sidebar-btn {
             display: none;

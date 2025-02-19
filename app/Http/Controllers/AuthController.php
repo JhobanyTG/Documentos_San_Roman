@@ -18,14 +18,18 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        // Lógica de inicio de sesión
-        $credentials = $request->only('email', 'password');
-        if (Auth::attempt($credentials)) {
-            return redirect()->intended('/documentos');
-        } else {
-            return redirect()->back()->withErrors(['email' => 'Credenciales incorrectas']);
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (!Auth::attempt($credentials)) {
+            return back()->with('error', 'Correo y/o contraseña incorrecta');
         }
+
+        return redirect()->intended('/documentos');
     }
+
 
     public function showChangePasswordForm()
     {

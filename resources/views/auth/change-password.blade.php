@@ -15,7 +15,6 @@
                     </div>
                 @endforeach
             @endif
-            <!-- Alerta para contraseñas no coincidentes -->
             <div id="password-alert" class="alert alert-danger d-none alert-dismissible fade show position-fixed top-0 end-0 mt-2 ms-2" role="alert" style="z-index: 999; background-color: #C71E42; color: #FFFFFF;">
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 <i class="fa fa-exclamation-triangle me-2" aria-hidden="true"></i>
@@ -26,19 +25,30 @@
             @csrf
             <div class="form-group mb-3 mt-2">
                 <label for="current_password" class="form-label label_password">{{ __('Contraseña Actual:') }}</label>
-                <input id="current_password" type="password" class="form-control input_change_pass password"
-                    name="current_password" required autocomplete="current-password">
+                <div class="input-group">
+                    <input id="current_password" type="password" class="form-control input_change_pass password" name="current_password" required autocomplete="current-password">
+                    <button type="button" class="btn btn-sm btn-outline-secondary toggle-password" data-target="current_password">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
             </div>
             <div class="form-group mb-3">
                 <label for="new_password" class="form-label label_password">{{ __('Nueva Contraseña:') }}</label>
-                <input id="new_password" type="password" class="form-control input_change_pass password" name="new_password"
-                    required autocomplete="new-password">
+                <div class="input-group">
+                    <input id="new_password" type="password" class="form-control input_change_pass password" name="new_password" required autocomplete="new-password">
+                    <button type="button" class="btn btn-sm btn-outline-secondary toggle-password" data-target="new_password">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
             </div>
             <div class="form-group mb-3">
-                <label for="confirm_password"
-                    class="form-label label_password">{{ __('Confirmar Nueva Contraseña:') }}</label>
-                <input id="confirm_password" type="password" class="form-control input_change_pass password"
-                    name="confirm_password" required autocomplete="new-password">
+                <label for="confirm_password" class="form-label label_password">{{ __('Confirmar Nueva Contraseña:') }}</label>
+                <div class="input-group">
+                    <input id="confirm_password" type="password" class="form-control input_change_pass password" name="confirm_password" required autocomplete="new-password">
+                    <button type="button" class="btn btn-sm btn-outline-secondary toggle-password" data-target="confirm_password">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
             </div>
             <div class="col-md-12 col-12 mt-4 d-flex align-items-center justify-content-center">
                 <a href="{{ route('documentos.index') }}" class="btn btn-danger btn-password me-2">
@@ -57,14 +67,29 @@
             let confirmarContraseña = document.getElementById("confirm_password").value;
             let alerta = document.getElementById("password-alert");
 
-            // Validación para contraseñas que no coinciden
             if (nuevaContraseña !== confirmarContraseña) {
-                alerta.classList.remove("d-none"); // Muestra la alerta
+                alerta.classList.remove("d-none");
                 return false;
             } else {
-                alerta.classList.add("d-none"); // Oculta la alerta si estaba visible
+                alerta.classList.add("d-none");
                 return true;
             }
         }
+
+        document.querySelectorAll(".toggle-password").forEach(button => {
+            button.addEventListener("click", function () {
+                let input = document.getElementById(this.dataset.target);
+                let icon = this.querySelector("i");
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.classList.remove("fa-eye");
+                    icon.classList.add("fa-eye-slash");
+                } else {
+                    input.type = "password";
+                    icon.classList.remove("fa-eye-slash");
+                    icon.classList.add("fa-eye");
+                }
+            });
+        });
     </script>
 @endsection

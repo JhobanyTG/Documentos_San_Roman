@@ -417,8 +417,6 @@
                                                 </form>
                                             @endif
                                         </td>
-
-
                                         <div class="modal fade pt-serif-regular" id="pdfModal-{{ $documento->id }}"
                                             tabindex="-1" role="dialog"
                                             aria-labelledby="pdfModalLabel-{{ $documento->id }}" aria-hidden="true">
