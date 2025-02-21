@@ -56,6 +56,7 @@
                             <button type="submit" class="boton_inicio"> <i class="fa fa-sign-in fa-1g"
                                     aria-hidden="true"></i>Iniciar Sesión</button>
                         </div>
+                        {{-- CREDITOS --}}
                         <p class="text-center creditos">Desarrollado por <strong>Alan Quenaya</strong> & <strong>Jhobany
                                 Ticona</strong> &copy; {{ date('Y') }}</p>
                     </form>
