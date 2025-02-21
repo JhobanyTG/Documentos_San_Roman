@@ -101,7 +101,7 @@
                     </li>
                     <li class="nav-item">
                         <a href="{{ url('dashboard') }}">
-                            <i class="fa fa-file-text" aria-hidden="true"></i>
+                            <i class="fa fa-bar-chart" aria-hidden="true"></i>
                             <span class="nav-text">Dashboard</span>
                         </a>
                     </li>
